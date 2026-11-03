@@ -358,7 +358,7 @@
     </div>
     <div class="wk-controls" id="wkControls">
       <button type="button" id="wkPrev" aria-label="Previous exercise"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2h2v12H3zM14 2.5v11L6 8z"/></svg>Back</button>
-      <button type="button" class="primary big" id="wkPlay"></button>
+      <button type="button" class="primary big" id="wkPlay">Pause</button>
       <button type="button" id="wkNext" aria-label="Skip to next exercise">Skip<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M11 2h2v12h-2zM2 2.5v11L10 8z"/></svg></button>
     </div>
     <div class="wk-done" id="wkDone" hidden>
@@ -806,6 +806,10 @@
 
   // ---------- Settings: your plan ----------
   const settings = Object.assign({ level: 'beginner', custom: {}, voice: true, sound: true, theme: 'auto', target: 2 }, store.get('backex.settings', {}));
+  if (!['beginner', 'standard', 'max', 'custom'].includes(settings.level)) settings.level = 'beginner';
+  if (![1, 2, 3].includes(Number(settings.target))) settings.target = 2;
+  if (!['auto', 'light', 'dark'].includes(settings.theme)) settings.theme = 'auto';
+  if (typeof settings.custom !== 'object' || !settings.custom) settings.custom = {};
   const saveSettings = () => store.set('backex.settings', settings);
   const presetValue = ([lo, hi], level) => level === 'max' ? hi : level === 'standard' ? Math.round((lo + hi) / 2) : lo;
   function planFor(ex) {
@@ -1042,9 +1046,10 @@
     const onChange = () => {
       const custom = {};
       EXERCISES.forEach((e) => { custom[e.id] = planFor(e); });
-      const reps = Math.round(Number(repIn.value)), hold = holdIn ? Math.round(Number(holdIn.value)) : 0;
-      if (reps >= 1 && reps <= 30) custom[ex.id].reps = reps;
-      if (holdIn && hold >= 1 && hold <= 60) custom[ex.id].hold = hold;
+      const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, Math.round(v)));
+      const reps = parseFloat(repIn.value), hold = holdIn ? parseFloat(holdIn.value) : NaN;
+      if (Number.isFinite(reps)) custom[ex.id].reps = clamp(reps, 1, 30);
+      if (holdIn && Number.isFinite(hold)) custom[ex.id].hold = clamp(hold, 1, 60);
       settings.level = 'custom';
       settings.custom = custom;
       saveSettings();
@@ -1166,6 +1171,7 @@
     } catch (e) { /* audio unavailable */ }
   }
   const live = document.getElementById('wkLive');
+  let sayToken = 0;
   function say(text) {
     live.textContent = text;
     if (!settings.voice || !('speechSynthesis' in window)) return;
@@ -1173,10 +1179,13 @@
       speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text.replace(/[—–]/g, ', '));
       u.rate = 0.95;
-      speechSynthesis.speak(u);
+      u.lang = document.documentElement.lang || 'en';
+      // Some browsers drop an utterance queued in the same tick as cancel(); speak on the next tick.
+      const token = ++sayToken;
+      setTimeout(() => { if (token === sayToken && settings.voice) speechSynthesis.speak(u); }, 30);
     } catch (e) { /* speech unavailable */ }
   }
-  const hush = () => { try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) { /* ignore */ } };
+  const hush = () => { sayToken++; try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) { /* ignore */ } };
   let wakeLock = null;
   async function lockScreen() {
     try { if ('wakeLock' in navigator && !wakeLock) { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => { wakeLock = null; }); } } catch (e) { wakeLock = null; }
@@ -1186,7 +1195,7 @@
   // ---------- Guided workout ----------
   const dlg = document.getElementById('workout');
   const $ = (id) => document.getElementById(id);
-  const W = { idx: 0, pl: null, running: false, lastKey: '', beepKey: '', totals: [], grand: 0 };
+  const W = { idx: 0, pl: null, running: false, lastKey: '', beepKey: '', totals: [], grand: 0, played: 0 };
   const wk = {
     count: $('wkCount'), title: $('wkTitle'), bar: $('wkBar'), stage: $('wkStage'), label: $('wkLabel'), sub: $('wkSub'),
     steps: $('wkSteps'), tip: $('wkTip'), play: $('wkPlay'), body: $('wkBody'), controls: $('wkControls'), done: $('wkDone'),
@@ -1214,6 +1223,7 @@
     cards.forEach((c) => { if (c.pl.playing) setCardPlaying(c, false); });
     W.totals = EXERCISES.map((ex) => buildPhases(ex, planFor(ex), 'workout').total);
     W.grand = W.totals.reduce((a, b) => a + b, 0);
+    W.played = 0;
     wk.body.hidden = false; wk.controls.hidden = false; wk.done.hidden = true;
     if (!dlg.open) dlg.showModal();
     loadExercise(0);
@@ -1224,33 +1234,49 @@
     wk.body.hidden = true; wk.controls.hidden = true; wk.done.hidden = false;
     wk.count.textContent = ''; wk.title.textContent = 'Well done';
     wk.bar.style.width = '100%';
-    addSession(1);
+    // Only count the session if most of the workout was actually played (not just skipped through).
+    const counted = W.played >= W.grand * 0.6;
+    if (counted) addSession(1);
     const n = log[dayKey(new Date())] || 0;
-    $('wkDoneText').textContent = `All ${EXERCISES.length} exercises finished. That's ${n} of ${settings.target} session${settings.target > 1 ? 's' : ''} today. If your back hurts more than usual over the next 2 hours, contact your provider.`;
+    const goal = `${n} of ${settings.target} session${settings.target > 1 ? 's' : ''} today`;
+    $('wkDoneText').textContent = (counted
+      ? `All ${EXERCISES.length} exercises finished. That's ${goal}.`
+      : `You skipped most of this workout, so it wasn't counted (${goal}). If you did the exercises, use "Mark a session done".`)
+      + ' If your back hurts more than usual over the next 2 hours, contact your provider.';
     beep(880, 0.15); setTimeout(() => beep(1175, 0.25), 180);
-    say('Workout complete. Well done.');
+    say(counted ? 'Workout complete. Well done.' : 'Workout ended.');
     $('wkFinish').focus();
+  }
+  // What to say when a phase starts (or when resuming mid-phase). Returns '' for nothing.
+  function speechFor(s, ex, plan) {
+    if (s.ph.intro) return `Next: ${ex.name}. ${plan.reps} ${ex.unit}.`;
+    if (s.holding && s.ph.move > 0 && s.ph.holdLabel === s.ph.label) return ''; // already said when the move began
+    if (!s.holding) return s.ph.first && s.ph.rep > 0 ? `Round ${s.ph.rep + 1}. ${s.label}` : s.label;
+    if (!s.ph.counted) return s.label;
+    const secs = Math.max(1, Math.ceil(s.remain / 1000));
+    const label = s.label;
+    if (/^Hold\b/.test(label)) {
+      const rest = label.replace(/^Hold,?\s*/, '');
+      return `Hold for ${secs} seconds.` + (rest ? ` ${rest.charAt(0).toUpperCase()}${rest.slice(1)}.` : '');
+    }
+    return /hold/i.test(label) ? `${label} for ${secs} seconds.` : `${label}. Hold for ${secs} seconds.`;
   }
   function renderWorkout() {
     const pl = W.pl, ex = pl.ex;
     const s = drawPlayer(pl, W.running);
     const key = `${W.idx}|${s.idx}|${s.holding}`;
     if (key !== W.lastKey) {
-      const prevKey = W.lastKey;
       W.lastKey = key;
       wk.label.textContent = s.label;
       wk.steps.querySelectorAll('li').forEach((li, i) => li.classList.toggle('active', i === s.step));
-      const secs = Math.round(s.ph.hold / 1000);
-      let text = s.label;
-      if (s.ph.intro) text = `Next: ${ex.name}. ${pl.plan.reps} ${ex.unit}.`;
-      else if (!s.holding && s.ph.first && s.ph.rep > 0) text = `Round ${s.ph.rep + 1}. ${s.label}`;
-      else if (s.holding && s.ph.counted) text = `${s.label}, ${secs} seconds`;
-      if (W.running && prevKey) {
+      if (W.running) {
+        const text = speechFor(s, ex, pl.plan);
         if (text) say(text);
         if (!s.holding || s.ph.move === 0) beep(990, 0.12);
       }
     }
-    wk.sub.textContent = s.ph.intro ? 'Get ready' : s.ph.setup ? 'Setting up' : `Round ${s.ph.rep + 1} of ${pl.plan.reps}` + (W.running ? '' : ' · paused');
+    const where = s.ph.intro ? 'Get ready' : s.ph.setup ? 'Setting up' : `Round ${s.ph.rep + 1} of ${pl.plan.reps}`;
+    wk.sub.textContent = where + (W.running ? '' : ' · paused');
     const secLeft = Math.max(1, Math.ceil(s.remain / 1000));
     const counting = s.holding && s.ph.hold >= 2000;
     wk.cnt.textContent = counting ? secLeft : '';
@@ -1265,6 +1291,7 @@
   function tickWorkout(dt) {
     if (!W.running || !W.pl) return;
     W.pl.time += dt;
+    W.played += dt;
     if (W.pl.time >= W.pl.total) {
       if (W.idx < EXERCISES.length - 1) loadExercise(W.idx + 1);
       else finishWorkout();
@@ -1320,7 +1347,7 @@
   cards.forEach(resetCard);
   requestAnimationFrame(frame);
 
-  if (/[?&]debug\b/.test(location.search)) window.__backExercises = { cards, renderCard, W, EXERCISES };
+  if (/[?&]debug\b/.test(location.search)) window.__backExercises = { cards, renderCard, W, EXERCISES, tick: tickWorkout };
 })();
 </script>
 </body>
