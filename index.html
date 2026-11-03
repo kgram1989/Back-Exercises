@@ -1,0 +1,615 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Back Exercises</title>
+<meta name="description" content="Animated, follow-along guide to seven back strengthening and flexibility exercises.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232f6f5e'/%3E%3Cpath d='M8 22c4-8 12-8 16 0' stroke='white' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='16' cy='10' r='3.5' fill='white'/%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg: #f6f4ef;
+    --surface: #ffffff;
+    --surface-2: #f0ede6;
+    --text: #1f2321;
+    --muted: #5d6460;
+    --border: #e2ddd3;
+    --accent: #2f6f5e;
+    --accent-soft: #e2efe9;
+    --warn-bg: #fff4e5;
+    --warn-border: #f0c88a;
+    --warn-text: #6b4210;
+    --danger-bg: #fdecec;
+    --danger-border: #eeb0b0;
+    --danger-text: #7a1f1f;
+    --figure: #2b3a36;
+    --figure-far: #9aa7a2;
+    --mat: #d9cfbd;
+    --floor: #c9bfae;
+    --glow: #e8794a;
+    --stage: #fbfaf7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141716;
+      --surface: #1c201f;
+      --surface-2: #232827;
+      --text: #e8ece9;
+      --muted: #a2aba7;
+      --border: #303735;
+      --accent: #6fc2a8;
+      --accent-soft: #1f332d;
+      --warn-bg: #2c2416;
+      --warn-border: #6b5222;
+      --warn-text: #f1d3a0;
+      --danger-bg: #2e1a1a;
+      --danger-border: #6e3434;
+      --danger-text: #f3b9b9;
+      --figure: #e3ebe8;
+      --figure-far: #67736f;
+      --mat: #3b3a33;
+      --floor: #4a483f;
+      --glow: #ff925f;
+      --stage: #181c1b;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141716; --surface: #1c201f; --surface-2: #232827; --text: #e8ece9; --muted: #a2aba7;
+    --border: #303735; --accent: #6fc2a8; --accent-soft: #1f332d; --warn-bg: #2c2416; --warn-border: #6b5222;
+    --warn-text: #f1d3a0; --danger-bg: #2e1a1a; --danger-border: #6e3434; --danger-text: #f3b9b9;
+    --figure: #e3ebe8; --figure-far: #67736f; --mat: #3b3a33; --floor: #4a483f; --glow: #ff925f; --stage: #181c1b;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 32px 16px 64px; }
+  header h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); line-height: 1.15; margin: 0 0 8px; letter-spacing: -0.01em; }
+  header p.lede { color: var(--muted); max-width: 62ch; margin: 0 0 20px; font-size: 1.05rem; }
+
+  .info-grid { display: grid; gap: 12px; grid-template-columns: 1fr; margin-bottom: 28px; }
+  @media (min-width: 760px) { .info-grid { grid-template-columns: 1.2fr 1fr; } }
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; }
+  .panel h2 { font-size: 0.95rem; margin: 0 0 8px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+  .panel ul { margin: 0; padding-left: 1.1em; }
+  .panel li { margin: 4px 0; }
+  .panel.warn { background: var(--warn-bg); border-color: var(--warn-border); color: var(--warn-text); }
+  .panel.warn h2 { color: inherit; }
+
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin: 0 0 14px; }
+  .toolbar h2 { margin: 0; font-size: 1.35rem; }
+  .toolbar .btns { display: flex; gap: 8px; }
+
+  button {
+    font: inherit; font-size: 0.9rem; font-weight: 600;
+    border: 1px solid var(--border); background: var(--surface); color: var(--text);
+    border-radius: 999px; padding: 7px 14px; cursor: pointer; min-height: 36px;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  button:hover { border-color: var(--accent); }
+  button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+  button svg { width: 14px; height: 14px; fill: currentColor; }
+
+  .grid { display: grid; gap: 18px; grid-template-columns: 1fr; }
+  @media (min-width: 880px) { .grid { grid-template-columns: 1fr 1fr; } }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
+  .card-head { display: flex; align-items: baseline; gap: 10px; padding: 16px 18px 10px; flex-wrap: wrap; }
+  .num { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--accent); background: var(--accent-soft); border-radius: 8px; padding: 1px 8px; font-size: 0.9rem; }
+  .card-head h3 { margin: 0; font-size: 1.2rem; flex: 1; min-width: 0; }
+  .reps { font-size: 0.85rem; color: var(--muted); white-space: nowrap; }
+
+  .stage { position: relative; background: var(--stage); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .stage svg.scene { display: block; width: 100%; height: auto; }
+  .hud { display: flex; align-items: center; gap: 12px; padding: 10px 18px; min-height: 58px; }
+  .hud .phase { flex: 1; min-width: 0; }
+  .hud .phase strong { display: block; font-size: 0.98rem; line-height: 1.3; }
+  .hud .phase span { font-size: 0.82rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .timer { position: relative; width: 40px; height: 40px; flex: none; }
+  .timer svg { width: 40px; height: 40px; transform: rotate(-90deg); }
+  .timer .track { stroke: var(--border); }
+  .timer .prog { stroke: var(--accent); transition: stroke 0.2s; }
+  .timer .count { position: absolute; inset: 0; display: grid; place-items: center; font-weight: 700; font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+  .hud .controls { display: flex; gap: 6px; }
+  .hud .controls button { padding: 7px 10px; }
+
+  .steps { padding: 12px 18px 18px; }
+  .steps ol { margin: 0; padding-left: 1.3em; }
+  .steps li { margin: 4px 0; }
+  .steps li.active { color: var(--accent); font-weight: 600; }
+  .tip { margin: 10px 0 0; font-size: 0.9rem; color: var(--muted); }
+
+  .help { margin-top: 28px; display: grid; gap: 12px; grid-template-columns: 1fr; }
+  @media (min-width: 760px) { .help { grid-template-columns: 1fr 1fr; } }
+  .panel.danger { background: var(--danger-bg); border-color: var(--danger-border); color: var(--danger-text); }
+  .panel.danger h2 { color: inherit; }
+  footer { margin-top: 28px; font-size: 0.85rem; color: var(--muted); }
+
+  /* figure */
+  .fig line, .fig path { stroke-linecap: round; stroke-linejoin: round; fill: none; }
+  .near { stroke: var(--figure); }
+  .far { stroke: var(--figure-far); }
+  .head { fill: var(--figure); }
+  .glow { fill: var(--glow); }
+  .mat { fill: var(--mat); }
+  .floor { stroke: var(--floor); }
+  .stage-label { fill: var(--muted); font: 600 10px system-ui, sans-serif; letter-spacing: 0.06em; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Back Exercises</h1>
+    <p class="lede">Seven exercises to strengthen your trunk and keep your lower back flexible. Each animation plays in real time, so you can follow along &mdash; the timer shows how long to hold each position.</p>
+  </header>
+
+  <section class="info-grid" aria-label="How often and safety">
+    <div class="panel">
+      <h2>How often</h2>
+      <ul>
+        <li><strong>With back pain:</strong> 2&ndash;3 times a day, or as your provider advises.</li>
+        <li><strong>As you improve:</strong> once a day (or more often if your provider says so).</li>
+        <li><strong>To keep pain from returning:</strong> once a day.</li>
+        <li>Use a firm bed or the floor.</li>
+      </ul>
+    </div>
+    <div class="panel warn" role="note">
+      <h2>Before you start</h2>
+      <p style="margin:0">Do the exercises exactly as your provider told you, and don't start until they say it's okay. <strong>Stop right away</strong> if you feel sudden pain or your pain gets worse.</p>
+    </div>
+  </section>
+
+  <div class="toolbar">
+    <h2>Exercises</h2>
+    <div class="btns">
+      <button type="button" id="playAll"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5v11l9-5.5z"/></svg>Play all</button>
+      <button type="button" id="pauseAll"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5h3v11H4zM9 2.5h3v11H9z"/></svg>Pause all</button>
+    </div>
+  </div>
+
+  <main class="grid" id="grid"></main>
+
+  <section class="help">
+    <div class="panel warn">
+      <h2>Contact your provider if</h2>
+      <ul>
+        <li>Your back pain gets a lot worse when you do an exercise.</li>
+        <li>Your back pain does not get better within 2 hours after exercising.</li>
+      </ul>
+      <p style="margin:8px 0 0">If either happens, stop the exercises and don't restart until your provider says it's okay.</p>
+    </div>
+    <div class="panel danger">
+      <h2>Get help right away if</h2>
+      <ul>
+        <li>You have sudden, very bad back pain. Stop the exercises and don't do them again until your provider says it's okay.</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    <p>This page is a visual aid only and does not replace advice from your health care provider. Discuss any questions with your provider.</p>
+  </footer>
+</div>
+
+<template id="cardTpl">
+  <article class="card">
+    <div class="card-head">
+      <span class="num"></span>
+      <h3></h3>
+      <span class="reps"></span>
+    </div>
+    <div class="stage">
+      <svg class="scene" viewBox="60 110 290 110" role="img">
+        <title></title>
+        <line class="floor" x1="60" y1="204.5" x2="350" y2="204.5" stroke-width="1"/>
+        <rect class="mat" x="82" y="200" width="246" height="5" rx="2.5"/>
+        <g class="fig">
+          <ellipse class="glow" rx="16" ry="9" opacity="0"/>
+          <g class="far" transform="translate(3,-3)">
+            <line data-p="fua" stroke-width="8"/><line data-p="ffa" stroke-width="7"/>
+            <line data-p="fth" stroke-width="11"/><line data-p="fsh" stroke-width="9"/><line data-p="fft" stroke-width="6"/>
+          </g>
+          <path class="near" data-p="torso" stroke-width="15"/>
+          <line class="near" data-p="neck" stroke-width="8"/>
+          <circle class="head" data-p="head" r="11"/>
+          <circle class="head" data-p="nose" r="3"/>
+          <g class="near">
+            <line data-p="nth" stroke-width="11"/><line data-p="nsh" stroke-width="9"/><line data-p="nft" stroke-width="6"/>
+            <line data-p="nua" stroke-width="8"/><line data-p="nfa" stroke-width="7"/>
+          </g>
+        </g>
+      </svg>
+    </div>
+    <div class="hud" aria-live="polite">
+      <div class="timer" aria-hidden="true">
+        <svg viewBox="0 0 40 40"><circle class="track" cx="20" cy="20" r="17" fill="none" stroke-width="4"/><circle class="prog" cx="20" cy="20" r="17" fill="none" stroke-width="4" stroke-linecap="round"/></svg>
+        <div class="count"></div>
+      </div>
+      <div class="phase"><strong></strong><span></span></div>
+      <div class="controls">
+        <button type="button" class="toggle" aria-label="Pause"></button>
+        <button type="button" class="restart" aria-label="Restart"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2a6 6 0 1 0 6 6h-2a4 4 0 1 1-1.2-2.8L9 7h5V2l-1.8 1.8A6 6 0 0 0 8 2z"/></svg></button>
+      </div>
+    </div>
+    <div class="steps"><ol></ol></div>
+  </article>
+</template>
+
+<script>
+(() => {
+  // ---------- Body model ----------
+  const L = { torso: 72, neck: 10, head: 11, ua: 30, fa: 28, th: 44, sh: 42, foot: 12 };
+  const RAD = Math.PI / 180;
+  const dir = (deg) => [Math.cos(deg * RAD), Math.sin(deg * RAD)];
+  const add = (p, v, s) => [p[0] + v[0] * s, p[1] + v[1] * s];
+
+  // Two-bone inverse kinematics. s = +1 / -1 picks which way the middle joint bends.
+  function ik(root, target, a, b, s) {
+    const dx = target[0] - root[0], dy = target[1] - root[1];
+    let d = Math.hypot(dx, dy);
+    const base = Math.atan2(dy, dx);
+    d = Math.min(Math.max(d, Math.abs(a - b) + 0.01), a + b - 0.01);
+    const off = Math.acos((a * a + d * d - b * b) / (2 * a * d));
+    const u = base + s * off;
+    const mid = [root[0] + a * Math.cos(u), root[1] + a * Math.sin(u)];
+    const l = Math.atan2(target[1] - mid[1], target[0] - mid[0]);
+    return [mid, [mid[0] + b * Math.cos(l), mid[1] + b * Math.sin(l)]];
+  }
+
+  function lerpPose(a, b, k) {
+    const out = {};
+    for (const key in a) {
+      const va = a[key], vb = key in b ? b[key] : va;
+      out[key] = Array.isArray(va) ? va.map((v, i) => v + (vb[i] - v) * k) : va + (vb - va) * k;
+    }
+    return out;
+  }
+  const ease = (x) => 0.5 - 0.5 * Math.cos(Math.PI * x);
+
+  // ---------- Exercises ----------
+  // Pose fields: hx,hy hip; t torso angle (deg, 0 = right, 90 = down); b spine bend;
+  // n neck angle; nh/fh near/far hand targets; nk/fk near/far ankle targets; nf/ff foot angles; g glow 0..1.
+  const P = (o, extra) => Object.assign({}, o, extra || {});
+
+  const supineFlat = { hx: 210, hy: 193, t: 180, b: 0, n: 190, nh: [195, 193], fh: [195, 193], nk: [296, 193], fk: [296, 193], nf: -70, ff: -70, g: 0 };
+  const supineBent = { hx: 210, hy: 193, t: 180, b: 0, n: 190, nh: [195, 194], fh: [195, 194], nk: [266, 192], fk: [266, 192], nf: 0, ff: 0, g: 0 };
+  const prone      = { hx: 220, hy: 192, t: 180, b: 0, n: 187, nh: [205, 194], fh: [205, 194], nk: [306, 193], fk: [306, 193], nf: 15, ff: 15, g: 0 };
+  const quad       = { hx: 252, hy: 150, t: 188, b: 0, n: 188, nh: [181, 196], fh: [181, 196], nk: [294, 195], fk: [294, 195], nf: 5, ff: 5, g: 0 };
+
+  const EXERCISES = [
+    {
+      name: 'Single knee to chest', reps: '3–5 times, each leg', cycles: 3, face: 1,
+      sign: { nh: 1, fh: 1, nk: -1, fk: -1 },
+      glow: { at: 0.12, off: -5, rx: 18, ry: 8 },
+      poses: {
+        rest: supineFlat,
+        near: P(supineFlat, { nk: [218, 180], nf: -40, nh: [186, 163], fh: [186, 163], g: 1 }),
+        far:  P(supineFlat, { fk: [218, 180], ff: -40, nh: [186, 163], fh: [186, 163], g: 1 }),
+      },
+      start: 'rest',
+      cycle: [
+        { to: 'near', move: 1800, label: 'Bring one knee to your chest', hold: 10000, holdLabel: 'Hold a gentle stretch (10–30 s)', step: 3 },
+        { to: 'rest', move: 1800, label: 'Slowly let go and straighten', hold: 1000, holdLabel: 'Relax', step: 4 },
+        { to: 'far',  move: 1800, label: 'Now the other knee', hold: 10000, holdLabel: 'Hold a gentle stretch (10–30 s)', step: 3 },
+        { to: 'rest', move: 1800, label: 'Slowly let go and straighten', hold: 1000, holdLabel: 'Relax', step: 4 },
+      ],
+      steps: [
+        'Lie on your back on a firm bed or the floor, legs stretched out.',
+        'Bring one knee up to your chest.',
+        'Hold your knee or thigh with both hands.',
+        'Pull gently until you feel a light stretch in your lower back or buttock, and hold for 10–30 seconds.',
+        'Slowly let go and straighten the leg.',
+        'Repeat 3–5 times for each leg.',
+      ],
+    },
+    {
+      name: 'Pelvic tilt', reps: '5–10 times', cycles: 5, face: 1,
+      sign: { nh: -1, fh: -1, nk: -1, fk: -1 },
+      glow: { at: 0.22, off: 6, rx: 16, ry: 8 },
+      poses: {
+        rest: P(supineBent, { b: 12 }),
+        tilt: P(supineBent, { b: 0, hy: 191.5, t: 179, g: 1 }),
+      },
+      start: 'rest',
+      cycle: [
+        { to: 'tilt', move: 1300, label: 'Tighten your lower belly', hold: 5000, holdLabel: 'Hold — press lower back down, breathe evenly', step: 2 },
+        { to: 'rest', move: 1300, label: 'Relax', hold: 1200, holdLabel: 'Rest', step: -1 },
+      ],
+      steps: [
+        'Lie on your back with your legs stretched out.',
+        'Bend your knees so they point to the ceiling, feet flat.',
+        'Tighten your lower belly to press your lower back into the floor — your tailbone tips up toward the ceiling.',
+        'Hold for 5–10 seconds while breathing evenly.',
+        'Repeat 5–10 times.',
+      ],
+    },
+    {
+      name: 'Cat–cow', reps: 'Until your lower back bends more easily', cycles: 5, face: -1,
+      sign: { nh: -1, fh: -1, nk: 1, fk: 1 },
+      glow: { at: 0.5, off: -9, rx: 20, ry: 8 },
+      poses: {
+        neutral: quad,
+        cat: P(quad, { b: 24, n: 112, hy: 152, g: 1 }),
+        cow: P(quad, { b: -16, n: 218, hy: 149 }),
+      },
+      start: 'neutral',
+      cycle: [
+        { to: 'cat', move: 1600, label: 'Round your back like a cat', hold: 5000, holdLabel: 'Hold — head down, belly tight', step: 1 },
+        { to: 'cow', move: 2200, label: 'Lift your head, let your back sag', hold: 5000, holdLabel: 'Hold — belly relaxed', step: 3 },
+      ],
+      steps: [
+        'Get on your hands and knees: hands under shoulders, knees under hips. Pad your knees if you like.',
+        'Let your head drop toward your chest, tighten your belly and tuck your tailbone so your lower back rounds like a cat.',
+        'Hold for 5 seconds.',
+        'Slowly lift your head, relax your belly and point your tailbone up so your back sags like a cow.',
+        'Hold for 5 seconds. Keep alternating.',
+      ],
+    },
+    {
+      name: 'Press-ups', reps: '5–10 times', cycles: 5, face: -1,
+      sign: { nh: -1, fh: -1, nk: -1, fk: -1 },
+      glow: null,
+      poses: {
+        down: P(prone, { nh: [150, 197], fh: [150, 197] }),
+        up:   P(prone, { nh: [150, 197], fh: [150, 197], t: 223, b: -6, n: 208 }),
+      },
+      start: 'down',
+      cycle: [
+        { to: 'up',   move: 2400, label: 'Straighten your arms — hips stay down', hold: 5000, holdLabel: 'Hold — keep your back relaxed', step: 2 },
+        { to: 'down', move: 2400, label: 'Slowly lower down', hold: 1200, holdLabel: 'Rest', step: 4 },
+      ],
+      steps: [
+        'Lie face-down on a firm bed or the floor.',
+        'Place your hands near your head, about shoulder-width apart.',
+        'Keeping your back relaxed and hips on the floor, slowly straighten your arms to lift your upper body. Let your arms do the work, not your back.',
+        'Hold for 5 seconds.',
+        'Slowly lower back down. Repeat 5–10 times.',
+      ],
+      tip: 'Move your hands around if it makes you more comfortable.',
+    },
+    {
+      name: 'Bridges', reps: '10 times', cycles: 10, face: 1,
+      sign: { nh: -1, fh: -1, nk: -1, fk: -1 },
+      glow: { at: 0.02, off: -7, rx: 14, ry: 9 },
+      poses: {
+        down: supineBent,
+        up: P(supineBent, { hx: 206, hy: 160, t: 152.7, g: 1 }),
+      },
+      start: 'down',
+      cycle: [
+        { to: 'up',   move: 1700, label: 'Squeeze your buttocks and lift your hips', hold: 3000, holdLabel: 'Hold (3–5 s)', step: 2 },
+        { to: 'down', move: 1700, label: 'Slowly lower and relax', hold: 900, holdLabel: 'Rest', step: 4 },
+      ],
+      steps: [
+        'Lie on your back.',
+        'Bend your knees, feet flat on the floor, arms flat by your sides.',
+        'Squeeze your buttocks and lift your hips until your waist is nearly level with your knees.',
+        'Hold for 3–5 seconds.',
+        'Slowly lower down and relax your buttocks. Repeat 10 times.',
+      ],
+      tip: 'Not feeling it in your buttocks and the backs of your thighs? Slide your feet 1–2 inches (2.5–5 cm) farther away. Too easy? Cross your arms over your chest.',
+    },
+    {
+      name: 'Belly crunches', reps: '5–10 times', cycles: 5, face: 1,
+      sign: { nh: 1, fh: 1, nk: -1, fk: -1 },
+      glow: { at: 0.42, off: 7, rx: 18, ry: 8 },
+      poses: {
+        down: P(supineBent, { nh: [143, 181], fh: [143, 181] }),
+        up:   P(supineBent, { nh: [148.4, 164.1], fh: [148.4, 164.1], t: 195, b: 6, n: 206, g: 1 }),
+      },
+      start: 'down',
+      cycle: [
+        { to: 'up',   move: 1500, label: 'Tighten your belly, lift your shoulder blades', hold: 1000, holdLabel: 'Just a little off the floor', step: 4 },
+        { to: 'down', move: 1700, label: 'Slowly lower your chest and head', hold: 1200, holdLabel: 'Rest', step: 5 },
+      ],
+      steps: [
+        'Lie on your back.',
+        'Bend your knees, feet flat on the floor.',
+        'Cross your arms over your chest.',
+        'Tip your chin slightly toward your chest without bending your neck.',
+        'Tighten your belly and raise your chest just enough to lift your shoulder blades slightly off the floor — no higher, to protect your lower back.',
+        'Slowly lower down. Repeat 5–10 times.',
+      ],
+    },
+    {
+      name: 'Back lifts', reps: '5–10 times', cycles: 5, face: -1,
+      sign: { nh: -1, fh: -1, nk: -1, fk: -1 },
+      glow: { at: 0.2, off: 7, rx: 20, ry: 8 },
+      poses: {
+        down: P(prone, { n: 185 }),
+        up:   P(prone, { t: 196, b: -6, n: 199, nh: [205, 186], fh: [205, 186], g: 1 }),
+      },
+      start: 'down',
+      cycle: [
+        { to: 'up',   move: 1900, label: 'Tighten legs and buttocks, lift your chest', hold: 3000, holdLabel: 'Hold (3–5 s) — eyes on the floor', step: 2 },
+        { to: 'down', move: 1900, label: 'Slowly lower your chest and face', hold: 1200, holdLabel: 'Rest', step: 4 },
+      ],
+      steps: [
+        'Lie face-down with your arms at your sides and forehead resting on the floor.',
+        'Tighten the muscles in your legs and buttocks.',
+        'Slowly lift your chest while your hips stay down. Keep your head in line with your back and look at the floor.',
+        'Hold for 3–5 seconds.',
+        'Slowly lower down. Repeat 5–10 times.',
+      ],
+    },
+  ];
+
+  // ---------- Rendering ----------
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const ICON_PLAY = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5v11l9-5.5z"/></svg>';
+  const ICON_PAUSE = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5h3v11H4zM9 2.5h3v11H9z"/></svg>';
+  const RING = 2 * Math.PI * 17;
+
+  function setLine(el, a, b) {
+    el.setAttribute('x1', a[0].toFixed(1)); el.setAttribute('y1', a[1].toFixed(1));
+    el.setAttribute('x2', b[0].toFixed(1)); el.setAttribute('y2', b[1].toFixed(1));
+  }
+
+  function drawPose(parts, ex, p) {
+    const hip = [p.hx, p.hy];
+    const td = dir(p.t);
+    const sh = add(hip, td, L.torso);
+    const perp = [-td[1], td[0]];
+    const mid = [(hip[0] + sh[0]) / 2, (hip[1] + sh[1]) / 2];
+    const ctrl = add(mid, perp, p.b);
+    parts.torso.setAttribute('d', `M${hip[0].toFixed(1)} ${hip[1].toFixed(1)} Q${ctrl[0].toFixed(1)} ${ctrl[1].toFixed(1)} ${sh[0].toFixed(1)} ${sh[1].toFixed(1)}`);
+
+    const nd = dir(p.n);
+    const neckEnd = add(sh, nd, L.neck);
+    setLine(parts.neck, sh, neckEnd);
+    const hc = add(neckEnd, nd, L.head);
+    parts.head.setAttribute('cx', hc[0].toFixed(1)); parts.head.setAttribute('cy', hc[1].toFixed(1));
+    const nose = add(hc, dir(p.n + ex.face * 90), L.head - 1);
+    parts.nose.setAttribute('cx', nose[0].toFixed(1)); parts.nose.setAttribute('cy', nose[1].toFixed(1));
+
+    for (const side of ['n', 'f']) {
+      const [elb, hand] = ik(sh, p[side + 'h'], L.ua, L.fa, ex.sign[side + 'h']);
+      setLine(parts[side + 'ua'], sh, elb);
+      setLine(parts[side + 'fa'], elb, hand);
+      const [knee, ank] = ik(hip, p[side + 'k'], L.th, L.sh, ex.sign[side + 'k']);
+      setLine(parts[side + 'th'], hip, knee);
+      setLine(parts[side + 'sh'], knee, ank);
+      setLine(parts[side + 'ft'], ank, add(ank, dir(p[side + 'f']), L.foot));
+    }
+
+    if (ex.glow) {
+      // A point along the spine curve (quadratic Bézier) offset toward belly/back.
+      const k = ex.glow.at, u = 1 - k;
+      const pt = [u * u * hip[0] + 2 * u * k * ctrl[0] + k * k * sh[0], u * u * hip[1] + 2 * u * k * ctrl[1] + k * k * sh[1]];
+      const gp = add(pt, perp, ex.glow.off);
+      const g = parts.glow;
+      g.setAttribute('cx', gp[0].toFixed(1)); g.setAttribute('cy', gp[1].toFixed(1));
+      g.setAttribute('rx', ex.glow.rx); g.setAttribute('ry', ex.glow.ry);
+      g.setAttribute('transform', `rotate(${p.t.toFixed(1)} ${gp[0].toFixed(1)} ${gp[1].toFixed(1)})`);
+      const pulse = 0.75 + 0.25 * Math.sin(performance.now() / 260);
+      g.setAttribute('opacity', (p.g * 0.45 * pulse).toFixed(3));
+    }
+  }
+
+  function buildPhases(ex) {
+    const phases = [];
+    let prev = ex.start;
+    for (let r = 0; r < ex.cycles; r++) {
+      for (const seg of ex.cycle) {
+        phases.push({ ...seg, from: prev, rep: r });
+        prev = seg.to;
+      }
+    }
+    phases.push({ from: prev, to: ex.start, move: prev === ex.start ? 0 : 1600, label: 'Set complete', hold: 3000, holdLabel: 'Nice work — starting again', step: -1, rep: ex.cycles - 1, done: true });
+    let t = 0;
+    for (const ph of phases) { ph.t0 = t; t += ph.move + ph.hold; ph.t1 = t; }
+    return { phases, total: t };
+  }
+
+  const grid = document.getElementById('grid');
+  const tpl = document.getElementById('cardTpl');
+  const cards = [];
+
+  EXERCISES.forEach((ex, i) => {
+    const node = tpl.content.firstElementChild.cloneNode(true);
+    node.querySelector('.num').textContent = String(i + 1).padStart(2, '0');
+    node.querySelector('h3').textContent = ex.name;
+    node.querySelector('.reps').textContent = ex.reps;
+    node.querySelector('svg.scene title').textContent = `Animation: ${ex.name}`;
+    const ol = node.querySelector('.steps ol');
+    ex.steps.forEach((s) => { const li = document.createElement('li'); li.textContent = s; ol.appendChild(li); });
+    if (ex.tip) { const p = document.createElement('p'); p.className = 'tip'; p.textContent = ex.tip; node.querySelector('.steps').appendChild(p); }
+
+    const parts = {};
+    node.querySelectorAll('[data-p]').forEach((el) => { parts[el.dataset.p] = el; });
+    parts.glow = node.querySelector('.glow');
+
+    const { phases, total } = buildPhases(ex);
+    const card = {
+      ex, node, parts, phases, total,
+      time: 0, playing: !reduceMotion, visible: false,
+      phaseEl: node.querySelector('.phase strong'),
+      subEl: node.querySelector('.phase span'),
+      countEl: node.querySelector('.count'),
+      progEl: node.querySelector('.prog'),
+      toggle: node.querySelector('.toggle'),
+      stepEls: [...ol.children],
+      lastKey: '',
+    };
+    card.progEl.setAttribute('stroke-dasharray', RING.toFixed(2));
+    card.toggle.addEventListener('click', () => setPlaying(card, !card.playing));
+    node.querySelector('.restart').addEventListener('click', () => { card.time = 0; setPlaying(card, true); });
+    updateToggle(card);
+    grid.appendChild(node);
+    cards.push(card);
+    render(card);
+  });
+
+  function updateToggle(card) {
+    card.toggle.innerHTML = card.playing ? ICON_PAUSE : ICON_PLAY;
+    card.toggle.setAttribute('aria-label', card.playing ? 'Pause' : 'Play');
+  }
+  function setPlaying(card, on) { card.playing = on; updateToggle(card); render(card); }
+
+  function render(card) {
+    const { ex, phases } = card;
+    const t = card.time % card.total;
+    const ph = phases.find((p) => t < p.t1) || phases[phases.length - 1];
+    const local = t - ph.t0;
+    const a = ex.poses[ph.from], b = ex.poses[ph.to];
+    let pose, holding;
+    if (local < ph.move) { pose = lerpPose(a, b, ease(local / ph.move)); holding = false; }
+    else { pose = b; holding = true; }
+    drawPose(card.parts, ex, pose);
+
+    // HUD
+    const label = holding ? ph.holdLabel : ph.label;
+    const rep = `Round ${ph.rep + 1} of ${ex.cycles}`;
+    let remain, frac;
+    if (holding) { remain = ph.hold - (local - ph.move); frac = remain / ph.hold; }
+    else { remain = ph.move - local; frac = 1 - local / ph.move; }
+    const secs = Math.max(1, Math.ceil(remain / 1000));
+    const key = label + '|' + rep + '|' + (holding ? 'h' : 'm') + '|' + card.playing;
+    if (key !== card.lastKey) {
+      card.phaseEl.textContent = label;
+      const sub = ph.done ? 'Rest' : (holding && ph.hold >= 2000 ? `${rep} · hold` : rep);
+      card.subEl.textContent = card.playing ? sub : 'Paused · ' + sub;
+      card.stepEls.forEach((li, i) => li.classList.toggle('active', i === ph.step));
+      card.lastKey = key;
+    }
+    card.countEl.textContent = holding && ph.hold >= 2000 ? secs : '';
+    card.progEl.setAttribute('stroke-dashoffset', (RING * (1 - Math.max(0, Math.min(1, frac)))).toFixed(2));
+    card.progEl.style.opacity = holding ? 1 : 0.35;
+  }
+
+  // Only animate cards that are on screen.
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      const c = cards.find((c) => c.node === e.target);
+      if (c) c.visible = e.isIntersecting;
+    }
+  }, { threshold: 0.15 });
+  cards.forEach((c) => io.observe(c.node));
+
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(100, now - last);
+    last = now;
+    for (const c of cards) {
+      if (!c.visible) continue;
+      if (c.playing) c.time += dt;
+      if (c.playing || c.ex.glow) render(c);
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  window.__backExercises = { cards, render };
+
+  document.getElementById('playAll').addEventListener('click', () => cards.forEach((c) => setPlaying(c, true)));
+  document.getElementById('pauseAll').addEventListener('click', () => cards.forEach((c) => setPlaying(c, false)));
+  document.addEventListener('visibilitychange', () => { last = performance.now(); });
+})();
+</script>
+</body>
+</html>
