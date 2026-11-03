@@ -142,9 +142,13 @@
     background: var(--surface); border-top: 1px solid var(--border); color: var(--muted);
   }
   .form-note::before { content: ""; width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--border); flex: none; transition: background .3s, border-color .3s; }
-  .form-note span { font-weight: 500; }
+  .form-note { flex-wrap: wrap; row-gap: 4px; }
+  .form-note .txt { font-weight: 500; flex: 1 1 14em; min-width: 0; }
+  .form-note .tag:empty { display: none; }
+  .form-note .tag { font-size: 0.78em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 2px 7px; border-radius: 99px; color: #fff; white-space: nowrap; }
+  .tag-work { background: var(--muscle); } .tag-stretch { background: var(--stretch); } .tag-relax { background: var(--accent); color: var(--on-accent) !important; }
   .form-note.show { color: var(--text); }
-  .form-note.show span { font-weight: 600; }
+  .form-note.show .txt { font-weight: 600; }
   .form-note.show::before { background: var(--cue); border-color: var(--cue); }
   .inset-mark { fill: none; stroke: var(--cue); stroke-width: 1; stroke-dasharray: 2 2; }
 
@@ -171,16 +175,63 @@
   footer { margin-top: 28px; font-size: 0.85rem; color: var(--muted); }
 
   /* figure */
-  .fig path, .fig circle, .fig ellipse { stroke: none; }
+  :root {
+    --skin-lo: #b97b58; --hair-hi: #6e5040; --lips: #b0605a;
+    --shirt-lo: #1f6c64; --pants-hi: #55669c; --pants-lo: #1d2541;
+    --sock: #f3efe7; --sock-far: #cbc5b9; --sole: #f6f1e8; --lace: #ffffff;
+    --muscle: #e5484d; --stretch: #3f7be8;
+    --wall-top: #ede4d6; --skirting: #e4d8c5; --floor: #d6be98; --floor-line: #bfa37b;
+    --sky-top: #a9d4f2; --sky-bot: #e7f4fb; --frame: #fbf8f2; --beam: #fff6dc;
+    --plant: #4f9160; --plant-dk: #3a7049; --pot: #c97b55;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --wall-top: #161a19; --skirting: #262c2a; --floor: #3a3128; --floor-line: #2b241e;
+      --sky-top: #14213d; --sky-bot: #3a4c73; --frame: #2f3634; --beam: #a9bdf5; --beam-op: 0.3;
+      --plant: #3f7a4a; --plant-dk: #2f5d39; --pot: #8d5a3e;
+    }
+  }
+  :root[data-theme="dark"] {
+    --wall-top: #161a19; --skirting: #262c2a; --floor: #3a3128; --floor-line: #2b241e;
+    --sky-top: #14213d; --sky-bot: #3a4c73; --frame: #2f3634; --beam: #a9bdf5; --beam-op: 0.3;
+    --plant: #3f7a4a; --plant-dk: #2f5d39; --pot: #8d5a3e;
+  }
+  .scene { shape-rendering: geometricPrecision; }
+  .fig .skin, .fig .shirt, .fig .pants, .fig .shoe, .fig .sock, .fig .hair { stroke: rgba(0, 0, 0, 0.22); stroke-width: 0.4; stroke-linejoin: round; }
   .skin { fill: var(--skin); } .far .skin { fill: var(--skin-far); }
   .shirt { fill: var(--shirt); } .far .shirt { fill: var(--shirt-far); }
   .pants { fill: var(--pants); } .far .pants { fill: var(--pants-far); }
   .shoe { fill: var(--shoe); } .far .shoe { fill: var(--shoe-far); }
-  .hair { fill: var(--hair); } .eye { fill: var(--eye); } .ear { fill: var(--skin-shade); }
-  .glow { fill: url(#glowGrad); }
-  .shadow { fill: #000; filter: url(#softBlur); }
-  .mat-top { fill: var(--mat-top); } .mat-side { fill: var(--mat-side); }
-  .wall { fill: var(--wall); } .ground { fill: var(--ground); }
+  .sock { fill: var(--sock); } .far .sock { fill: var(--sock-far); }
+  .sole { fill: var(--sole); }
+  .band { fill: var(--pants-hi); }
+  .hair { fill: var(--hair); } .eye { fill: var(--eye); }
+  .fig .sh { fill: #000; opacity: 0.13; }
+  .fig .hi { fill: #fff; opacity: 0.09; }
+  .kneecap { fill: var(--pants-hi); opacity: 0.22; }
+  .fig .ear { fill: var(--skin-lo); opacity: 0.75; stroke: none; }
+  .blush { fill: #e8826e; opacity: 0.22; }
+  .ln { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .ln-shirt { stroke: var(--shirt-lo); stroke-width: 0.8; }
+  .ln-collar { stroke: var(--shirt-lo); stroke-width: 1.5; }
+  .ln-skin { stroke: var(--skin-lo); stroke-width: 0.45; }
+  .ln-hair { stroke: var(--hair-hi); stroke-width: 0.6; }
+  .ln-seam { stroke: var(--pants-hi); stroke-width: 0.5; opacity: 0.6; }
+  .ln-crease { stroke: var(--pants-lo); stroke-width: 0.6; }
+  .ln-lace { stroke: var(--lace); stroke-width: 0.7; }
+  .brow { stroke: var(--hair); stroke-width: 1.1; }
+  .lid { stroke: var(--eye); stroke-width: 0.5; }
+  .mouth { stroke: var(--lips); stroke-width: 0.75; }
+  .m-work .m-fill { fill: var(--muscle); } .m-stretch .m-fill { fill: var(--stretch); }
+  .m-fib { fill: none; stroke: #fff; stroke-opacity: 0.55; stroke-width: 0.45; stroke-linecap: round; }
+  .shadows ellipse { fill: #000; filter: url(#shadowBlur); }
+  .mat-top { fill: var(--mat-top); } .mat-side { fill: var(--mat-side); } .mat-edge { fill: #fff; opacity: 0.18; }
+  .skirting { fill: var(--skirting); }
+  .floor { fill: var(--floor); } .floor-lines { fill: none; stroke: var(--floor-line); stroke-width: 0.5; }
+  .win-frame { fill: var(--frame); stroke: rgba(0, 0, 0, 0.12); stroke-width: 0.5; } .win-sill { fill: var(--frame); stroke: rgba(0, 0, 0, 0.12); stroke-width: 0.4; }
+  .beam { opacity: var(--beam-op, 1); }
+  .leaf { fill: var(--plant); } .leaf-dk { fill: var(--plant-dk); }
+  .pot, .pot-rim { fill: var(--pot); } .pot-rim { filter: brightness(1.1); }
   .cue { fill: none; stroke: var(--cue); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
   .inset-bg { fill: var(--wall); }
   .inset-ring { fill: none; stroke: var(--cue); stroke-width: 1.4; }
@@ -227,7 +278,8 @@
     .wk-main { display: contents; }
     #wkStage { grid-column: 1; grid-row: 1 / span 2; align-self: start; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
     #wkStage svg.scene { max-height: calc(100vh - 160px); max-height: calc(100dvh - 160px); }
-    #wkStage .form-note { min-height: 28px; padding: 4px 12px; font-size: 0.8rem; }
+    #wkStage .form-note { min-height: 28px; padding: 4px 12px; font-size: 0.8rem; flex-wrap: nowrap; }
+    #wkStage .form-note .txt { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .wk-hud { grid-column: 2; grid-row: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 8px 12px; gap: 10px; }
     .wk-hud .timer { width: 46px; height: 46px; }
     .wk-hud .timer .count { font-size: 1rem; }
@@ -243,6 +295,74 @@
   .wk-done h2 { margin: 0; font-size: 2rem; }
   .wk-done p { margin: 0; color: var(--muted); max-width: 46ch; }
 
+  .head-btns { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+  .tv-btn[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .upnext { display: none; }
+  .tv-hint { display: none; }
+
+  /* "Watch on TV" help sheet */
+  dialog.sheet { width: min(860px, calc(100% - 24px)); max-height: calc(100% - 24px); border: 1px solid var(--border); border-radius: 18px; padding: 0; background: var(--surface); color: var(--text); }
+  dialog.sheet::backdrop { background: rgba(0, 0, 0, 0.5); }
+  .sheet-body { padding: 18px 20px 22px; }
+  .sheet-top { display: flex; align-items: center; gap: 12px; }
+  .sheet-top h2 { margin: 0; flex: 1; font-size: 1.4rem; }
+  .site-url { font-size: 1.25rem; font-weight: 700; color: var(--accent); margin: 10px 0 14px; word-break: break-all; }
+  .cast-grid { display: grid; gap: 12px; grid-template-columns: 1fr; }
+  @media (min-width: 640px) { .cast-grid { grid-template-columns: 1fr 1fr; } }
+  .cast-grid section { background: var(--surface-2); border-radius: 12px; padding: 12px 14px; }
+  .sheet h3 { margin: 0 0 6px; font-size: 1rem; }
+  .sheet ul { margin: 0; padding-left: 1.1em; }
+  .sheet li { margin: 4px 0; }
+  .sheet .tips { margin-top: 4px; }
+  .sheet-body > h3 { margin-top: 16px; }
+  kbd { font: inherit; font-size: 0.85em; font-weight: 700; border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 6px; padding: 0 6px; background: var(--surface); }
+
+  /* ---------- TV mode: readable from the sofa, driven by a remote ---------- */
+  /* Scales with the screen width, so a 960-wide TV browser looks the same as 1920 on the TV itself. */
+  html.tv { font-size: max(12px, 1.25vw); }
+  html.tv body { font-size: 1rem; }
+  html.tv .wrap { max-width: 92vw; padding: 2.2rem 1rem 3rem; }
+  html.tv :focus-visible, html.tv button:focus, html.tv select:focus, html.tv input:focus { outline: 0.25rem solid var(--accent); outline-offset: 0.2rem; box-shadow: 0 0 0 0.7rem rgba(47, 111, 94, 0.28); }
+  html.tv button { font-size: 0.95rem; min-height: 2.6rem; padding: 0.45rem 1.1rem; }
+  html.tv #startWorkout { font-size: 1.25rem; min-height: 3.4rem; padding: 0.6rem 1.8rem; }
+  html.tv #printBtn { display: none; }
+  html.tv .wrap { display: flex; flex-direction: column; }
+  html.tv .site-head { order: -2; }
+  html.tv .toolbar { order: -1; margin-bottom: 1.4rem; }
+  html.tv button svg { width: 0.9em; height: 0.9em; }
+  html.tv .info-grid, html.tv .me-grid { margin-bottom: 1.2rem; }
+  html.tv .help { margin-top: 1.6rem; }
+  html.tv .plan-table input, html.tv .row select { font-size: 1rem; min-height: 2.4rem; }
+  html.tv .card-head h3 { font-size: 1.35rem; }
+  @media (min-width: 1300px) { html.tv .grid { grid-template-columns: repeat(3, 1fr); } }
+  html.tv .stage .form-note { font-size: 0.85rem; }
+
+  html.tv .wk { max-width: none; height: 100vh; height: 100dvh; min-height: 0; padding: 1.4rem 2rem 1rem; gap: 0.8rem; }
+  html.tv .wk-top h2 { font-size: 2rem; }
+  html.tv .wk-count { font-size: 1rem; }
+  html.tv .wk-progress { height: 0.5rem; }
+  html.tv .wk-body { flex: 1; min-height: 0; grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); gap: 1.2rem; }
+  html.tv .wk-main { display: contents; }
+  html.tv #wkStage { grid-column: 1; grid-row: 1 / span 2; align-self: center; background: var(--surface); border: 1px solid var(--border); border-radius: 1.2rem; overflow: hidden; }
+  html.tv #wkStage svg.scene { max-height: calc(100vh - 13rem); max-height: calc(100dvh - 13rem); }
+  html.tv #wkStage .form-note { font-size: 1.05rem; min-height: 2.6rem; padding: 0.5rem 1.2rem; }
+  html.tv .wk-hud { grid-column: 2; grid-row: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 1.2rem; padding: 1.2rem 1.4rem; gap: 1.2rem; align-items: center; }
+  html.tv .wk-hud .timer { width: 8.5rem; height: 8.5rem; }
+  html.tv .wk-hud .timer .count { font-size: 2.8rem; }
+  html.tv .wk-hud .phase strong { font-size: 2rem; line-height: 1.2; }
+  html.tv .wk-hud .phase span { font-size: 1.05rem; }
+  html.tv .upnext { display: block; margin-top: 0.5rem; color: var(--muted); }
+  html.tv .upnext:empty { display: none; }
+  html.tv .wk-side { grid-column: 2; grid-row: 2; min-height: 0; overflow: auto; position: relative; font-size: 1.05rem; padding: 1rem 1.3rem; border-radius: 1.2rem; }
+  html.tv .wk-controls { position: static; padding: 0; gap: 1.2rem; }
+  html.tv .wk-controls button { font-size: 1.2rem; min-height: 3.2rem; padding: 0.5rem 1.6rem; }
+  html.tv .wk-controls .big { min-width: 10rem; }
+  html.tv .tv-hint { display: block; text-align: center; margin: 0; color: var(--muted); font-size: 0.95rem; }
+  html.tv .tv-hint span { margin: 0 0.5rem; }
+  html.tv .wk-toggles button { font-size: 0.95rem; }
+  html.tv dialog.workout.no-cursor, html.tv dialog.workout.no-cursor * { cursor: none !important; }
+  html.tv dialog.sheet { width: min(70rem, 92vw); font-size: 1.05rem; }
+
   @media print {
     :root:not(#_), :root[data-theme]:not(#_) {
       --bg: #fff; --surface: #fff; --surface-2: #f2f2f2; --text: #000; --muted: #444; --border: #ccc; --accent: #2f6f5e; --accent-soft: #e2efe9;
@@ -251,7 +371,7 @@
     }
     * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .wrap { padding: 0; max-width: none; }
-    .theme-btn, .toolbar .btns, .hud, .me-grid, dialog, .form-note, .plan-line { display: none !important; }
+    .head-btns, .toolbar .btns, .hud, .me-grid, dialog, .form-note, .plan-line { display: none !important; }
     .grid { grid-template-columns: 1fr 1fr; gap: 12px; }
     .card { break-inside: avoid; border-radius: 10px; }
     li.active { color: inherit; font-weight: normal; }
@@ -262,12 +382,23 @@
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
-    <radialGradient id="glowGrad">
-      <stop offset="0" stop-color="#ff7a45" stop-opacity="0.95"/>
-      <stop offset="0.55" stop-color="#ff8f5a" stop-opacity="0.55"/>
-      <stop offset="1" stop-color="#ffa36f" stop-opacity="0"/>
-    </radialGradient>
     <filter id="softBlur" x="-20%" y="-200%" width="140%" height="500%"><feGaussianBlur stdDeviation="2"/></filter>
+    <filter id="shadowBlur" x="-50%" y="-300%" width="200%" height="700%"><feGaussianBlur stdDeviation="1.4"/></filter>
+    <linearGradient id="wallGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" style="stop-color: var(--wall-top)"/>
+      <stop offset="1" style="stop-color: var(--wall)"/>
+    </linearGradient>
+    <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" style="stop-color: var(--sky-top)"/>
+      <stop offset="1" style="stop-color: var(--sky-bot)"/>
+    </linearGradient>
+    <linearGradient id="beamGrad" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" style="stop-color: var(--beam); stop-opacity: 0.55"/>
+      <stop offset="1" style="stop-color: var(--beam); stop-opacity: 0"/>
+    </linearGradient>
+    <pattern id="matTex" width="3" height="3" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
+      <path d="M0 0V3" stroke="#fff" stroke-opacity="0.13" stroke-width="0.6"/>
+    </pattern>
   </defs>
 </svg>
 <div class="wrap">
@@ -276,9 +407,14 @@
       <h1>Back Exercises</h1>
       <p class="lede">Seven exercises to strengthen your trunk and keep your lower back flexible. Watch each one, or press <strong>Start workout</strong> to be guided through them one at a time with spoken cues.</p>
     </div>
-    <button type="button" class="theme-btn" id="themeBtn" aria-label="Colour theme: automatic">
-      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 12.5V2.5a5.5 5.5 0 0 1 0 11z"/></svg><span>Auto</span>
-    </button>
+    <div class="head-btns">
+      <button type="button" class="tv-btn" id="tvBtn" aria-pressed="false">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1.5 3h13a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-8a.5.5 0 0 1 .5-.5zm1 1.5v6h11v-6zM5 13.5h6v1H5z"/></svg><span>TV mode</span>
+      </button>
+      <button type="button" class="theme-btn" id="themeBtn" aria-label="Colour theme: automatic">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 12.5V2.5a5.5 5.5 0 0 1 0 11z"/></svg><span>Auto</span>
+      </button>
+    </div>
   </header>
 
   <section class="info-grid" aria-label="How often and safety">
@@ -332,6 +468,7 @@
     <h2>Exercises</h2>
     <div class="btns">
       <button type="button" class="primary" id="startWorkout"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5v11l9-5.5z"/></svg><span>Start workout</span></button>
+      <button type="button" id="castBtn"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1 3.5A1.5 1.5 0 0 1 2.5 2h11A1.5 1.5 0 0 1 15 3.5v8a1.5 1.5 0 0 1-1.5 1.5H9v-1.5h4.5v-8h-11V6H1zM1 8a6 6 0 0 1 6 6H5.5A4.5 4.5 0 0 0 1 9.5zm0 3a3 3 0 0 1 3 3H1z"/></svg>Watch on TV</button>
       <button type="button" id="printBtn"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 1h8v4H4zM2 6h12a1 1 0 0 1 1 1v5h-3v3H4v-3H1V7a1 1 0 0 1 1-1zm3 5v3h6v-3z"/></svg>Print</button>
     </div>
   </div>
@@ -382,7 +519,7 @@
             <svg viewBox="0 0 40 40"><circle class="track" cx="20" cy="20" r="17" fill="none" stroke-width="4"/><circle class="prog" cx="20" cy="20" r="17" fill="none" stroke-width="4" stroke-linecap="round"/></svg>
             <div class="count"></div>
           </div>
-          <div class="phase"><strong id="wkLabel"></strong><span id="wkSub"></span></div>
+          <div class="phase"><strong id="wkLabel"></strong><span id="wkSub"></span><span class="upnext" id="wkUpNext"></span></div>
         </div>
       </div>
       <aside class="wk-side">
@@ -396,6 +533,7 @@
       <button type="button" class="primary big" id="wkPlay">Pause</button>
       <button type="button" id="wkNext" aria-label="Skip to next exercise">Skip<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M11 2h2v12h-2zM2 2.5v11L10 8z"/></svg></button>
     </div>
+    <p class="tv-hint" id="wkHint" aria-hidden="true"><kbd>◀</kbd> Back <span>·</span> <kbd>OK</kbd> Pause / resume <span>·</span> Skip <kbd>▶</kbd> <span>·</span> <kbd>↩</kbd> Exit</p>
     <div class="wk-done" id="wkDone" hidden>
       <h2>Workout complete</h2>
       <p id="wkDoneText"></p>
@@ -405,6 +543,52 @@
       </div>
     </div>
     <div class="visually-hidden" aria-live="polite" id="wkLive"></div>
+  </div>
+</dialog>
+
+<dialog id="castHelp" class="sheet" aria-labelledby="castTitle">
+  <div class="sheet-body">
+    <div class="sheet-top">
+      <h2 id="castTitle">Watch on your TV</h2>
+      <button type="button" class="sheet-close" aria-label="Close"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 2.4 8 6.9l4.5-4.5 1.1 1.1L9.1 8l4.5 4.5-1.1 1.1L8 9.1l-4.5 4.5-1.1-1.1L6.9 8 2.4 3.5z"/></svg></button>
+    </div>
+    <p class="site-url">kgram1989.github.io/Back-Exercises</p>
+    <div class="cast-grid">
+      <section>
+        <h3>Chromecast or Google TV</h3>
+        <ul>
+          <li><strong>Computer:</strong> in Chrome or Edge, open this page → menu ⋮ → <em>Cast, save and share</em> → <em>Cast…</em> → choose the TV. Then press F11 for full screen.</li>
+          <li><strong>Android phone:</strong> Google Home app → your TV → <em>Cast my screen</em>, or Quick Settings → <em>Screen cast</em>.</li>
+        </ul>
+      </section>
+      <section>
+        <h3>Apple TV or AirPlay TV</h3>
+        <ul>
+          <li><strong>iPhone / iPad:</strong> open this page in Safari → Control Centre → <em>Screen Mirroring</em> → choose the TV.</li>
+          <li><strong>Mac:</strong> Control Centre → <em>Screen Mirroring</em>.</li>
+        </ul>
+      </section>
+      <section>
+        <h3>Samsung, Windows or a cable</h3>
+        <ul>
+          <li><strong>Samsung phone → Samsung TV:</strong> Quick Settings → <em>Smart View</em>.</li>
+          <li><strong>Windows laptop:</strong> press <kbd>Windows</kbd> + <kbd>K</kbd>, or plug in an HDMI cable.</li>
+        </ul>
+      </section>
+      <section>
+        <h3>The TV's own browser</h3>
+        <ul>
+          <li>Open the TV's web browser, type the address above and bookmark it. TV mode switches on by itself, and the remote's arrows, OK and Back buttons work.</li>
+          <li>Many TV browsers can't speak the instructions; the beeps and timer still work.</li>
+        </ul>
+      </section>
+    </div>
+    <h3>Tips</h3>
+    <ul class="tips">
+      <li>When mirroring a phone, turn it sideways so the workout fills the TV screen.</li>
+      <li>Sound plays through the TV, so leave Voice and Beeps on.</li>
+      <li>Your plan and the daily tracker are saved on the device running the page.</li>
+    </ul>
   </div>
 </dialog>
 
@@ -438,36 +622,33 @@
       <title></title>
       <defs><clipPath class="inset-clip"><circle r="24"/></clipPath></defs>
       <g class="scene-root">
-        <rect class="wall" x="60" y="102" width="290" height="102"/>
-        <rect class="ground" x="60" y="203" width="290" height="17"/>
+        <rect class="wall" x="60" y="102" width="290" height="99" fill="url(#wallGrad)"/>
+        <g class="window">
+          <rect class="win-frame" x="69" y="110" width="40" height="52" rx="1.5"/>
+          <rect class="win-sky" x="71.5" y="112.5" width="16.2" height="22.4" fill="url(#skyGrad)"/>
+          <rect class="win-sky" x="90.3" y="112.5" width="16.2" height="22.4" fill="url(#skyGrad)"/>
+          <rect class="win-sky" x="71.5" y="137.1" width="16.2" height="22.4" fill="url(#skyGrad)"/>
+          <rect class="win-sky" x="90.3" y="137.1" width="16.2" height="22.4" fill="url(#skyGrad)"/>
+          <rect class="win-sill" x="66.5" y="161" width="45" height="2.6" rx="1"/>
+        </g>
+        <path class="beam" d="M71 163L108 163L176 201L104 201Z" fill="url(#beamGrad)"/>
+        <rect class="skirting" x="60" y="195.5" width="290" height="5.5"/>
+        <rect class="floor" x="60" y="201" width="290" height="19"/>
+        <path class="floor-lines" d="M60 206.5H350M60 213H350M66 201L39 220M86 201L67 220M106 201L94 220M126 201L121 220M146 201L148 220M166 201L175 220M186 201L202 220M206 201L229 220M226 201L256 220M246 201L283 220M266 201L310 220M286 201L337 220M306 201L364 220M326 201L391 220M346 201L418 220"/>
+        <g class="plant">
+          <path class="leaf" d="M341 186C336 176 331 170 333 163C338 168 341 176 341 186Z"/>
+          <path class="leaf leaf-dk" d="M341 186C343 174 341 166 345 159C348 167 346 177 341 186Z"/>
+          <path class="leaf" d="M341 186C347 178 350 173 349 167C344 171 342 178 341 186Z"/>
+          <path class="leaf leaf-dk" d="M341 186C336 181 332 179 330 175C335 175 339 179 341 186Z"/>
+          <path class="pot" d="M334.5 185.5h13l-1.6 15.5h-9.8z"/>
+          <rect class="pot-rim" x="333.6" y="184.4" width="14.8" height="2.6" rx="1"/>
+        </g>
         <path class="mat-side" d="M84 201.5h242a3 3 0 0 1 3 3v1.5a3 3 0 0 1-3 3H84a3 3 0 0 1-3-3v-1.5a3 3 0 0 1 3-3z"/>
         <rect class="mat-top" x="81" y="199.5" width="248" height="4" rx="2"/>
-        <ellipse class="shadow" data-p="shadow" cx="200" cy="201" rx="80" ry="2.6" opacity="0.18"/>
-        <g class="fig">
-          <g class="far" transform="translate(2,-2.2)">
-            <path class="skin" data-p="fua"/><path class="shirt" data-p="fsl"/>
-            <path class="skin" data-p="ffa"/><circle class="skin" data-p="fhd" r="3.3"/>
-            <path class="pants" data-p="fth"/><path class="pants" data-p="fsh"/>
-            <path class="shoe" data-p="fft"/>
-          </g>
-          <path class="skin" data-p="neck"/>
-          <circle class="skin" data-p="head" r="10"/>
-          <circle class="skin" data-p="nose" r="2.1"/>
-          <path class="hair" data-p="hair"/>
-          <ellipse class="ear" data-p="ear" rx="2" ry="2.8"/>
-          <circle class="eye" data-p="eye" r="1.15"/>
-          <circle class="pants" data-p="pelvisCap"/>
-          <path class="pants" data-p="pelvis"/>
-          <path class="shirt" data-p="shirt"/>
-          <circle class="shirt" data-p="shoulderCap"/>
-          <ellipse class="glow" data-p="glow" rx="16" ry="9" opacity="0"/>
-          <g class="near">
-            <path class="pants" data-p="nth"/><path class="pants" data-p="nsh"/>
-            <path class="shoe" data-p="nft"/>
-            <path class="skin" data-p="nua"/><path class="shirt" data-p="nsl"/>
-            <path class="skin" data-p="nfa"/><circle class="skin" data-p="nhd" r="3.4"/>
-          </g>
-        </g>
+        <rect x="81" y="199.5" width="248" height="4" rx="2" fill="url(#matTex)"/>
+        <rect class="mat-edge" x="81" y="199.3" width="248" height="0.9" rx="0.45"/>
+        <g class="shadows"></g>
+        <g class="fig"></g>
       </g>
       <g class="cues"></g>
       <g class="inset">
@@ -479,7 +660,7 @@
         <text class="inset-label" text-anchor="middle"></text>
       </g>
     </svg>
-    <div class="form-note"><span></span></div>
+    <div class="form-note"><b class="tag"></b><span class="txt"></span></div>
   </div>
 </template>
 
@@ -496,6 +677,8 @@
 
   // ---------- Body model ----------
   const L = { torso: 72, neck: 10, head: 11, ua: 30, fa: 28, th: 44, sh: 42, foot: 12 };
+  // Body build: how thick the torso and limbs are (1 = slim), and head / hand / foot size.
+  const BUILD = 1.3, HEAD_S = 1.12, HAND_S = 1.15, SHOE_S = 1.08;
   const RAD = Math.PI / 180;
   const dir = (deg) => [Math.cos(deg * RAD), Math.sin(deg * RAD)];
   const add = (p, v, s) => [p[0] + v[0] * s, p[1] + v[1] * s];
@@ -504,7 +687,6 @@
   const f1 = (v) => v.toFixed(1);
   const pt = (p) => `${f1(p[0])} ${f1(p[1])}`;
   const ease = (x) => 0.5 - 0.5 * Math.cos(Math.PI * x);
-  const bez = (H, C, S, t) => { const u = 1 - t; return [u * u * H[0] + 2 * u * t * C[0] + t * t * S[0], u * u * H[1] + 2 * u * t * C[1] + t * t * S[1]]; };
 
   // Two-bone inverse kinematics. s = +1 / -1 picks which way the middle joint bends.
   function ik(root, target, a, b, s) {
@@ -518,10 +700,15 @@
     const l = Math.atan2(target[1] - mid[1], target[0] - mid[0]);
     return [mid, [mid[0] + b * Math.cos(l), mid[1] + b * Math.sin(l)]];
   }
-  function lerpPose(a, b, k) {
+  // Overlapping action: the hips and torso lead, the head, arms and hands follow a little later.
+  const DELAY = { n: 0.12, nh: 0.08, fh: 0.1, nA: 0.08, fA: 0.1, hd: 0.1, hdw: 0.1, hg: 0.2, nf: 0.05, ff: 0.07, g: 0.1, m2: 0.1 };
+  // x is the linear progress (0..1) of the move; each field eases on its own slightly delayed clock.
+  function lerpPose(a, b, x, easeFn = ease) {
     const out = {};
     for (const key in a) {
       const va = a[key], vb = key in b ? b[key] : va;
+      const d = DELAY[key] || 0;
+      const k = easeFn(Math.max(0, Math.min(1, (x - d) / (1 - d))));
       out[key] = Array.isArray(va) ? va.map((v, i) => v + (vb[i] - v) * k) : va + (vb - va) * k;
     }
     return out;
@@ -537,112 +724,367 @@
     el.setAttribute('cx', f1(c[0])); el.setAttribute('cy', f1(c[1]));
     if (r != null) el.setAttribute('r', f1(r));
   }
-  // Torso half-widths along the spine (0 = hips, 1 = shoulders).
-  const TORSO_FRONT = [[0, 7.6], [0.3, 7.0], [0.5, 7.4], [0.72, 9.0], [0.9, 8.2], [1, 6.6]];
-  const TORSO_BACK  = [[0, 9.0], [0.18, 8.0], [0.38, 6.6], [0.7, 7.4], [0.9, 7.6], [1, 6.6]];
+  // ---------- Drawing helpers ----------
+  const lerp = (a, b, k) => a + (b - a) * k;
+  const lerp2 = (A, B, k) => [lerp(A[0], B[0], k), lerp(A[1], B[1], k)];
+  const perpOf = (d) => [-d[1], d[0]];
+  const neg = (v) => [-v[0], -v[1]];
+  const dot = (a, b) => a[0] * b[0] + a[1] * b[1];
+  const clamp01 = (x) => Math.max(0, Math.min(1, x));
+  const rotVec = (v, deg) => { const c = Math.cos(deg * RAD), s = Math.sin(deg * RAD); return [v[0] * c - v[1] * s, v[0] * s + v[1] * c]; };
+  const angOf = (v) => Math.atan2(v[1], v[0]) / RAD;
+  const easeCubic = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+  const TO_LIGHT = norm([-0.55, -1]); // light comes from the upper left
+
+  // Smooth curve through points (Catmull-Rom as cubic Béziers). `cmd` is M to start a path or L to continue one.
+  function spline(P, cmd = 'M') {
+    let d = `${cmd}${pt(P[0])}`;
+    for (let i = 0; i < P.length - 1; i++) {
+      const p0 = P[i - 1] || P[i], p1 = P[i], p2 = P[i + 1], p3 = P[i + 2] || P[i + 1];
+      d += `C${pt([p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6])} ${pt([p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6])} ${pt(p2)}`;
+    }
+    return d;
+  }
+  function closedSpline(P) {
+    const n = P.length;
+    let d = `M${pt(P[0])}`;
+    for (let i = 0; i < n; i++) {
+      const p0 = P[(i - 1 + n) % n], p1 = P[i], p2 = P[(i + 1) % n], p3 = P[(i + 2) % n];
+      d += `C${pt([p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6])} ${pt([p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6])} ${pt(p2)}`;
+    }
+    return d + 'Z';
+  }
   function widthAt(tbl, t) {
+    if (t <= tbl[0][0]) return tbl[0][1];
     for (let i = 1; i < tbl.length; i++) {
       if (t <= tbl[i][0]) { const [t0, w0] = tbl[i - 1], [t1, w1] = tbl[i]; return w0 + (w1 - w0) * ease((t - t0) / (t1 - t0)); }
     }
     return tbl[tbl.length - 1][1];
   }
-  function torsoPath(H, C, S, t0, t1, face, breath, tilt) {
-    const left = [], right = [];
+
+  // A body part as a ribbon around a centre line (P points, N normals; +N side uses widths wl).
+  // Returns the outline, a shadow strip on the side away from the light, and a highlight strip on the lit side.
+  function ribbon(P, N, wl, wr) {
+    const n = P.length, mid = n >> 1;
+    const Lf = P.map((p, i) => add(p, N[i], wl[i])), Rt = P.map((p, i) => add(p, N[i], -wr[i]));
+    const tE = norm(sub(P[n - 1], P[n - 2])), tS = norm(sub(P[0], P[1]));
+    const capE = add(P[n - 1], tE, (wl[n - 1] + wr[n - 1]) * 0.9);
+    const capS = add(P[0], tS, (wl[0] + wr[0]) * 0.9);
+    const d = spline(Lf) + `Q${pt(capE)} ${pt(Rt[n - 1])}` + spline(Rt.slice().reverse(), 'L') + `Q${pt(capS)} ${pt(Lf[0])}Z`;
+    const litLeft = dot(N[mid], TO_LIGHT) >= 0;
+    const ds = litLeft ? -1 : 1, wd = litLeft ? wr : wl, wlit = litLeft ? wl : wr;
+    const dark = litLeft ? Rt : Lf;
+    const inner = P.map((p, i) => add(p, N[i], ds * wd[i] * 0.15));
+    const sh = spline(dark) + spline(inner.slice().reverse(), 'L') + 'Z';
+    const h1 = P.map((p, i) => add(p, N[i], -ds * wlit[i] * 0.8)).slice(1, -1);
+    const h2 = P.map((p, i) => add(p, N[i], -ds * wlit[i] * 0.4)).slice(1, -1);
+    const hi = spline(h1) + spline(h2.reverse(), 'L') + 'Z';
+    return { d, sh, hi };
+  }
+
+  // Limb muscle profiles: half-widths along the limb on the front (f) and back (b) side.
+  const LIMB = {
+    thigh:  { f: [[0, 7.3], [0.3, 7.5], [0.75, 5.8], [1, 5.0]], b: [[0, 7.8], [0.35, 6.6], [0.8, 5.2], [1, 4.8]] },
+    shin:   { f: [[0, 4.9], [0.25, 4.2], [0.8, 3.0], [1, 2.9]], b: [[0, 4.6], [0.3, 5.5], [0.65, 3.9], [1, 3.0]] },
+    sock:   { f: [[0, 3.4], [1, 3.3]], b: [[0, 3.5], [1, 3.4]] },
+    upper:  { f: [[0, 5.0], [0.45, 4.7], [1, 3.4]], b: [[0, 5.4], [0.35, 5.1], [1, 3.5]] },
+    sleeve: { f: [[0, 5.7], [1, 5.0]], b: [[0, 6.0], [1, 5.3]] },
+    fore:   { f: [[0, 3.5], [0.3, 3.8], [1, 2.4]], b: [[0, 3.3], [0.3, 3.6], [1, 2.3]] },
+    neck:   { f: [[0, 4.4], [1, 3.7]], b: [[0, 4.6], [1, 3.9]] },
+  };
+  for (const k in LIMB) for (const side of ['f', 'b']) LIMB[k][side] = LIMB[k][side].map(([t, w]) => [t, w * BUILD]);
+  const FRACS = [0, 0.15, 0.32, 0.5, 0.68, 0.85, 1];
+  // A limb from A to B; `ant` points to the limb's front (quadriceps / biceps side). fa..fb trims the limb.
+  function limbRibbon(A, B, prof, ant, fa = 0, fb = 1) {
+    let N = perpOf(norm(sub(B, A)));
+    if (dot(N, ant) < 0) N = neg(N);
+    const P = [], NN = [], wl = [], wr = [];
+    for (const f of FRACS) {
+      const ff = fa + (fb - fa) * f;
+      P.push(lerp2(A, B, ff)); NN.push(N); wl.push(widthAt(prof.f, ff)); wr.push(widthAt(prof.b, ff));
+    }
+    return ribbon(P, NN, wl, wr);
+  }
+  function setRib(parts, key, r) {
+    parts[key].setAttribute('d', r.d);
+    if (parts[key + 's']) parts[key + 's'].setAttribute('d', r.sh);
+    if (parts[key + 'h']) parts[key + 'h'].setAttribute('d', r.hi);
+  }
+
+  // Spine: a cubic curve from hips (H) to shoulders (S) with lower-back (C1) and upper-back (C2) controls.
+  const cub = (H, C1, C2, S, t) => { const u = 1 - t; return [0, 1].map((k) => u * u * u * H[k] + 3 * u * u * t * C1[k] + 3 * u * t * t * C2[k] + t * t * t * S[k]); };
+  const cubD = (H, C1, C2, S, t) => { const u = 1 - t; return norm([0, 1].map((k) => 3 * u * u * (C1[k] - H[k]) + 6 * u * t * (C2[k] - C1[k]) + 3 * t * t * (S[k] - C2[k]))); };
+  // Torso half-widths along the spine (0 = hips, 1 = shoulders): front (chest/belly) and back (glutes/shoulder blades).
+  const TORSO_FRONT = [[0, 7.6], [0.3, 7.2], [0.5, 7.6], [0.72, 9.0], [0.9, 8.2], [1, 6.6]].map(([t, w]) => [t, w * BUILD]);
+  const TORSO_BACK  = [[0, 9.0], [0.18, 8.0], [0.38, 6.6], [0.7, 7.4], [0.84, 8.0], [0.94, 7.4], [1, 6.6]].map(([t, w]) => [t, w * BUILD]);
+  function torsoRibbon(g, t0, t1, breath, tilt, face) {
+    const P = [], N = [], wl = [], wr = [];
     for (let i = 0; i <= 10; i++) {
-      const t = t0 + (t1 - t0) * (i / 10), u = 1 - t;
-      const P = bez(H, C, S, t);
-      const D = norm([2 * u * (C[0] - H[0]) + 2 * t * (S[0] - C[0]), 2 * u * (C[1] - H[1]) + 2 * t * (S[1] - C[1])]);
-      const n = [-D[1] * face, D[0] * face]; // toward the belly
+      const t = t0 + (t1 - t0) * (i / 10);
+      P.push(cub(g.hip, g.c1, g.c2, g.sh, t));
+      const D = cubD(g.hip, g.c1, g.c2, g.sh, t);
+      N.push([-D[1] * face, D[0] * face]); // toward the belly
       const chest = t > 0.45 && t < 0.95 ? breath * Math.sin(Math.PI * (t - 0.45) / 0.5) : 0;
       const glute = t < 0.3 ? tilt * 1.6 * (1 - t / 0.3) : 0;
-      left.push(add(P, n, widthAt(TORSO_FRONT, t) + chest));
-      right.push(add(P, n, -(widthAt(TORSO_BACK, t) + glute)));
+      wl.push(widthAt(TORSO_FRONT, t) + chest);
+      wr.push(widthAt(TORSO_BACK, t) + glute);
     }
-    const pts = left.concat(right.reverse());
-    return 'M' + pts.map(pt).join('L') + 'Z';
+    return { rib: ribbon(P, N, wl, wr), P, N, wl, wr };
+  }
+  // A band across the torso (spine t0..t1) inset from the outline, toward the belly (side 1) or the back (side -1).
+  function torsoBand(g, t0, t1, side, inA, inB, face) {
+    const outer = [], inner = [];
+    for (let i = 0; i <= 8; i++) {
+      const t = t0 + (t1 - t0) * (i / 8);
+      const P = cub(g.hip, g.c1, g.c2, g.sh, t), D = cubD(g.hip, g.c1, g.c2, g.sh, t);
+      const N = [-D[1] * face * side, D[0] * face * side];
+      const w = widthAt(side > 0 ? TORSO_FRONT : TORSO_BACK, t) + (side < 0 && t < 0.3 ? g.tilt * 1.6 * (1 - t / 0.3) : 0);
+      outer.push(add(P, N, w - inA)); inner.push(add(P, N, w - inB));
+    }
+    return { d: spline(outer) + spline(inner.slice().reverse(), 'L') + 'Z', outer, inner };
+  }
+
+  // Local frame helper: point = origin + u * fwd + v * up
+  const loc = (o, fwd, up) => ([u, v]) => [o[0] + fwd[0] * u + up[0] * v, o[1] + fwd[1] * u + up[1] * v];
+  // Head profile (u = toward the face, v = toward the crown), roughly 10 units in radius.
+  const HEAD = [[0, 10.6], [5.6, 8.6], [8.6, 5.0], [9.2, 2.4], [11.5, -0.4], [11.2, -1.4], [9.6, -1.9], [9.9, -3.0], [9.3, -3.9], [9.3, -5.0], [8.2, -7.0], [4.6, -8.7], [0.4, -8.2], [-4.4, -7.0], [-8.6, -3.6], [-10.4, 1.2], [-8.8, 6.6], [-4.6, 9.8]];
+  const HAIR = [[2.5, 10.6], [6.6, 8.6], [8.0, 6.6], [4.6, 7.2], [0.8, 7.6], [-3.8, 5.8], [-7.0, 2.8], [-8.6, -2.2], [-9.4, -4.6], [-11.0, -1.0], [-11.0, 3.4], [-8.6, 8.2], [-4.4, 11.1], [0, 11.6]];
+  const STRANDS = [[[6.2, 8.2], [2.0, 10.4], [-3.4, 10.2]], [[4.0, 7.6], [-1.0, 8.8], [-6.2, 6.8]], [[-2.0, 6.6], [-6.8, 4.8], [-9.6, 0.4]]];
+  // Shoe outline in the foot's frame (u = toward the toes, v = toward the top of the foot).
+  const SHOE = [[-4.3, -3.3], [-4.9, -0.6], [-4.0, 2.6], [-1.4, 4.4], [2.2, 4.3], [6.0, 3.0], [9.6, 1.6], [11.9, -0.2], [11.6, -2.4], [9.0, -3.4], [2.0, -3.5]];
+
+  function drawHand(parts, k, wrist, hdir, ant, grip) {
+    const s = dot(perpOf(hdir), ant) >= 0 ? 1 : -1; // rotate toward the palm side
+    const S = HAND_S;
+    const palmEnd = add(wrist, hdir, 5.2 * S);
+    const fdir = rotVec(hdir, s * grip * 80);
+    const tip = add(palmEnd, fdir, 5.0 * S);
+    const tdir = rotVec(hdir, s * 38);
+    const tBase = add(add(wrist, hdir, 1.6 * S), ant, 1.4 * S);
+    parts[k].setAttribute('d', capsule(add(wrist, hdir, -0.6), palmEnd, 2.5 * S, 2.4 * S) + capsule(palmEnd, tip, 2.2 * S, 1.6 * S) + capsule(tBase, add(tBase, tdir, 3.6 * S), 1.25 * S, 1.0 * S));
+    const n = perpOf(fdir);
+    parts[k + 'l'].setAttribute('d', `M${pt(add(add(palmEnd, n, 0.75), fdir, 0.4))}L${pt(add(add(tip, n, 0.6), fdir, -1.2))}M${pt(add(add(palmEnd, n, -0.75), fdir, 0.4))}L${pt(add(add(tip, n, -0.6), fdir, -1.2))}`);
   }
 
   // Draw a pose. `t` is the player's own clock (null = no idle motion) so a paused figure stays still.
   function drawPose(stage, ex, p, t) {
     const parts = stage.parts;
+    const idle = t != null;
     const hip = [p.hx, p.hy];
     const td = dir(p.t);
-    const sh = add(hip, td, L.torso);
     const perp = [-td[1], td[0]];
     const front = [perp[0] * ex.face, perp[1] * ex.face];
-    const ctrl = add([(hip[0] + sh[0]) / 2, (hip[1] + sh[1]) / 2], perp, p.b);
-    const breath = t == null ? 0.6 : 0.6 + 0.6 * Math.sin(t / 1500);
+    const breath = idle ? 0.6 + 0.6 * Math.sin(t / 1500) : 0.6;
+    let sh = add(hip, td, L.torso);
+    const c1 = add(add(hip, td, L.torso / 3), perp, p.bl);
+    const c2 = add(add(hip, td, 2 * L.torso / 3), perp, p.bt);
     const tilt = p.pt || 0;
+    const g = { hip, c1, c2, sh, td, perp, front, tilt };
 
-    parts.pelvis.setAttribute('d', torsoPath(hip, ctrl, sh, 0, 0.34, ex.face, 0, tilt));
-    parts.shirt.setAttribute('d', torsoPath(hip, ctrl, sh, 0.26, 1, ex.face, breath, 0));
-    // Pelvis tilt: the buttocks swing back/up (tailbone up) or tuck under.
-    setCircle(parts.pelvisCap, add(add(hip, front, -(0.8 + 1.6 * tilt)), td, -1.4 * tilt), 8.2 + 0.4 * Math.abs(tilt));
-    setCircle(parts.shoulderCap, add(sh, td, -3), 6.2);
+    // Torso: leggings over the hips, waistband, then the t-shirt.
+    const pel = torsoRibbon(g, 0, 0.36, 0, tilt, ex.face).rib;
+    setRib(parts, 'pelvis', pel);
+    setCircle(parts.pelvisCap, add(add(hip, front, -(0.8 + 1.6 * tilt) * BUILD), td, -1.4 * tilt), (8.2 + 0.4 * Math.abs(tilt)) * BUILD);
+    const band = (() => {
+      const a = torsoBand(g, 0.27, 0.33, 1, -0.2, 0, ex.face), b = torsoBand(g, 0.27, 0.33, -1, -0.2, 0, ex.face);
+      return spline(a.outer) + spline(b.outer.slice().reverse(), 'L') + 'Z';
+    })();
+    parts.band.setAttribute('d', band);
+    const shirt = torsoRibbon(g, 0.31, 1, breath, 0, ex.face);
+    setRib(parts, 'shirt', shirt.rib);
+    setCircle(parts.shoulderCap, add(sh, td, -3.6), 6.2 * BUILD);
+    const hemA = add(shirt.P[0], shirt.N[0], shirt.wl[0]), hemB = add(shirt.P[0], shirt.N[0], -shirt.wr[0]);
+    parts.hem.setAttribute('d', `M${pt(hemA)}Q${pt(add(shirt.P[0], td, -0.8))} ${pt(hemB)}`);
 
     // Neck and head
-    const nd = dir(p.n);
+    const hairLag = p.hairLag || 0;
+    const n = p.n + (idle ? 0.6 * Math.sin(t / 2300) : 0);
+    const nd = dir(n);
+    const fwd = dir(n + ex.face * 90);
     const neckEnd = add(sh, nd, L.neck);
-    parts.neck.setAttribute('d', capsule(add(sh, nd, -3), add(neckEnd, nd, 2), 4.2, 3.6));
-    const hc = add(neckEnd, nd, L.head - 1);
-    const face = dir(p.n + ex.face * 90);
-    const back = [-face[0], -face[1]];
-    setCircle(parts.head, hc);
-    setCircle(parts.nose, add(add(hc, face, 9.6), nd, 0.8));
-    setCircle(parts.eye, add(add(hc, face, 5.4), nd, 3));
-    const ear = add(add(hc, back, 0.6), nd, -0.5);
+    const hc = add(neckEnd, nd, (L.head - 1) * HEAD_S);
+    const H = loc(hc, [fwd[0] * HEAD_S, fwd[1] * HEAD_S], [nd[0] * HEAD_S, nd[1] * HEAD_S]);
+    setRib(parts, 'neck', limbRibbon(add(sh, nd, -3), H([0.6, -6.8]), LIMB.neck, fwd));
+    parts.collar.setAttribute('d', `M${pt(add(add(sh, perp, 5.2 * BUILD), nd, -0.6))}Q${pt(add(sh, nd, 1.8))} ${pt(add(add(sh, perp, -5.2 * BUILD), nd, -0.6))}`);
+    parts.head.setAttribute('d', closedSpline(HEAD.map(H)));
+    const hf = dir(n + hairLag + ex.face * 90), hu = dir(n + hairLag);
+    const Hh = loc(hc, [hf[0] * HEAD_S, hf[1] * HEAD_S], [hu[0] * HEAD_S, hu[1] * HEAD_S]);
+    parts.hair.setAttribute('d', closedSpline(HAIR.map(Hh)));
+    parts.strands.setAttribute('d', STRANDS.map((s) => spline(s.map(Hh))).join(''));
+    const blink = idle && (t % 3900) < 140;
+    const eye = H([5.9, 2.4]);
+    setCircle(parts.eye, eye);
+    parts.eye.setAttribute('ry', f1((blink ? 0.2 : 1.15) * HEAD_S));
+    parts.eye.setAttribute('transform', `rotate(${f1(n + ex.face * 90)} ${pt(eye)})`);
+    parts.lid.setAttribute('d', spline([[4.4, 3.4], [5.9, 3.9], [7.3, 3.3]].map(H)));
+    parts.brow.setAttribute('d', spline([[4.0, 5.4], [6.0, 6.0], [8.0, 5.3]].map(H)));
+    const effort = p.g > 0.5 ? 1 : 0;
+    parts.mouth.setAttribute('d', spline([[8.3, -3.6], [9.0, -3.85 + 0.3 * effort], [9.7, -3.45]].map(H)));
+    setCircle(parts.blush, H([6.4, -1.6]));
+    const ear = H([-2.2, -0.2]);
     setCircle(parts.ear, ear);
-    parts.ear.setAttribute('transform', `rotate(${f1(p.n)} ${pt(ear)})`);
-    const R = 11.2, a1 = p.n + ex.face * 40, a2 = p.n - ex.face * 150;
-    const hA = add(hc, dir(a1), R), hB = add(hc, dir(a2), 8.4);
-    const inner = add(add(hc, face, -1.5), nd, -2.5);
-    parts.hair.setAttribute('d', `M${pt(hA)}A${R} ${R} 0 1 ${ex.face > 0 ? 0 : 1} ${pt(hB)}Q${pt(inner)} ${pt(add(hc, dir(a1), 8.6))}Z`);
+    parts.ear.setAttribute('transform', `rotate(${f1(n + ex.face * 90)} ${pt(ear)})`);
+    parts.earIn.setAttribute('d', spline([[-1.3, 1.6], [-2.9, 0.2], [-1.6, -1.6]].map(H)));
 
-    let minX = Math.min(hc[0] - 11, hip[0]), maxX = Math.max(hc[0] + 11, hip[0]);
+    const contacts = [[hip, 11], [sh, 9], [hc, 7]];
     for (const side of ['n', 'f']) {
+      // Arm
       const ang = p[side + 'A'];
       let elb, hand;
       if (ang) { elb = add(sh, dir(ang[0]), L.ua); hand = add(elb, dir(ang[1]), L.fa); }
       else [elb, hand] = ik(sh, p[side + 'h'], L.ua, L.fa, ex.sign[side + 'h']);
-      const ud = norm(sub(elb, sh));
-      parts[side + 'ua'].setAttribute('d', capsule(sh, elb, 4.8, 3.6));
-      parts[side + 'sl'].setAttribute('d', capsule(add(sh, ud, -1), add(sh, ud, L.ua * 0.55), 5.9, 5.0));
-      parts[side + 'fa'].setAttribute('d', capsule(elb, hand, 3.6, 2.7));
-      setCircle(parts[side + 'hd'], add(hand, norm(sub(hand, elb)), 1.6));
+      const eOff = sub(elb, lerp2(sh, hand, 0.5));
+      const armAnt = Math.hypot(eOff[0], eOff[1]) > 1.5 ? neg(norm(eOff)) : front;
+      setRib(parts, side + 'ua', limbRibbon(sh, elb, LIMB.upper, armAnt));
+      setRib(parts, side + 'sl', limbRibbon(sh, elb, LIMB.sleeve, armAnt, -0.06, 0.46));
+      const ud = norm(sub(elb, sh)), un = perpOf(ud);
+      const hemC = add(sh, ud, L.ua * 0.46);
+      parts[side + 'slhem'].setAttribute('d', `M${pt(add(hemC, un, 5.0 * BUILD))}L${pt(add(hemC, un, -5.0 * BUILD))}`);
+      setCircle(parts[side + 'elb'], add(elb, armAnt, -1.4 * BUILD), 3.1 * BUILD);
+      setRib(parts, side + 'fa', limbRibbon(elb, hand, LIMB.fore, armAnt));
+      const fdir = norm(sub(hand, elb));
+      const a0 = angOf(fdir);
+      let diff = ((p.hd - a0 + 540) % 360) - 180;
+      if (diff > 150) diff -= 360; // a half-turn goes over the top, never through the floor
+      let ha = a0 + diff * p.hdw;
+      // Floor guard: a hand resting near the floor can't point down into it.
+      const room = clamp01((197.5 - hand[1]) / 10), sy = Math.sin(ha * RAD);
+      if (sy > room) ha = Math.cos(ha * RAD) >= 0 ? Math.asin(room) / RAD : 180 - Math.asin(room) / RAD;
+      drawHand(parts, side + 'hand', hand, dir(ha), armAnt, p.hg);
 
+      // Leg
       const [knee, ank] = ik(hip, p[side + 'k'], L.th, L.sh, ex.sign[side + 'k']);
-      parts[side + 'th'].setAttribute('d', capsule(hip, knee, 7.6, 5.2));
-      parts[side + 'sh'].setAttribute('d', capsule(knee, ank, 5.1, 3.3));
+      const kOff = sub(knee, lerp2(hip, ank, 0.5));
+      const legAnt = Math.hypot(kOff[0], kOff[1]) > 1.5 ? norm(kOff) : front;
+      setRib(parts, side + 'th', limbRibbon(hip, knee, LIMB.thigh, legAnt));
+      setRib(parts, side + 'sh', limbRibbon(knee, ank, LIMB.shin, legAnt));
+      setRib(parts, side + 'sock', limbRibbon(knee, ank, LIMB.sock, legAnt, 0.86, 1.02));
+      const kneeCap = add(knee, legAnt, 3.2 * BUILD);
+      setCircle(parts[side + 'knee'], kneeCap);
+      parts[side + 'knee'].setAttribute('transform', `rotate(${f1(angOf(sub(ank, hip)))} ${pt(kneeCap)})`);
+      if (parts[side + 'seam']) parts[side + 'seam'].setAttribute('d', spline([add(hip, legAnt, -1), lerp2(hip, knee, 0.5), knee, lerp2(knee, ank, 0.5), add(ank, legAnt, -0.5)]));
+      const dTh = norm(sub(knee, hip)), dSh = norm(sub(ank, knee));
+      const bend = Math.acos(Math.max(-1, Math.min(1, dot(dTh, dSh)))) / RAD;
+      if (parts[side + 'crease']) {
+        const bk = add(knee, legAnt, -3.4 * BUILD);
+        parts[side + 'crease'].setAttribute('d', `M${pt(add(bk, dTh, -3.5))}Q${pt(add(bk, legAnt, 0.8))} ${pt(add(bk, dSh, 3.5))}M${pt(add(add(bk, dTh, -2), legAnt, 1.2))}Q${pt(add(bk, legAnt, 1.8))} ${pt(add(add(bk, dSh, 2), legAnt, 1.2))}`);
+        parts[side + 'crease'].setAttribute('opacity', clamp01((bend - 55) / 50).toFixed(2));
+      }
+      // Shoe
       const fd = dir(p[side + 'f']);
-      const toe = add(ank, fd, L.foot - 1);
-      parts[side + 'ft'].setAttribute('d', capsule(add(ank, fd, -3), toe, 4.0, 3.0));
-      for (const q of [hand, ank, toe, knee, elb]) { minX = Math.min(minX, q[0]); maxX = Math.max(maxX, q[0]); }
+      let up = perpOf(fd);
+      if (dot(up, sub(knee, ank)) < 0) up = neg(up);
+      const F = loc(ank, [fd[0] * SHOE_S, fd[1] * SHOE_S], [up[0] * SHOE_S, up[1] * SHOE_S]);
+      parts[side + 'shoe'].setAttribute('d', closedSpline(SHOE.map(F)));
+      parts[side + 'sole'].setAttribute('d', spline([[-4.5, -3.4], [2, -3.7], [9, -3.6], [11.7, -2.3]].map(F)) + spline([[11.2, -1.0], [9, -2.2], [2, -2.3], [-4.6, -2.0]].map(F), 'L') + 'Z');
+      parts[side + 'lace'].setAttribute('d', `M${pt(F([2.4, 4.0]))}L${pt(F([3.6, 2.4]))}M${pt(F([4.8, 3.4]))}L${pt(F([5.9, 2.0]))}M${pt(F([8.8, -2.6]))}Q${pt(F([9.4, 0.6]))} ${pt(F([10.8, 1.0]))}`);
+      contacts.push([hand, 3.5], [ank, 4], [F([9, -3]), 4], [knee, 5], [elb, 3]);
     }
-    parts.shadow.setAttribute('cx', f1((minX + maxX) / 2));
-    parts.shadow.setAttribute('rx', f1((maxX - minX) / 2 + 4));
 
-    if (ex.glow) {
-      const gp = add(bez(hip, ctrl, sh, ex.glow.at), perp, ex.glow.off);
-      const g = parts.glow;
-      g.setAttribute('cx', f1(gp[0])); g.setAttribute('cy', f1(gp[1]));
-      g.setAttribute('rx', ex.glow.rx); g.setAttribute('ry', ex.glow.ry);
-      g.setAttribute('transform', `rotate(${f1(p.t)} ${pt(gp)})`);
-      const pulse = t == null ? 1 : 0.75 + 0.25 * Math.sin(t / 450);
-      g.setAttribute('opacity', (p.g * 0.85 * pulse).toFixed(3));
+    // Soft contact shadows: darker the closer each body part is to the floor.
+    stage.shadows.forEach((el, i) => {
+      const c = contacts[i];
+      if (!c) { el.setAttribute('opacity', '0'); return; }
+      const h = Math.max(0, 201 - c[0][1]);
+      el.setAttribute('cx', f1(c[0][0])); el.setAttribute('cy', '200.4');
+      el.setAttribute('rx', f1(c[1] * (1.2 + h / 40))); el.setAttribute('ry', '1.3');
+      el.setAttribute('opacity', (Math.max(0, 1 - h / 45) * 0.17).toFixed(2));
+    });
+
+    // Working / stretching muscles, shown during holds.
+    const pulse = idle ? 0.82 + 0.18 * Math.sin(t / 450) : 1;
+    for (const m of stage.muscles) {
+      const op = (p[m.def.key || 'g'] || 0) * 0.62 * pulse;
+      m.g.setAttribute('opacity', op.toFixed(3));
+      if (op < 0.01) continue;
+      const k = m.def.kind;
+      if (k === 'abs') {
+        const b = torsoBand(g, m.def.from ?? 0.3, m.def.to ?? 0.74, 1, 0.5, 4.4, ex.face);
+        m.p.setAttribute('d', b.d);
+        const segs = [];
+        for (const i of [2, 4, 6]) segs.push(`M${pt(b.outer[i])}L${pt(b.inner[i])}`);
+        segs.push(spline(b.outer.map((o, i) => lerp2(o, b.inner[i], 0.5))));
+        m.f.setAttribute('d', segs.join(''));
+      } else if (k === 'lowerBack') {
+        const b = torsoBand(g, m.def.from ?? 0.14, m.def.to ?? 0.52, -1, 0.5, 4.0, ex.face);
+        m.p.setAttribute('d', b.d);
+        m.f.setAttribute('d', [0.3, 0.55, 0.8].map((q) => spline(b.outer.map((o, i) => lerp2(o, b.inner[i], q)))).join(''));
+      } else if (k === 'glutes') {
+        const b = torsoBand(g, -0.03, 0.22, -1, 0.3, 6.0, ex.face);
+        m.p.setAttribute('d', b.d);
+        m.f.setAttribute('d', [1, 3, 5, 7].map((i) => `M${pt(b.outer[i])}L${pt(b.inner[Math.min(8, i + 1)])}`).join(''));
+      }
     }
-    return { hip, ctrl, sh, front };
+    return { hip, c1, c2, sh, front, contacts };
   }
   // A point on the body: `at` along the spine (0 hips → 1 shoulders), `off` toward the belly (negative = toward the back).
-  const bodyPoint = (geo, at, off) => add(bez(geo.hip, geo.ctrl, geo.sh, at), geo.front, off);
+  const bodyPoint = (geo, at, off) => add(cub(geo.hip, geo.c1, geo.c2, geo.sh, at), geo.front, off);
+
+  // Builds the figure's SVG elements, back to front, and returns them keyed by name.
+  const FIG_LAYERS = [
+    ['far', [
+      ['fua', 'skin'], ['fuas', 'sh'], ['fsl', 'shirt'], ['fsls', 'sh'], ['fslhem', 'ln ln-shirt'], ['felb', 'skin', 'circle'],
+      ['ffa', 'skin'], ['ffas', 'sh'], ['fhand', 'skin'], ['fhandl', 'ln ln-skin'],
+      ['fth', 'pants'], ['fths', 'sh'], ['fknee', 'kneecap', 'ellipse'], ['fsh', 'pants'], ['fshs', 'sh'],
+      ['fsock', 'sock'], ['fshoe', 'shoe'], ['fsole', 'sole'], ['flace', 'ln ln-lace'],
+    ]],
+    ['body', [
+      ['neck', 'skin'], ['necks', 'sh'],
+      ['pelvisCap', 'pants', 'circle'], ['pelvis', 'pants'], ['pelviss', 'sh'], ['pelvish', 'hi'], ['band', 'band'],
+      ['shirt', 'shirt'], ['shirts', 'sh'], ['shirth', 'hi'], ['shoulderCap', 'shirt', 'circle'], ['hem', 'ln ln-shirt'], ['collar', 'ln ln-collar'],
+      ['head', 'skin'], ['blush', 'blush', 'circle'], ['ear', 'skin ear', 'ellipse'], ['earIn', 'ln ln-skin'],
+      ['hair', 'hair'], ['strands', 'ln ln-hair'], ['brow', 'ln brow'], ['eye', 'eye', 'ellipse'], ['lid', 'ln lid'], ['mouth', 'ln mouth'],
+    ]],
+    ['muscles', []],
+    ['near', [
+      ['nth', 'pants'], ['nths', 'sh'], ['nthh', 'hi'], ['nseam', 'ln ln-seam'], ['ncrease', 'ln ln-crease'], ['nknee', 'kneecap', 'ellipse'],
+      ['nsh', 'pants'], ['nshs', 'sh'], ['nshh', 'hi'], ['nsock', 'sock'], ['nsocks', 'sh'], ['nshoe', 'shoe'], ['nsole', 'sole'], ['nlace', 'ln ln-lace'],
+      ['nua', 'skin'], ['nuas', 'sh'], ['nuah', 'hi'], ['nelb', 'skin', 'circle'], ['nsl', 'shirt'], ['nsls', 'sh'], ['nslh', 'hi'], ['nslhem', 'ln ln-shirt'],
+      ['nfa', 'skin'], ['nfas', 'sh'], ['nfah', 'hi'], ['nhand', 'skin'], ['nhandl', 'ln ln-skin'],
+    ]],
+  ];
+  function buildFigure(fig, ex) {
+    const parts = {};
+    let muscleG = null;
+    for (const [group, items] of FIG_LAYERS) {
+      const g = document.createElementNS(SVGNS, 'g');
+      g.setAttribute('class', group);
+      if (group === 'far') g.setAttribute('transform', 'translate(2,-2.2)');
+      if (group === 'muscles') muscleG = g;
+      for (const [key, cls, tag = 'path'] of items) {
+        const el = document.createElementNS(SVGNS, tag);
+        el.setAttribute('class', cls);
+        el.dataset.p = key;
+        if (key === 'blush') el.setAttribute('r', f1(2 * HEAD_S));
+        if (key === 'eye') { el.setAttribute('rx', f1(1.35 * HEAD_S)); el.setAttribute('ry', f1(1.15 * HEAD_S)); }
+        if (key === 'ear') { el.setAttribute('rx', f1(1.9 * HEAD_S)); el.setAttribute('ry', f1(2.9 * HEAD_S)); }
+        if (key.endsWith('knee')) { el.setAttribute('rx', f1(2.8 * BUILD)); el.setAttribute('ry', f1(2.1 * BUILD)); }
+        g.appendChild(el);
+        parts[key] = el;
+      }
+      fig.appendChild(g);
+    }
+    const muscles = (ex.muscles || []).map((def) => {
+      const g = document.createElementNS(SVGNS, 'g');
+      g.setAttribute('class', `muscle ${def.mode === 'stretch' ? 'm-stretch' : 'm-work'}`);
+      g.setAttribute('opacity', '0');
+      const p = document.createElementNS(SVGNS, 'path'), f = document.createElementNS(SVGNS, 'path');
+      p.setAttribute('class', 'm-fill'); f.setAttribute('class', 'm-fib');
+      g.append(p, f); muscleG.appendChild(g);
+      return { def, g, p, f };
+    });
+    return { parts, muscles };
+  }
 
   // ---------- Exercises ----------
   // Pose fields: hx,hy hip; t torso angle (deg, 0 = right, 90 = down); b spine bend; n neck angle;
-  // nh/fh hand targets; nk/fk ankle targets; nf/ff foot angles; g glow; pt pelvis tilt; a1/a2 arrow cues.
+  // nh/fh hand targets; nk/fk ankle targets; nf/ff foot angles; g/m2 muscle highlights; pt pelvis tilt; a1/a2 arrow cues;
+  // bl/bt lower/upper back bend (from b); hg hand grip 0..1; hd/hdw hand angle and how much it overrides the forearm.
   const P = (o, extra) => Object.assign({}, o, extra || {});
-  const base = { b: 0, g: 0, pt: 0, a1: 0, a2: 0 };
-  const supineFlat = P(base, { hx: 210, hy: 193, t: 180, n: 190, nh: [195, 193], fh: [195, 193], nk: [296, 193], fk: [296, 193], nf: -70, ff: -70 });
-  const supineBent = P(base, { hx: 210, hy: 193, t: 180, n: 190, nh: [195, 194], fh: [195, 194], nk: [266, 192], fk: [266, 192], nf: 0, ff: 0 });
-  const prone      = P(base, { hx: 220, hy: 192, t: 180, n: 187, nh: [205, 194], fh: [205, 194], nk: [306, 193], fk: [306, 193], nf: 15, ff: 15 });
+  const base = { b: 0, g: 0, pt: 0, a1: 0, a2: 0, m2: 0, hg: 0.2, hd: 0, hdw: 0 };
+  const supineFlat = P(base, { hx: 210, hy: 189.5, t: 180, n: 190, nh: [195, 193], fh: [195, 193], nk: [296, 193], fk: [296, 193], nf: -70, ff: -70 });
+  const supineBent = P(base, { hx: 210, hy: 189.5, t: 180, n: 190, nh: [195, 194], fh: [195, 194], nk: [266, 192], fk: [266, 192], nf: 0, ff: 0 });
+  const prone      = P(base, { hx: 220, hy: 188.5, t: 180, n: 187, nh: [205, 194], fh: [205, 194], nk: [306, 193], fk: [306, 193], nf: 15, ff: 15 });
   const quad       = P(base, { hx: 252, hy: 150, t: 188, n: 188, nh: [181, 196], fh: [181, 196], nk: [294, 195], fk: [294, 195], nf: 5, ff: 5 });
 
   // hold: 'H' = the hold time from "Your plan"; otherwise milliseconds.
@@ -652,11 +1094,12 @@
       range: { reps: [3, 5], hold: [10, 30] }, face: 1, key: 'near',
       setup: [['Lie on your back, legs stretched out', 0, 3000]],
       sign: { nh: 1, fh: 1, nk: -1, fk: -1 },
-      glow: { at: 0.12, off: -5, rx: 18, ry: 8 },
+      muscles: [{ kind: 'glutes', mode: 'stretch' }, { kind: 'lowerBack', mode: 'stretch' }],
+      labels: { g: 'Stretch: lower back, buttock' },
       poses: {
         rest: supineFlat,
-        near: P(supineFlat, { nk: [218, 180], nf: -40, nh: [186, 163], fh: [186, 163], g: 1 }),
-        far:  P(supineFlat, { fk: [218, 180], ff: -40, nh: [186, 163], fh: [186, 163], g: 1 }),
+        near: P(supineFlat, { nk: [218, 180], nf: -40, nh: [186, 163], fh: [186, 163], g: 1, hg: 1 }),
+        far:  P(supineFlat, { fk: [218, 180], ff: -40, nh: [186, 163], fh: [186, 163], g: 1, hg: 1 }),
       },
       start: 'rest',
       cycle: [
@@ -679,13 +1122,14 @@
       range: { reps: [5, 10], hold: [5, 10] }, face: 1, key: 'tilt',
       setup: [['Lie on your back, legs stretched out', 0, 2500], ['Bend your knees, feet flat on the floor', 1, 1500, 'rest', 1800]],
       sign: { nh: -1, fh: -1, nk: -1, fk: -1 },
-      glow: { at: 0.22, off: 6, rx: 16, ry: 8 },
+      muscles: [{ kind: 'abs', from: 0.26, to: 0.56 }],
+      labels: { g: 'Working: lower belly' },
       cues: [{ key: 'a1', from: [0.3, 30], to: [0.3, 14] }],
-      inset: { focus: [0.3, -9], zoom: 2.6, cx: 316, cy: 132, label: 'LOWER BACK' },
+      inset: { focus: [0.3, -9], zoom: 2.6, cx: 304, cy: 137, label: 'LOWER BACK' },
       poses: {
         flat: supineFlat,
-        rest: P(supineBent, { b: 12 }),
-        tilt: P(supineBent, { b: 0, hy: 191.5, t: 179, g: 1, a1: 1 }),
+        rest: P(supineBent, { bl: 13, bt: 3 }),
+        tilt: P(supineBent, { bl: 0, bt: 0, hy: 188, t: 179, g: 1, a1: 1, pt: 0.6 }),
       },
       start: 'flat',
       cycle: [
@@ -705,7 +1149,8 @@
       range: { reps: [3, 10], fixedHold: 5 }, face: -1, key: 'cat',
       setup: [['Hands under shoulders, knees under hips', 0, 3500]],
       sign: { nh: -1, fh: -1, nk: 1, fk: 1 },
-      glow: { at: 0.5, off: -9, rx: 20, ry: 8 },
+      muscles: [{ kind: 'abs' }, { kind: 'lowerBack', key: 'm2' }],
+      labels: { g: 'Working: belly', m2: 'Moving: lower back' },
       cues: [
         { key: 'a1', from: [0.5, -16], to: [0.5, -30] },
         { key: 'a1', from: [-0.05, -14], to: [-0.17, -3] },
@@ -713,9 +1158,9 @@
         { key: 'a2', from: [-0.17, -5], to: [-0.07, -18] },
       ],
       poses: {
-        neutral: quad,
-        cat: P(quad, { b: 24, n: 112, hy: 152, g: 1, pt: -1, a1: 1 }),
-        cow: P(quad, { b: -16, n: 218, hy: 149, pt: 1, a2: 1 }),
+        neutral: P(quad, { hd: 180, hdw: 1, hg: 0 }),
+        cat: P(quad, { bl: 15, bt: 18, n: 112, hy: 152, g: 1, pt: -1, a1: 1, hd: 180, hdw: 1, hg: 0 }),
+        cow: P(quad, { bl: -14, bt: -7, n: 218, hy: 149, pt: 1, a2: 1, m2: 1, hd: 180, hdw: 1, hg: 0 }),
       },
       start: 'neutral',
       cycle: [
@@ -735,12 +1180,13 @@
       range: { reps: [5, 10], fixedHold: 5 }, face: -1, key: 'up',
       setup: [['Lie face-down', 0, 2500], ['Hands near your head, shoulder-width apart', 1, 1500, 'down', 1600]],
       sign: { nh: -1, fh: -1, nk: -1, fk: -1 },
-      glow: null,
+      muscles: [],
+      labels: { a1: 'Relaxed: lower back' },
       cues: [{ key: 'a1', from: [0.0, -28], to: [0.0, -14] }],
       poses: {
         flat: prone,
-        down: P(prone, { nh: [150, 197], fh: [150, 197] }),
-        up:   P(prone, { nh: [150, 197], fh: [150, 197], t: 223, b: -6, n: 208, a1: 1 }),
+        down: P(prone, { nh: [150, 197], fh: [150, 197], hd: 180, hdw: 1, hg: 0 }),
+        up:   P(prone, { nh: [150, 197], fh: [150, 197], t: 223, bl: -10, bt: -2, n: 208, a1: 1, hd: 180, hdw: 1, hg: 0 }),
       },
       start: 'flat',
       cycle: [
@@ -761,12 +1207,13 @@
       range: { reps: [10, 10], hold: [3, 5] }, face: 1, key: 'up',
       setup: [['Lie on your back', 0, 2500], ['Bend your knees, feet flat, arms flat by your sides', 1, 2000, 'down', 1800]],
       sign: { nh: -1, fh: -1, nk: -1, fk: -1 },
-      glow: { at: 0.02, off: -7, rx: 14, ry: 9 },
+      muscles: [{ kind: 'glutes' }],
+      labels: { g: 'Working: buttocks' },
       cues: [{ key: 'a1', from: [0.08, 12], to: [0.08, 28] }],
       poses: {
         flat: supineFlat,
         down: supineBent,
-        up: P(supineBent, { hx: 206, hy: 160, t: 152.7, g: 1, a1: 1 }),
+        up: P(supineBent, { hx: 206, hy: 157, t: 152.7, g: 1, a1: 1 }),
       },
       start: 'flat',
       cycle: [
@@ -787,15 +1234,16 @@
       range: { reps: [5, 10] }, face: 1, key: 'up',
       setup: [['Lie on your back', 0, 2500], ['Bend your knees, feet flat on the floor', 1, 1500, 'bent', 1800], ['Cross your arms over your chest', 2, 1500, 'down', 1800]],
       sign: { nh: 1, fh: 1, nk: -1, fk: -1 },
-      glow: { at: 0.42, off: 7, rx: 18, ry: 8 },
+      muscles: [{ kind: 'abs', from: 0.42, to: 0.8 }],
+      labels: { g: 'Working: upper belly' },
       cues: [{ key: 'a1', from: [0.95, 13], to: [0.95, 25] }],
-      inset: { focus: [0.86, -7], zoom: 1.7, floorMix: 0.45, cx: 316, cy: 132, label: 'SHOULDER BLADES' },
+      inset: { focus: [0.86, -7], zoom: 1.7, floorMix: 0.45, cx: 304, cy: 137, label: 'SHOULDER BLADES' },
       poses: {
         // Arms use joint angles [upper arm, forearm] so the forearm swings up and over the chest.
         flat: P(supineFlat, { nA: [0, 0], fA: [0, 0] }),
         bent: P(supineBent, { nA: [0, 0], fA: [0, 0] }),
-        down: P(supineBent, { nA: [1.2, -153.3], fA: [1.2, -153.3] }),
-        up:   P(supineBent, { nA: [16.2, -138.3], fA: [16.2, -138.3], t: 195, b: 6, n: 206, g: 1, a1: 1 }),
+        down: P(supineBent, { nA: [1.2, -153.3], fA: [1.2, -153.3], hg: 0.5 }),
+        up:   P(supineBent, { nA: [16.2, -138.3], fA: [16.2, -138.3], t: 195, bl: 0, bt: 9, n: 206, g: 1, a1: 1, hg: 0.5 }),
       },
       start: 'flat',
       cycle: [
@@ -817,11 +1265,12 @@
       range: { reps: [5, 10], hold: [3, 5] }, face: -1, key: 'up',
       setup: [['Lie face-down, arms at your sides, forehead on the floor', 0, 3500]],
       sign: { nh: -1, fh: -1, nk: -1, fk: -1 },
-      glow: { at: 0.2, off: 7, rx: 20, ry: 8 },
+      muscles: [{ kind: 'lowerBack' }, { kind: 'glutes' }],
+      labels: { g: 'Working: lower back, buttocks' },
       cues: [{ key: 'a1', from: [0.85, -13], to: [0.85, -26] }],
       poses: {
         down: P(prone, { n: 185 }),
-        up:   P(prone, { t: 196, b: -6, n: 199, nh: [205, 186], fh: [205, 186], g: 1, a1: 1 }),
+        up:   P(prone, { t: 196, bl: -7, bt: -4, n: 199, nh: [205, 186], fh: [205, 186], g: 1, a1: 1 }),
       },
       start: 'down',
       cycle: [
@@ -839,11 +1288,21 @@
     },
   ];
 
+  // Fill in derived pose fields so every pose of an exercise has the same keys (needed for blending).
+  for (const ex of EXERCISES) {
+    for (const p of Object.values(ex.poses)) {
+      if (p.bl == null) p.bl = (p.b || 0) * 2 / 3;
+      if (p.bt == null) p.bt = (p.b || 0) * 2 / 3;
+      delete p.b;
+    }
+  }
+
   // ---------- Settings: your plan ----------
-  const settings = Object.assign({ level: 'beginner', custom: {}, voice: true, sound: true, theme: 'auto', target: 2 }, store.get('backex.settings', {}));
+  const settings = Object.assign({ level: 'beginner', custom: {}, voice: true, sound: true, theme: 'auto', target: 2, tv: 'auto' }, store.get('backex.settings', {}));
   if (!['beginner', 'standard', 'max', 'custom'].includes(settings.level)) settings.level = 'beginner';
   if (![1, 2, 3].includes(Number(settings.target))) settings.target = 2;
   if (!['auto', 'light', 'dark'].includes(settings.theme)) settings.theme = 'auto';
+  if (!['auto', 'on', 'off'].includes(settings.tv)) settings.tv = 'auto';
   if (typeof settings.custom !== 'object' || !settings.custom) settings.custom = {};
   const saveSettings = () => store.set('backex.settings', settings);
   const presetValue = ([lo, hi], level) => level === 'max' ? hi : level === 'standard' ? Math.round((lo + hi) / 2) : lo;
@@ -894,8 +1353,9 @@
     const el = stageTpl.content.firstElementChild.cloneNode(true);
     const id = ++uid;
     el.querySelector('title').textContent = `Illustration: ${ex.name}`;
-    const parts = {};
-    el.querySelectorAll('[data-p]').forEach((n) => { parts[n.dataset.p] = n; });
+    const { parts, muscles } = buildFigure(el.querySelector('.fig'), ex);
+    const shadowG = el.querySelector('.shadows');
+    const shadows = Array.from({ length: 13 }, () => { const e = document.createElementNS(SVGNS, 'ellipse'); shadowG.appendChild(e); return e; });
     const root = el.querySelector('.scene-root');
     root.id = `scene-${id}`;
     const cueG = el.querySelector('.cues');
@@ -913,7 +1373,7 @@
       const use = el.querySelector('.inset-use');
       use.setAttribute('href', `#scene-${id}`);
       const text = el.querySelector('.inset-label');
-      text.setAttribute('x', cx); text.setAttribute('y', cy + 32); text.textContent = label;
+      text.setAttribute('x', cx); text.setAttribute('y', cy - 27); text.textContent = label;
       inset = { use, mark: el.querySelector('circle.inset-mark'), link: el.querySelector('.inset-link') };
       inset.mark.setAttribute('r', f1(24 / ex.inset.zoom));
       el.classList.add('has-inset');
@@ -921,7 +1381,7 @@
       insetG.remove();
     }
     host.replaceChildren(el);
-    return { el, parts, cues, inset, formEl: el.querySelector('.form-note') };
+    return { el, parts, muscles, shadows, cues, inset, formEl: el.querySelector('.form-note') };
   }
 
   // ---------- Player: a timeline bound to a stage ----------
@@ -944,14 +1404,40 @@
     const local = t - ph.t0;
     const holding = local >= ph.move;
     const a = pl.ex.poses[ph.from], b = pl.ex.poses[ph.to];
-    const pose = holding ? b : lerpPose(a, b, ease(local / ph.move));
+    const pose = holding ? b : lerpPose(a, b, local / ph.move, ph.move >= 1200 ? easeCubic : ease);
     const remain = holding ? ph.hold - (local - ph.move) : ph.move - local;
     const frac = holding ? remain / ph.hold : 1 - local / ph.move;
     return { idx, ph, holding, pose, remain, frac, label: holding ? ph.holdLabel : ph.label, step: holding ? ph.holdStep : ph.moveStep };
   }
+  // Follow-through: the head and hands trail the body slightly (time constants in ms).
+  const FOLLOW = { n: 110, nh: 70, fh: 85, nA: 70, fA: 85 };
+  function followThrough(pl, pose, live) {
+    const dt = pl.time - (pl.smT ?? -1e9);
+    pl.smT = pl.time;
+    const out = { ...pose };
+    if (!live || !pl.sm || dt <= 0 || dt > 250) {
+      // Snap (paused, seeking or restarting) so still frames are exact.
+      pl.sm = {};
+      for (const k in FOLLOW) if (k in pose) pl.sm[k] = Array.isArray(pose[k]) ? pose[k].slice() : pose[k];
+      pl.sm.hairN = pose.n;
+      out.hairLag = 0;
+      return out;
+    }
+    for (const k in FOLLOW) {
+      if (!(k in pose)) continue;
+      const a = 1 - Math.exp(-dt / FOLLOW[k]);
+      if (Array.isArray(pose[k])) { pl.sm[k] = pl.sm[k].map((v, i) => v + (pose[k][i] - v) * a); out[k] = pl.sm[k].slice(); }
+      else { pl.sm[k] += (pose[k] - pl.sm[k]) * a; out[k] = pl.sm[k]; }
+    }
+    pl.sm.hairN += (pose.n - pl.sm.hairN) * (1 - Math.exp(-dt / 220));
+    out.hairLag = Math.max(-8, Math.min(8, (pl.sm.hairN - pose.n) * 0.6));
+    return out;
+  }
   function drawPlayer(pl, idle) {
     const s = stateOf(pl);
-    const geo = drawPose(pl.stage, pl.ex, s.pose, idle && !reduceMotion ? pl.time : null);
+    const live = idle && !reduceMotion;
+    const pose = followThrough(pl, s.pose, live);
+    const geo = drawPose(pl.stage, pl.ex, pose, live ? pl.time : null);
     for (const { c, p } of pl.stage.cues) {
       const op = s.pose[c.key] || 0;
       if (op < 0.02) { p.setAttribute('opacity', '0'); continue; }
@@ -972,11 +1458,16 @@
       pl.stage.inset.use.setAttribute('transform', `translate(${cx} ${cy}) scale(${zoom}) translate(${f1(-fpt[0])} ${f1(-fpt[1])})`);
     }
     const form = s.holding && s.ph.form ? s.ph.form : '';
-    if (pl.stage.formEl.dataset.text !== form || !pl.stage.formEl.dataset.init) {
-      pl.stage.formEl.dataset.text = form;
-      pl.stage.formEl.dataset.init = '1';
-      pl.stage.formEl.firstElementChild.textContent = form || 'Form check appears when the position is reached';
-      pl.stage.formEl.classList.toggle('show', !!form);
+    let tag = '';
+    if (s.holding) for (const key in pl.ex.labels || {}) if ((s.pose[key] || 0) > 0.5) tag = pl.ex.labels[key];
+    const fe = pl.stage.formEl, txt = tag + '|' + form;
+    if (fe.dataset.text !== txt || !fe.dataset.init) {
+      fe.dataset.text = txt;
+      fe.dataset.init = '1';
+      fe.querySelector('.tag').textContent = tag;
+      fe.querySelector('.tag').className = `tag ${/^Stretch/.test(tag) ? 'tag-stretch' : /^Relax/.test(tag) ? 'tag-relax' : 'tag-work'}`;
+      fe.querySelector('.txt').textContent = form || 'Form check appears when the position is reached';
+      fe.classList.toggle('show', !!form);
     }
     return s;
   }
@@ -1184,6 +1675,93 @@
     saveSettings(); applyTheme();
   });
 
+  // ---------- TV mode ----------
+  const TV_UA = /SMART-TV|SmartTV|Tizen|Web0S|webOS|NetCast|HbbTV|BRAVIA|AFT[A-Z]|CrKey|GoogleTV|Android ?TV|PhilipsTV|Viera/i;
+  const tvDetected = TV_UA.test(navigator.userAgent) || /[?&]tv=1\b/.test(location.search);
+  const isTV = () => settings.tv === 'on' || (settings.tv === 'auto' && tvDetected);
+  const tvBtn = document.getElementById('tvBtn');
+  function applyTV() {
+    const on = isTV();
+    document.documentElement.classList.toggle('tv', on);
+    tvBtn.setAttribute('aria-pressed', String(on));
+    tvBtn.title = on ? 'Turn off the big-screen TV layout' : 'Big-screen layout for TVs, with remote control';
+  }
+  tvBtn.addEventListener('click', () => {
+    settings.tv = isTV() ? 'off' : 'on';
+    saveSettings();
+    applyTV();
+  });
+  function enterFullscreen() {
+    const el = document.documentElement;
+    try {
+      const req = el.requestFullscreen || el.webkitRequestFullscreen;
+      if (req && !document.fullscreenElement) { const r = req.call(el); if (r && r.catch) r.catch(() => {}); }
+    } catch (e) { /* not allowed here */ }
+  }
+  function exitFullscreen() {
+    try { if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {}); } catch (e) { /* ignore */ }
+  }
+  // Remote keys: standard key names plus the numeric codes used by Samsung (Tizen) and LG (webOS) TVs.
+  const KEYS = {
+    toggle: [' ', 'Spacebar', 'k', 'K', 'MediaPlayPause', 'MediaPlay', 'MediaPause', 'Play', 'Pause'],
+    next: ['ArrowRight', 'Right', 'MediaTrackNext', 'MediaFastForward', 'FastFwd'],
+    prev: ['ArrowLeft', 'Left', 'MediaTrackPrevious', 'MediaRewind', 'Rewind'],
+    exit: ['Backspace', 'BrowserBack', 'GoBack', 'XF86Back'],
+  };
+  const KEY_CODES = { 415: 'toggle', 19: 'toggle', 10252: 'toggle', 417: 'next', 412: 'prev', 10009: 'exit', 461: 'exit' };
+  function keyAction(e) {
+    for (const act in KEYS) if (KEYS[act].includes(e.key)) return act;
+    return KEY_CODES[e.keyCode] || '';
+  }
+  try {
+    if (window.tizen && tizen.tvinputdevice) {
+      ['MediaPlayPause', 'MediaPlay', 'MediaPause', 'MediaFastForward', 'MediaRewind', 'MediaTrackNext', 'MediaTrackPrevious']
+        .forEach((k) => { try { tizen.tvinputdevice.registerKey(k); } catch (e) { /* key not available */ } });
+    }
+  } catch (e) { /* not a Samsung TV */ }
+
+  // Arrow-key focus movement: go to the nearest control in the pressed direction.
+  function focusables(root) {
+    return [...root.querySelectorAll('button, a[href], input, select, textarea, [tabindex]:not([tabindex="-1"])')]
+      .filter((el) => !el.disabled && el.getClientRects().length > 0 && !el.closest('[hidden]') && (root !== document || !el.closest('dialog')));
+  }
+  function spatialMove(key, root) {
+    const all = focusables(root);
+    if (!all.length) return;
+    const cur = document.activeElement;
+    if (!all.includes(cur)) { all[0].focus(); return; }
+    const r = cur.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    const dx = key === 'ArrowLeft' ? -1 : key === 'ArrowRight' ? 1 : 0, dy = key === 'ArrowUp' ? -1 : key === 'ArrowDown' ? 1 : 0;
+    let best = null, bestScore = Infinity;
+    for (const el of all) {
+      if (el === cur) continue;
+      const q = el.getBoundingClientRect(), vx = q.left + q.width / 2 - cx, vy = q.top + q.height / 2 - cy;
+      const along = dx ? vx * dx : vy * dy;
+      if (along <= 4) continue;
+      const score = along + (dx ? Math.abs(vy) : Math.abs(vx)) * 2.5;
+      if (score < bestScore) { bestScore = score; best = el; }
+    }
+    if (best) {
+      best.focus({ preventScroll: true });
+      const q = best.getBoundingClientRect();
+      if (q.top < 0 || q.bottom > window.innerHeight) best.scrollIntoView({ block: 'center' });
+    }
+  }
+  const castDlg = document.getElementById('castHelp');
+  document.getElementById('castBtn').addEventListener('click', () => { castDlg.showModal(); castDlg.querySelector('.sheet-close').focus(); });
+  castDlg.querySelector('.sheet-close').addEventListener('click', () => castDlg.close());
+  castDlg.addEventListener('click', (e) => { if (e.target === castDlg) castDlg.close(); });
+  castDlg.addEventListener('keydown', (e) => {
+    if (keyAction(e) === 'exit') { e.preventDefault(); castDlg.close(); }
+    else if (isTV() && e.key.startsWith('Arrow')) { e.preventDefault(); const b = castDlg.querySelector('.sheet-body'); b.parentElement.scrollBy(0, e.key === 'ArrowDown' ? 120 : e.key === 'ArrowUp' ? -120 : 0); }
+  });
+  // On the main page in TV mode, the remote's arrow keys move between controls.
+  document.addEventListener('keydown', (e) => {
+    if (!isTV() || dlg.open || castDlg.open || !e.key.startsWith('Arrow') || e.altKey || e.ctrlKey || e.metaKey) return;
+    e.preventDefault();
+    spatialMove(e.key, document);
+  });
+
   // ---------- Print ----------
   document.getElementById('printBtn').addEventListener('click', () => window.print());
   window.addEventListener('beforeprint', () => cards.forEach(resetCard));
@@ -1234,7 +1812,7 @@
   const wk = {
     count: $('wkCount'), title: $('wkTitle'), bar: $('wkBar'), stage: $('wkStage'), label: $('wkLabel'), sub: $('wkSub'),
     steps: $('wkSteps'), tip: $('wkTip'), play: $('wkPlay'), body: $('wkBody'), controls: $('wkControls'), done: $('wkDone'),
-    prog: dlg.querySelector('.wk-hud .prog'), cnt: dlg.querySelector('.wk-hud .count'), voice: $('wkVoice'), sound: $('wkSound'),
+    prog: dlg.querySelector('.wk-hud .prog'), cnt: dlg.querySelector('.wk-hud .count'), voice: $('wkVoice'), sound: $('wkSound'), upnext: $('wkUpNext'),
   };
   function loadExercise(i) {
     W.idx = i;
@@ -1261,8 +1839,10 @@
     W.played = 0;
     wk.body.hidden = false; wk.controls.hidden = false; wk.done.hidden = true;
     if (!dlg.open) dlg.showModal();
+    if (isTV()) enterFullscreen();
     loadExercise(0);
     setRunning(true);
+    wk.play.focus(); // the remote's OK button pauses / resumes
   }
   function finishWorkout() {
     setRunning(false);
@@ -1296,6 +1876,13 @@
     }
     return /hold/i.test(label) ? `${label} for ${secs} seconds.` : `${label}. Hold for ${secs} seconds.`;
   }
+  // The next instruction (or next exercise) for the "Up next" line in TV mode.
+  function upNextText(pl, s) {
+    if (!s.holding && s.ph.hold > 0 && s.ph.holdLabel !== s.ph.label) return s.ph.holdLabel;
+    const nx = pl.phases[s.idx + 1];
+    if (nx) return nx.move > 0 && nx.label ? nx.label : nx.holdLabel;
+    return W.idx < EXERCISES.length - 1 ? `next exercise, ${EXERCISES[W.idx + 1].name}` : 'finish';
+  }
   function renderWorkout() {
     const pl = W.pl, ex = pl.ex;
     const s = drawPlayer(pl, W.running);
@@ -1303,6 +1890,7 @@
     if (key !== W.lastKey) {
       W.lastKey = key;
       wk.label.textContent = s.label;
+      wk.upnext.textContent = `Up next: ${upNextText(pl, s)}`;
       wk.steps.querySelectorAll('li').forEach((li, i) => li.classList.toggle('active', i === s.step));
       // When the steps panel scrolls on its own (phones held sideways), keep the current step in view.
       const side = wk.steps.closest('.wk-side'), act = wk.steps.children[s.step];
@@ -1348,14 +1936,42 @@
   }
   $('startWorkout').addEventListener('click', openWorkout);
   wk.play.addEventListener('click', () => setRunning(!W.running));
-  $('wkPrev').addEventListener('click', () => { loadExercise(W.pl.time > 3000 ? W.idx : Math.max(0, W.idx - 1)); });
-  $('wkNext').addEventListener('click', () => { if (W.idx < EXERCISES.length - 1) loadExercise(W.idx + 1); else finishWorkout(); });
+  const goPrev = () => loadExercise(W.pl.time > 3000 ? W.idx : Math.max(0, W.idx - 1));
+  const goNext = () => { if (W.idx < EXERCISES.length - 1) loadExercise(W.idx + 1); else finishWorkout(); };
+  $('wkPrev').addEventListener('click', goPrev);
+  $('wkNext').addEventListener('click', goNext);
+  // TV remote and keyboard control inside the workout.
+  dlg.addEventListener('keydown', (e) => {
+    const onButton = e.target.closest && e.target.closest('button');
+    let act = keyAction(e);
+    if (act === 'toggle' && (e.key === ' ' || e.key === 'Spacebar') && onButton) return; // Space clicks the focused button
+    if (e.key === 'Enter' && !onButton) act = 'toggle';
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') { e.preventDefault(); spatialMove(e.key, dlg); return; }
+    if (!act) return;
+    e.preventDefault();
+    if (!wk.done.hidden) { // finished screen: arrows just move between its buttons
+      if (act === 'exit') dlg.close();
+      else if (act !== 'toggle') spatialMove(act === 'next' ? 'ArrowRight' : 'ArrowLeft', dlg);
+      return;
+    }
+    if (act === 'toggle') setRunning(!W.running);
+    else if (act === 'next') goNext();
+    else if (act === 'prev') goPrev();
+    else if (act === 'exit') dlg.close();
+  });
+  // Hide the mouse pointer during a TV workout once it stops moving.
+  let cursorTimer = 0;
+  dlg.addEventListener('mousemove', () => {
+    dlg.classList.remove('no-cursor');
+    clearTimeout(cursorTimer);
+    cursorTimer = setTimeout(() => dlg.classList.add('no-cursor'), 3000);
+  });
   $('wkClose').addEventListener('click', () => dlg.close());
   $('wkFinish').addEventListener('click', () => dlg.close());
   $('wkAgain').addEventListener('click', openWorkout);
   wk.voice.addEventListener('click', () => { settings.voice = !settings.voice; saveSettings(); updateToggles(); if (!settings.voice) hush(); });
   wk.sound.addEventListener('click', () => { settings.sound = !settings.sound; saveSettings(); updateToggles(); });
-  dlg.addEventListener('close', () => { W.running = false; hush(); unlockScreen(); });
+  dlg.addEventListener('close', () => { W.running = false; hush(); unlockScreen(); exitFullscreen(); clearTimeout(cursorTimer); dlg.classList.remove('no-cursor'); });
   document.addEventListener('visibilitychange', () => {
     last = performance.now();
     if (document.visibilityState === 'visible' && W.running && dlg.open) lockScreen();
@@ -1382,13 +1998,15 @@
   if (mqReduce.addEventListener) mqReduce.addEventListener('change', onMotionChange); else if (mqReduce.addListener) mqReduce.addListener(onMotionChange);
 
   applyTheme();
+  applyTV();
   updateToggles();
   renderTracker();
   applyPlan();
   cards.forEach(resetCard);
   requestAnimationFrame(frame);
+  if (isTV()) document.getElementById('startWorkout').focus({ preventScroll: true });
 
-  if (/[?&]debug\b/.test(location.search)) window.__backExercises = { cards, renderCard, W, EXERCISES, tick: tickWorkout };
+  if (/[?&]debug\b/.test(location.search)) window.__backExercises = { cards, renderCard, W, EXERCISES, tick: tickWorkout, spatialMove, focusables };
 })();
 </script>
 </body>
