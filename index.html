@@ -677,6 +677,8 @@
 
   // ---------- Body model ----------
   const L = { torso: 72, neck: 10, head: 11, ua: 30, fa: 28, th: 44, sh: 42, foot: 12 };
+  // Body build: how thick the torso and limbs are (1 = slim), and head / hand / foot size.
+  const BUILD = 1.3, HEAD_S = 1.12, HAND_S = 1.15, SHOE_S = 1.08;
   const RAD = Math.PI / 180;
   const dir = (deg) => [Math.cos(deg * RAD), Math.sin(deg * RAD)];
   const add = (p, v, s) => [p[0] + v[0] * s, p[1] + v[1] * s];
@@ -790,6 +792,7 @@
     fore:   { f: [[0, 3.5], [0.3, 3.8], [1, 2.4]], b: [[0, 3.3], [0.3, 3.6], [1, 2.3]] },
     neck:   { f: [[0, 4.4], [1, 3.7]], b: [[0, 4.6], [1, 3.9]] },
   };
+  for (const k in LIMB) for (const side of ['f', 'b']) LIMB[k][side] = LIMB[k][side].map(([t, w]) => [t, w * BUILD]);
   const FRACS = [0, 0.15, 0.32, 0.5, 0.68, 0.85, 1];
   // A limb from A to B; `ant` points to the limb's front (quadriceps / biceps side). fa..fb trims the limb.
   function limbRibbon(A, B, prof, ant, fa = 0, fb = 1) {
@@ -812,8 +815,8 @@
   const cub = (H, C1, C2, S, t) => { const u = 1 - t; return [0, 1].map((k) => u * u * u * H[k] + 3 * u * u * t * C1[k] + 3 * u * t * t * C2[k] + t * t * t * S[k]); };
   const cubD = (H, C1, C2, S, t) => { const u = 1 - t; return norm([0, 1].map((k) => 3 * u * u * (C1[k] - H[k]) + 6 * u * t * (C2[k] - C1[k]) + 3 * t * t * (S[k] - C2[k]))); };
   // Torso half-widths along the spine (0 = hips, 1 = shoulders): front (chest/belly) and back (glutes/shoulder blades).
-  const TORSO_FRONT = [[0, 7.6], [0.3, 7.0], [0.5, 7.4], [0.72, 9.0], [0.9, 8.2], [1, 6.6]];
-  const TORSO_BACK  = [[0, 9.0], [0.18, 8.0], [0.38, 6.6], [0.7, 7.4], [0.84, 8.0], [0.94, 7.4], [1, 6.6]];
+  const TORSO_FRONT = [[0, 7.6], [0.3, 7.2], [0.5, 7.6], [0.72, 9.0], [0.9, 8.2], [1, 6.6]].map(([t, w]) => [t, w * BUILD]);
+  const TORSO_BACK  = [[0, 9.0], [0.18, 8.0], [0.38, 6.6], [0.7, 7.4], [0.84, 8.0], [0.94, 7.4], [1, 6.6]].map(([t, w]) => [t, w * BUILD]);
   function torsoRibbon(g, t0, t1, breath, tilt, face) {
     const P = [], N = [], wl = [], wr = [];
     for (let i = 0; i <= 10; i++) {
@@ -852,12 +855,13 @@
 
   function drawHand(parts, k, wrist, hdir, ant, grip) {
     const s = dot(perpOf(hdir), ant) >= 0 ? 1 : -1; // rotate toward the palm side
-    const palmEnd = add(wrist, hdir, 5.2);
+    const S = HAND_S;
+    const palmEnd = add(wrist, hdir, 5.2 * S);
     const fdir = rotVec(hdir, s * grip * 80);
-    const tip = add(palmEnd, fdir, 5.0);
+    const tip = add(palmEnd, fdir, 5.0 * S);
     const tdir = rotVec(hdir, s * 38);
-    const tBase = add(add(wrist, hdir, 1.6), ant, 1.4);
-    parts[k].setAttribute('d', capsule(add(wrist, hdir, -0.6), palmEnd, 2.5, 2.4) + capsule(palmEnd, tip, 2.2, 1.6) + capsule(tBase, add(tBase, tdir, 3.6), 1.25, 1.0));
+    const tBase = add(add(wrist, hdir, 1.6 * S), ant, 1.4 * S);
+    parts[k].setAttribute('d', capsule(add(wrist, hdir, -0.6), palmEnd, 2.5 * S, 2.4 * S) + capsule(palmEnd, tip, 2.2 * S, 1.6 * S) + capsule(tBase, add(tBase, tdir, 3.6 * S), 1.25 * S, 1.0 * S));
     const n = perpOf(fdir);
     parts[k + 'l'].setAttribute('d', `M${pt(add(add(palmEnd, n, 0.75), fdir, 0.4))}L${pt(add(add(tip, n, 0.6), fdir, -1.2))}M${pt(add(add(palmEnd, n, -0.75), fdir, 0.4))}L${pt(add(add(tip, n, -0.6), fdir, -1.2))}`);
   }
@@ -880,7 +884,7 @@
     // Torso: leggings over the hips, waistband, then the t-shirt.
     const pel = torsoRibbon(g, 0, 0.36, 0, tilt, ex.face).rib;
     setRib(parts, 'pelvis', pel);
-    setCircle(parts.pelvisCap, add(add(hip, front, -(0.8 + 1.6 * tilt)), td, -1.4 * tilt), 8.2 + 0.4 * Math.abs(tilt));
+    setCircle(parts.pelvisCap, add(add(hip, front, -(0.8 + 1.6 * tilt) * BUILD), td, -1.4 * tilt), (8.2 + 0.4 * Math.abs(tilt)) * BUILD);
     const band = (() => {
       const a = torsoBand(g, 0.27, 0.33, 1, -0.2, 0, ex.face), b = torsoBand(g, 0.27, 0.33, -1, -0.2, 0, ex.face);
       return spline(a.outer) + spline(b.outer.slice().reverse(), 'L') + 'Z';
@@ -888,7 +892,7 @@
     parts.band.setAttribute('d', band);
     const shirt = torsoRibbon(g, 0.31, 1, breath, 0, ex.face);
     setRib(parts, 'shirt', shirt.rib);
-    setCircle(parts.shoulderCap, add(sh, td, -3), 6.2);
+    setCircle(parts.shoulderCap, add(sh, td, -3.6), 6.2 * BUILD);
     const hemA = add(shirt.P[0], shirt.N[0], shirt.wl[0]), hemB = add(shirt.P[0], shirt.N[0], -shirt.wr[0]);
     parts.hem.setAttribute('d', `M${pt(hemA)}Q${pt(add(shirt.P[0], td, -0.8))} ${pt(hemB)}`);
 
@@ -898,18 +902,19 @@
     const nd = dir(n);
     const fwd = dir(n + ex.face * 90);
     const neckEnd = add(sh, nd, L.neck);
-    const hc = add(neckEnd, nd, L.head - 1);
-    const H = loc(hc, fwd, nd);
+    const hc = add(neckEnd, nd, (L.head - 1) * HEAD_S);
+    const H = loc(hc, [fwd[0] * HEAD_S, fwd[1] * HEAD_S], [nd[0] * HEAD_S, nd[1] * HEAD_S]);
     setRib(parts, 'neck', limbRibbon(add(sh, nd, -3), H([0.6, -6.8]), LIMB.neck, fwd));
-    parts.collar.setAttribute('d', `M${pt(add(add(sh, perp, 5.2), nd, -0.6))}Q${pt(add(sh, nd, 1.6))} ${pt(add(add(sh, perp, -5.2), nd, -0.6))}`);
+    parts.collar.setAttribute('d', `M${pt(add(add(sh, perp, 5.2 * BUILD), nd, -0.6))}Q${pt(add(sh, nd, 1.8))} ${pt(add(add(sh, perp, -5.2 * BUILD), nd, -0.6))}`);
     parts.head.setAttribute('d', closedSpline(HEAD.map(H)));
-    const Hh = loc(hc, dir(n + hairLag + ex.face * 90), dir(n + hairLag));
+    const hf = dir(n + hairLag + ex.face * 90), hu = dir(n + hairLag);
+    const Hh = loc(hc, [hf[0] * HEAD_S, hf[1] * HEAD_S], [hu[0] * HEAD_S, hu[1] * HEAD_S]);
     parts.hair.setAttribute('d', closedSpline(HAIR.map(Hh)));
     parts.strands.setAttribute('d', STRANDS.map((s) => spline(s.map(Hh))).join(''));
     const blink = idle && (t % 3900) < 140;
     const eye = H([5.9, 2.4]);
     setCircle(parts.eye, eye);
-    parts.eye.setAttribute('ry', blink ? '0.2' : '1.15');
+    parts.eye.setAttribute('ry', f1((blink ? 0.2 : 1.15) * HEAD_S));
     parts.eye.setAttribute('transform', `rotate(${f1(n + ex.face * 90)} ${pt(eye)})`);
     parts.lid.setAttribute('d', spline([[4.4, 3.4], [5.9, 3.9], [7.3, 3.3]].map(H)));
     parts.brow.setAttribute('d', spline([[4.0, 5.4], [6.0, 6.0], [8.0, 5.3]].map(H)));
@@ -934,8 +939,8 @@
       setRib(parts, side + 'sl', limbRibbon(sh, elb, LIMB.sleeve, armAnt, -0.06, 0.46));
       const ud = norm(sub(elb, sh)), un = perpOf(ud);
       const hemC = add(sh, ud, L.ua * 0.46);
-      parts[side + 'slhem'].setAttribute('d', `M${pt(add(hemC, un, 5.0))}L${pt(add(hemC, un, -5.0))}`);
-      setCircle(parts[side + 'elb'], add(elb, armAnt, -1.4), 3.1);
+      parts[side + 'slhem'].setAttribute('d', `M${pt(add(hemC, un, 5.0 * BUILD))}L${pt(add(hemC, un, -5.0 * BUILD))}`);
+      setCircle(parts[side + 'elb'], add(elb, armAnt, -1.4 * BUILD), 3.1 * BUILD);
       setRib(parts, side + 'fa', limbRibbon(elb, hand, LIMB.fore, armAnt));
       const fdir = norm(sub(hand, elb));
       const a0 = angOf(fdir);
@@ -954,14 +959,14 @@
       setRib(parts, side + 'th', limbRibbon(hip, knee, LIMB.thigh, legAnt));
       setRib(parts, side + 'sh', limbRibbon(knee, ank, LIMB.shin, legAnt));
       setRib(parts, side + 'sock', limbRibbon(knee, ank, LIMB.sock, legAnt, 0.86, 1.02));
-      const kneeCap = add(knee, legAnt, 3.2);
+      const kneeCap = add(knee, legAnt, 3.2 * BUILD);
       setCircle(parts[side + 'knee'], kneeCap);
       parts[side + 'knee'].setAttribute('transform', `rotate(${f1(angOf(sub(ank, hip)))} ${pt(kneeCap)})`);
       if (parts[side + 'seam']) parts[side + 'seam'].setAttribute('d', spline([add(hip, legAnt, -1), lerp2(hip, knee, 0.5), knee, lerp2(knee, ank, 0.5), add(ank, legAnt, -0.5)]));
       const dTh = norm(sub(knee, hip)), dSh = norm(sub(ank, knee));
       const bend = Math.acos(Math.max(-1, Math.min(1, dot(dTh, dSh)))) / RAD;
       if (parts[side + 'crease']) {
-        const bk = add(knee, legAnt, -3.4);
+        const bk = add(knee, legAnt, -3.4 * BUILD);
         parts[side + 'crease'].setAttribute('d', `M${pt(add(bk, dTh, -3.5))}Q${pt(add(bk, legAnt, 0.8))} ${pt(add(bk, dSh, 3.5))}M${pt(add(add(bk, dTh, -2), legAnt, 1.2))}Q${pt(add(bk, legAnt, 1.8))} ${pt(add(add(bk, dSh, 2), legAnt, 1.2))}`);
         parts[side + 'crease'].setAttribute('opacity', clamp01((bend - 55) / 50).toFixed(2));
       }
@@ -969,7 +974,7 @@
       const fd = dir(p[side + 'f']);
       let up = perpOf(fd);
       if (dot(up, sub(knee, ank)) < 0) up = neg(up);
-      const F = loc(ank, fd, up);
+      const F = loc(ank, [fd[0] * SHOE_S, fd[1] * SHOE_S], [up[0] * SHOE_S, up[1] * SHOE_S]);
       parts[side + 'shoe'].setAttribute('d', closedSpline(SHOE.map(F)));
       parts[side + 'sole'].setAttribute('d', spline([[-4.5, -3.4], [2, -3.7], [9, -3.6], [11.7, -2.3]].map(F)) + spline([[11.2, -1.0], [9, -2.2], [2, -2.3], [-4.6, -2.0]].map(F), 'L') + 'Z');
       parts[side + 'lace'].setAttribute('d', `M${pt(F([2.4, 4.0]))}L${pt(F([3.6, 2.4]))}M${pt(F([4.8, 3.4]))}L${pt(F([5.9, 2.0]))}M${pt(F([8.8, -2.6]))}Q${pt(F([9.4, 0.6]))} ${pt(F([10.8, 1.0]))}`);
@@ -1050,10 +1055,10 @@
         const el = document.createElementNS(SVGNS, tag);
         el.setAttribute('class', cls);
         el.dataset.p = key;
-        if (key === 'blush') el.setAttribute('r', '2');
-        if (key === 'eye') { el.setAttribute('rx', '1.35'); el.setAttribute('ry', '1.15'); }
-        if (key === 'ear') { el.setAttribute('rx', '1.9'); el.setAttribute('ry', '2.9'); }
-        if (key.endsWith('knee')) { el.setAttribute('rx', '2.8'); el.setAttribute('ry', '2.1'); }
+        if (key === 'blush') el.setAttribute('r', f1(2 * HEAD_S));
+        if (key === 'eye') { el.setAttribute('rx', f1(1.35 * HEAD_S)); el.setAttribute('ry', f1(1.15 * HEAD_S)); }
+        if (key === 'ear') { el.setAttribute('rx', f1(1.9 * HEAD_S)); el.setAttribute('ry', f1(2.9 * HEAD_S)); }
+        if (key.endsWith('knee')) { el.setAttribute('rx', f1(2.8 * BUILD)); el.setAttribute('ry', f1(2.1 * BUILD)); }
         g.appendChild(el);
         parts[key] = el;
       }
@@ -1077,9 +1082,9 @@
   // bl/bt lower/upper back bend (from b); hg hand grip 0..1; hd/hdw hand angle and how much it overrides the forearm.
   const P = (o, extra) => Object.assign({}, o, extra || {});
   const base = { b: 0, g: 0, pt: 0, a1: 0, a2: 0, m2: 0, hg: 0.2, hd: 0, hdw: 0 };
-  const supineFlat = P(base, { hx: 210, hy: 193, t: 180, n: 190, nh: [195, 193], fh: [195, 193], nk: [296, 193], fk: [296, 193], nf: -70, ff: -70 });
-  const supineBent = P(base, { hx: 210, hy: 193, t: 180, n: 190, nh: [195, 194], fh: [195, 194], nk: [266, 192], fk: [266, 192], nf: 0, ff: 0 });
-  const prone      = P(base, { hx: 220, hy: 192, t: 180, n: 187, nh: [205, 194], fh: [205, 194], nk: [306, 193], fk: [306, 193], nf: 15, ff: 15 });
+  const supineFlat = P(base, { hx: 210, hy: 189.5, t: 180, n: 190, nh: [195, 193], fh: [195, 193], nk: [296, 193], fk: [296, 193], nf: -70, ff: -70 });
+  const supineBent = P(base, { hx: 210, hy: 189.5, t: 180, n: 190, nh: [195, 194], fh: [195, 194], nk: [266, 192], fk: [266, 192], nf: 0, ff: 0 });
+  const prone      = P(base, { hx: 220, hy: 188.5, t: 180, n: 187, nh: [205, 194], fh: [205, 194], nk: [306, 193], fk: [306, 193], nf: 15, ff: 15 });
   const quad       = P(base, { hx: 252, hy: 150, t: 188, n: 188, nh: [181, 196], fh: [181, 196], nk: [294, 195], fk: [294, 195], nf: 5, ff: 5 });
 
   // hold: 'H' = the hold time from "Your plan"; otherwise milliseconds.
@@ -1124,7 +1129,7 @@
       poses: {
         flat: supineFlat,
         rest: P(supineBent, { bl: 13, bt: 3 }),
-        tilt: P(supineBent, { bl: 0, bt: 0, hy: 191.5, t: 179, g: 1, a1: 1, pt: 0.6 }),
+        tilt: P(supineBent, { bl: 0, bt: 0, hy: 188, t: 179, g: 1, a1: 1, pt: 0.6 }),
       },
       start: 'flat',
       cycle: [
@@ -1208,7 +1213,7 @@
       poses: {
         flat: supineFlat,
         down: supineBent,
-        up: P(supineBent, { hx: 206, hy: 160, t: 152.7, g: 1, a1: 1 }),
+        up: P(supineBent, { hx: 206, hy: 157, t: 152.7, g: 1, a1: 1 }),
       },
       start: 'flat',
       cycle: [
