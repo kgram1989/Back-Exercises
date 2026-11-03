@@ -327,6 +327,7 @@
 
   const EXERCISES = [
     {
+      setup: [['Lie on your back, legs stretched out', 0, 3000]],
       name: 'Single knee to chest', reps: '3–5 times, each leg', cycles: 3, face: 1,
       sign: { nh: 1, fh: 1, nk: -1, fk: -1 },
       glow: { at: 0.12, off: -5, rx: 18, ry: 8 },
@@ -337,10 +338,10 @@
       },
       start: 'rest',
       cycle: [
-        { to: 'near', move: 1800, label: 'Bring one knee to your chest', hold: 10000, holdLabel: 'Hold a gentle stretch (10–30 s)', step: 3 },
-        { to: 'rest', move: 1800, label: 'Slowly let go and straighten', hold: 1000, holdLabel: 'Relax', step: 4 },
-        { to: 'far',  move: 1800, label: 'Now the other knee', hold: 10000, holdLabel: 'Hold a gentle stretch (10–30 s)', step: 3 },
-        { to: 'rest', move: 1800, label: 'Slowly let go and straighten', hold: 1000, holdLabel: 'Relax', step: 4 },
+        { to: 'near', move: 1800, label: 'Bring one knee up and hold it with both hands', hold: 10000, holdLabel: 'Pull gently — hold the stretch (10–30 s)', moveStep: 1, holdStep: 3 },
+        { to: 'rest', move: 1800, label: 'Slowly let go and straighten the leg', hold: 2000, holdLabel: 'Relax', moveStep: 4, holdStep: 4 },
+        { to: 'far',  move: 1800, label: 'Now bring the other knee up', hold: 10000, holdLabel: 'Pull gently — hold the stretch (10–30 s)', moveStep: 1, holdStep: 3 },
+        { to: 'rest', move: 1800, label: 'Slowly let go and straighten the leg', hold: 2000, holdLabel: 'Relax', moveStep: 4, holdStep: 4 },
       ],
       steps: [
         'Lie on your back on a firm bed or the floor, legs stretched out.',
@@ -352,17 +353,19 @@
       ],
     },
     {
+      setup: [['Lie on your back, legs stretched out', 0, 2500], ['Bend your knees, feet flat on the floor', 1, 1500, 'rest', 1800]],
       name: 'Pelvic tilt', reps: '5–10 times', cycles: 5, face: 1,
       sign: { nh: -1, fh: -1, nk: -1, fk: -1 },
       glow: { at: 0.22, off: 6, rx: 16, ry: 8 },
       poses: {
+        flat: supineFlat,
         rest: P(supineBent, { b: 12 }),
         tilt: P(supineBent, { b: 0, hy: 191.5, t: 179, g: 1 }),
       },
-      start: 'rest',
+      start: 'flat',
       cycle: [
-        { to: 'tilt', move: 1300, label: 'Tighten your lower belly', hold: 5000, holdLabel: 'Hold — press lower back down, breathe evenly', step: 2 },
-        { to: 'rest', move: 1300, label: 'Relax', hold: 1200, holdLabel: 'Rest', step: -1 },
+        { to: 'tilt', move: 1300, label: 'Tighten your lower belly', hold: 5000, holdLabel: 'Hold — lower back pressed down, breathe evenly', moveStep: 2, holdStep: 3 },
+        { to: 'rest', move: 1300, label: 'Relax', hold: 2000, holdLabel: 'Rest', moveStep: 4, holdStep: 4 },
       ],
       steps: [
         'Lie on your back with your legs stretched out.',
@@ -373,6 +376,7 @@
       ],
     },
     {
+      setup: [['Hands under shoulders, knees under hips', 0, 3500]],
       name: 'Cat–cow', reps: 'Until your lower back bends more easily', cycles: 5, face: -1,
       sign: { nh: -1, fh: -1, nk: 1, fk: 1 },
       glow: { at: 0.5, off: -9, rx: 20, ry: 8 },
@@ -383,8 +387,8 @@
       },
       start: 'neutral',
       cycle: [
-        { to: 'cat', move: 1600, label: 'Round your back like a cat', hold: 5000, holdLabel: 'Hold — head down, belly tight', step: 1 },
-        { to: 'cow', move: 2200, label: 'Lift your head, let your back sag', hold: 5000, holdLabel: 'Hold — belly relaxed', step: 3 },
+        { to: 'cat', move: 1600, label: 'Round your back like a cat', hold: 5000, holdLabel: 'Hold — head down, belly tight', moveStep: 1, holdStep: 2 },
+        { to: 'cow', move: 2200, label: 'Lift your head, let your back sag', hold: 5000, holdLabel: 'Hold — belly relaxed', moveStep: 3, holdStep: 4 },
       ],
       steps: [
         'Get on your hands and knees: hands under shoulders, knees under hips. Pad your knees if you like.',
@@ -395,17 +399,19 @@
       ],
     },
     {
+      setup: [['Lie face-down', 0, 2500], ['Hands near your head, shoulder-width apart', 1, 1500, 'down', 1600]],
       name: 'Press-ups', reps: '5–10 times', cycles: 5, face: -1,
       sign: { nh: -1, fh: -1, nk: -1, fk: -1 },
       glow: null,
       poses: {
+        flat: prone,
         down: P(prone, { nh: [150, 197], fh: [150, 197] }),
         up:   P(prone, { nh: [150, 197], fh: [150, 197], t: 223, b: -6, n: 208 }),
       },
-      start: 'down',
+      start: 'flat',
       cycle: [
-        { to: 'up',   move: 2400, label: 'Straighten your arms — hips stay down', hold: 5000, holdLabel: 'Hold — keep your back relaxed', step: 2 },
-        { to: 'down', move: 2400, label: 'Slowly lower down', hold: 1200, holdLabel: 'Rest', step: 4 },
+        { to: 'up',   move: 2400, label: 'Straighten your arms — hips stay down', hold: 5000, holdLabel: 'Hold — keep your back relaxed', moveStep: 2, holdStep: 3 },
+        { to: 'down', move: 2400, label: 'Slowly lower down', hold: 2000, holdLabel: 'Rest', moveStep: 4, holdStep: 4 },
       ],
       steps: [
         'Lie face-down on a firm bed or the floor.',
@@ -417,17 +423,19 @@
       tip: 'Move your hands around if it makes you more comfortable.',
     },
     {
+      setup: [['Lie on your back', 0, 2500], ['Bend your knees, feet flat, arms flat by your sides', 1, 2000, 'down', 1800]],
       name: 'Bridges', reps: '10 times', cycles: 10, face: 1,
       sign: { nh: -1, fh: -1, nk: -1, fk: -1 },
       glow: { at: 0.02, off: -7, rx: 14, ry: 9 },
       poses: {
+        flat: supineFlat,
         down: supineBent,
         up: P(supineBent, { hx: 206, hy: 160, t: 152.7, g: 1 }),
       },
-      start: 'down',
+      start: 'flat',
       cycle: [
-        { to: 'up',   move: 1700, label: 'Squeeze your buttocks and lift your hips', hold: 3000, holdLabel: 'Hold (3–5 s)', step: 2 },
-        { to: 'down', move: 1700, label: 'Slowly lower and relax', hold: 900, holdLabel: 'Rest', step: 4 },
+        { to: 'up',   move: 1700, label: 'Squeeze your buttocks and lift your hips', hold: 3000, holdLabel: 'Hold (3–5 s)', moveStep: 2, holdStep: 3 },
+        { to: 'down', move: 1700, label: 'Slowly lower and relax your buttocks', hold: 2000, holdLabel: 'Rest', moveStep: 4, holdStep: 4 },
       ],
       steps: [
         'Lie on your back.',
@@ -439,17 +447,22 @@
       tip: 'Not feeling it in your buttocks and the backs of your thighs? Slide your feet 1–2 inches (2.5–5 cm) farther away. Too easy? Cross your arms over your chest.',
     },
     {
+      setup: [['Lie on your back', 0, 2500], ['Bend your knees, feet flat on the floor', 1, 1500, 'bent', 1800], ['Cross your arms over your chest', 2, 1500, 'down', 1800]],
       name: 'Belly crunches', reps: '5–10 times', cycles: 5, face: 1,
       sign: { nh: 1, fh: 1, nk: -1, fk: -1 },
       glow: { at: 0.42, off: 7, rx: 18, ry: 8 },
       poses: {
-        down: P(supineBent, { nh: [143, 181], fh: [143, 181] }),
-        up:   P(supineBent, { nh: [148.4, 164.1], fh: [148.4, 164.1], t: 195, b: 6, n: 206, g: 1 }),
+        // Arms use joint angles [upper arm, forearm] so the forearm swings up and over the chest.
+        flat: P(supineFlat, { nA: [0, 0], fA: [0, 0] }),
+        bent: P(supineBent, { nA: [0, 0], fA: [0, 0] }),
+        down: P(supineBent, { nA: [1.2, -153.3], fA: [1.2, -153.3] }),
+        up:   P(supineBent, { nA: [16.2, -138.3], fA: [16.2, -138.3], t: 195, b: 6, n: 206, g: 1 }),
       },
-      start: 'down',
+      start: 'flat',
       cycle: [
-        { to: 'up',   move: 1500, label: 'Tighten your belly, lift your shoulder blades', hold: 1000, holdLabel: 'Just a little off the floor', step: 4 },
-        { to: 'down', move: 1700, label: 'Slowly lower your chest and head', hold: 1200, holdLabel: 'Rest', step: 5 },
+        { to: 'down', move: 0, label: '', hold: 1500, holdLabel: 'Tip your chin slightly toward your chest', moveStep: 3, holdStep: 3 },
+        { to: 'up',   move: 1500, label: 'Tighten your belly, lift your shoulder blades', hold: 1500, holdLabel: 'Just a little off the floor', moveStep: 4, holdStep: 4 },
+        { to: 'down', move: 1700, label: 'Slowly lower your chest and head', hold: 2000, holdLabel: 'Rest', moveStep: 5, holdStep: 5 },
       ],
       steps: [
         'Lie on your back.',
@@ -461,6 +474,7 @@
       ],
     },
     {
+      setup: [['Lie face-down, arms at your sides, forehead on the floor', 0, 3500]],
       name: 'Back lifts', reps: '5–10 times', cycles: 5, face: -1,
       sign: { nh: -1, fh: -1, nk: -1, fk: -1 },
       glow: { at: 0.2, off: 7, rx: 20, ry: 8 },
@@ -470,8 +484,9 @@
       },
       start: 'down',
       cycle: [
-        { to: 'up',   move: 1900, label: 'Tighten legs and buttocks, lift your chest', hold: 3000, holdLabel: 'Hold (3–5 s) — eyes on the floor', step: 2 },
-        { to: 'down', move: 1900, label: 'Slowly lower your chest and face', hold: 1200, holdLabel: 'Rest', step: 4 },
+        { to: 'down', move: 0, label: '', hold: 1500, holdLabel: 'Tighten your legs and buttocks', moveStep: 1, holdStep: 1 },
+        { to: 'up',   move: 1900, label: 'Slowly lift your chest — hips stay down', hold: 3000, holdLabel: 'Hold (3–5 s) — eyes on the floor', moveStep: 2, holdStep: 3 },
+        { to: 'down', move: 1900, label: 'Slowly lower your chest and face', hold: 2000, holdLabel: 'Rest', moveStep: 4, holdStep: 4 },
       ],
       steps: [
         'Lie face-down with your arms at your sides and forehead resting on the floor.',
@@ -542,7 +557,7 @@
     const perp = [-td[1], td[0]];
     const mid = [(hip[0] + sh[0]) / 2, (hip[1] + sh[1]) / 2];
     const ctrl = add(mid, perp, p.b);
-    const breath = 0.6 + 0.6 * Math.sin(now / 900);
+    const breath = 0.6 + 0.6 * Math.sin(now / 1500);
 
     parts.pelvis.setAttribute('d', torsoPath(hip, ctrl, sh, 0, 0.34, ex.face, 0));
     parts.shirt.setAttribute('d', torsoPath(hip, ctrl, sh, 0.26, 1, ex.face, breath));
@@ -572,7 +587,10 @@
 
     let minX = Math.min(hc[0] - 11, hip[0]), maxX = Math.max(hc[0] + 11, hip[0]);
     for (const side of ['n', 'f']) {
-      const [elb, hand] = ik(sh, p[side + 'h'], L.ua, L.fa, ex.sign[side + 'h']);
+      const ang = p[side + 'A'];
+      const [elb, hand] = ang
+        ? (() => { const e = add(sh, dir(ang[0]), L.ua); return [e, add(e, dir(ang[1]), L.fa)]; })()
+        : ik(sh, p[side + 'h'], L.ua, L.fa, ex.sign[side + 'h']);
       parts[side + 'ua'].setAttribute('d', capsule(sh, elb, 4.8, 3.6));
       const sleeveEnd = add(sh, norm(sub(elb, sh)), L.ua * 0.55);
       parts[side + 'sl'].setAttribute('d', capsule(add(sh, norm(sub(elb, sh)), -1), sleeveEnd, 5.9, 5.0));
@@ -602,21 +620,29 @@
       g.setAttribute('cx', f1(gp[0])); g.setAttribute('cy', f1(gp[1]));
       g.setAttribute('rx', ex.glow.rx); g.setAttribute('ry', ex.glow.ry);
       g.setAttribute('transform', `rotate(${f1(p.t)} ${pt(gp)})`);
-      const pulse = 0.75 + 0.25 * Math.sin(now / 260);
+      const pulse = 0.75 + 0.25 * Math.sin(now / 450);
       g.setAttribute('opacity', (p.g * 0.85 * pulse).toFixed(3));
     }
   }
 
+  // Movements are played slower than the raw timings so they are easy to follow.
+  const MOVE_SCALE = 1.6;
+
   function buildPhases(ex) {
     const phases = [];
     let prev = ex.start;
+    // Setup entries: [instruction, step index, hold ms, optional pose to move into, move ms]
+    for (const [text, step, hold, to = prev, move = 0] of ex.setup || []) {
+      phases.push({ from: prev, to, move: move * MOVE_SCALE, label: text, hold, holdLabel: text, moveStep: step, holdStep: step, rep: 0, setup: true });
+      prev = to;
+    }
     for (let r = 0; r < ex.cycles; r++) {
       for (const seg of ex.cycle) {
-        phases.push({ ...seg, from: prev, rep: r });
+        phases.push({ ...seg, move: seg.move * MOVE_SCALE, from: prev, rep: r });
         prev = seg.to;
       }
     }
-    phases.push({ from: prev, to: ex.start, move: prev === ex.start ? 0 : 1600, label: 'Set complete', hold: 3000, holdLabel: 'Nice work — starting again', step: -1, rep: ex.cycles - 1, done: true });
+    phases.push({ from: prev, to: ex.start, move: prev === ex.start ? 0 : 2500, label: 'Set complete', hold: 4000, holdLabel: 'Nice work — starting again', moveStep: -1, holdStep: -1, rep: ex.cycles - 1, done: true });
     let t = 0;
     for (const ph of phases) { ph.t0 = t; t += ph.move + ph.hold; ph.t1 = t; }
     return { phases, total: t };
@@ -688,9 +714,10 @@
     const key = label + '|' + rep + '|' + (holding ? 'h' : 'm') + '|' + card.playing;
     if (key !== card.lastKey) {
       card.phaseEl.textContent = label;
-      const sub = ph.done ? 'Rest' : (holding && ph.hold >= 2000 ? `${rep} · hold` : rep);
-      card.subEl.textContent = card.playing ? sub : 'Paused · ' + sub;
-      card.stepEls.forEach((li, i) => li.classList.toggle('active', i === ph.step));
+      const subText = ph.done ? 'Rest' : ph.setup ? 'Get ready' : (holding && ph.hold >= 2000 ? `${rep} · hold` : rep);
+      card.subEl.textContent = card.playing ? subText : 'Paused · ' + subText;
+      const activeStep = holding ? ph.holdStep : ph.moveStep;
+      card.stepEls.forEach((li, i) => li.classList.toggle('active', i === activeStep));
       card.lastKey = key;
     }
     card.countEl.textContent = holding && ph.hold >= 2000 ? secs : '';
