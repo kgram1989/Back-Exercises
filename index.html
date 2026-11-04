@@ -215,6 +215,8 @@
   .ln-shirt { stroke: var(--shirt-lo); stroke-width: 0.8; }
   .ln-collar { stroke: var(--shirt-lo); stroke-width: 1.5; }
   .ln-skin { stroke: var(--skin-lo); stroke-width: 0.45; }
+  .fig .hand { stroke: none; }
+  .ln-hand { stroke: rgba(0, 0, 0, 0.24); stroke-width: 0.4; }
   .ln-hair { stroke: var(--hair-hi); stroke-width: 0.6; }
   .ln-seam { stroke: var(--pants-hi); stroke-width: 0.5; opacity: 0.6; }
   .ln-crease { stroke: var(--pants-lo); stroke-width: 0.6; }
@@ -764,11 +766,11 @@
 
   // A body part as a ribbon around a centre line (P points, N normals; +N side uses widths wl).
   // Returns the outline, a shadow strip on the side away from the light, and a highlight strip on the lit side.
-  function ribbon(P, N, wl, wr, lfOverride) {
+  function ribbon(P, N, wl, wr, lfOverride, capEndK = 0.9) {
     const n = P.length, mid = n >> 1;
     const Lf = lfOverride || P.map((p, i) => add(p, N[i], wl[i])), Rt = P.map((p, i) => add(p, N[i], -wr[i]));
     const tE = norm(sub(P[n - 1], P[n - 2])), tS = norm(sub(P[0], P[1]));
-    const capE = add(P[n - 1], tE, (wl[n - 1] + wr[n - 1]) * 0.9);
+    const capE = add(P[n - 1], tE, (wl[n - 1] + wr[n - 1]) * capEndK);
     const capS = add(P[0], tS, (wl[0] + wr[0]) * 0.9);
     const d = spline(Lf) + `Q${pt(capE)} ${pt(Rt[n - 1])}` + spline(Rt.slice().reverse(), 'L') + `Q${pt(capS)} ${pt(Lf[0])}Z`;
     const litLeft = dot(N[mid], TO_LIGHT) >= 0;
@@ -867,22 +869,45 @@
     [2.2, 7.85], [2.8, 8.25], [3.5, 8.15], [4.0, 7.55],          // index finger
     [4.3, 6.6], [4.3, 5.6], [5.4, 5.0], [6.2, 4.4], [6.1, 3.5], [5.2, 3.1], [4.2, 2.6], [3.6, 1.4], [3.0, 0]]; // thumb
   const GRIP_S = 1.1;
-  function drawGripHand(parts, k, wrist, up, along) {
+  function drawGripHand(parts, k, wrist, up, along, fdir) {
     const G = ([w, u]) => [wrist[0] + (up[0] * u + along[0] * w) * GRIP_S, wrist[1] + (up[1] * u + along[1] * w) * GRIP_S];
-    parts[k].setAttribute('d', closedSpline(GRIP_HAND.map(G)));
-    parts[k + 'l'].setAttribute('d', [[-2.4, 7.3], [-0.18, 7.8], [2.0, 7.85]].map(([w, u]) => `M${pt(G([w, u - 0.1]))}L${pt(G([w * 0.97, u - 1.6]))}`).join('') + `M${pt(G([4.2, 5.5]))}Q${pt(G([4.8, 4.3]))} ${pt(G([4.3, 3.0]))}`);
-    parts[k + 'l'].setAttribute('opacity', '0.9');
+    // The fill reaches back into the forearm; the outline stops at the wrist so the forearm flows into the hand.
+    let fillPts = GRIP_HAND.map(G);
+    if (fdir) {
+      const fw = widthAt(LIMB.fore.f, 1), fn = perpOf(fdir);
+      const left = dot(fn, sub(G([-3, 0]), wrist)) >= 0 ? 1 : -1;
+      fillPts = [add(add(wrist, fdir, -1.3), fn, left * fw * 0.92), ...fillPts, add(add(wrist, fdir, -1.3), fn, -left * fw * 0.92)];
+    }
+    parts[k].setAttribute('d', closedSpline(fillPts));
+    parts[k + 'l'].setAttribute('d', spline(GRIP_HAND.map(G)) +
+      [[-2.4, 7.3], [-0.18, 7.8], [2.0, 7.85]].map(([w, u]) => `M${pt(G([w, u - 0.1]))}L${pt(G([w * 0.97, u - 1.6]))}`).join('') +
+      `M${pt(G([4.2, 5.5]))}Q${pt(G([4.8, 4.3]))} ${pt(G([4.3, 3.0]))}`);
+    parts[k + 'l'].setAttribute('opacity', '1');
   }
-  function drawHand(parts, k, wrist, hdir, palm, grip) {
+  function drawHand(parts, k, wrist, hdir, palm, grip, fdir, flat = 0) {
     let side = perpOf(hdir);
     if (dot(side, palm) < 0) side = neg(side);
     const W = loc(wrist, [hdir[0] * HAND_S, hdir[1] * HAND_S], [side[0] * HAND_S, side[1] * HAND_S]);
     const rot = (P, pivot, deg) => { const c = Math.cos(deg * RAD), sn = Math.sin(deg * RAD); return P.map(([u, v]) => [pivot[0] + u * c - v * sn, pivot[1] + u * sn + v * c]); };
     const fingers = rot(FINGERS, [5.2, 0], grip * 75);            // fingers curl toward the palm
-    const thumb = rot(THUMB, [1.0, 1.9], 28 - grip * 34);          // thumb opens a little, then tucks in
-    parts[k].setAttribute('d', closedSpline(PALM.map(W)) + closedSpline(fingers.map(W)) + closedSpline(thumb.map(W)));
-    parts[k + 'l'].setAttribute('d', `M${pt(W([5.1, -2.1]))}Q${pt(W([5.7, -0.2]))} ${pt(W([5.3, 1.7]))}`);
-    parts[k + 'l'].setAttribute('opacity', clamp01(grip * 1.2).toFixed(2));
+    const thumb = rot(THUMB, [1.0, 1.9], (28 - grip * 34) * (1 - flat)); // thumb opens a little, tucks in, and lies flat on the floor
+    // Fill (palm reaching back into the forearm, fingers, thumb), all wound the same way so they merge without gaps.
+    // The palm's base joins the forearm along the forearm's own direction, so any wrist angle meets cleanly.
+    let palmW = PALM.map(W);
+    if (fdir) {
+      const fw = widthAt(LIMB.fore.f, 1), fn = perpOf(fdir);
+      const backSide = dot(fn, sub(W([0, -2.2]), wrist)) >= 0 ? 1 : -1;
+      const b1 = add(add(wrist, fdir, -1.3), fn, backSide * fw * 0.92), b2 = add(add(wrist, fdir, -1.3), fn, -backSide * fw * 0.92);
+      palmW = [b1, ...palmW, b2];
+    }
+    const wind = (P) => { let a = 0; for (let i = 0; i < P.length; i++) { const [x1, y1] = P[i], [x2, y2] = P[(i + 1) % P.length]; a += x1 * y2 - x2 * y1; } return a; };
+    const shapes = [palmW, fingers.map(W), thumb.map(W)];
+    const sgn = Math.sign(wind(shapes[0])) || 1;
+    parts[k].setAttribute('d', shapes.map((P) => closedSpline(Math.sign(wind(P)) === sgn ? P : P.slice().reverse())).join(''));
+    // Outline only the outside edges, left open at the wrist so the forearm flows into the hand.
+    parts[k + 'l'].setAttribute('d', spline(PALM.slice(0, 3).map(W)) + spline(PALM.slice(4).map(W)) + spline(fingers.map(W)) + spline(thumb.map(W)) +
+      (grip > 0.2 ? `M${pt(W([5.1, -2.1]))}Q${pt(W([5.7, -0.2]))} ${pt(W([5.3, 1.7]))}` : ''));
+    parts[k + 'l'].setAttribute('opacity', '1');
   }
   // One continuous arm outline from shoulder to wrist, with a rounded elbow on the outside of the bend.
   function armRibbon(sh, elb, hand, ant) {
@@ -917,7 +942,7 @@
         }
       }
     }
-    return ribbon(P, N, wl, wr, Lf);
+    return ribbon(P, N, wl, wr, Lf, 0.3); // short end at the wrist: the hand covers it
   }
   const FAR_OFF = [2, -2.2]; // the far-side limbs are drawn shifted by this much
 
@@ -1063,10 +1088,10 @@
       if (sy > room) ha = Math.cos(ha * RAD) >= 0 ? Math.asin(room) / RAD : 180 - Math.asin(room) / RAD;
       if (grabDir && p.grab > 0.5) {
         const gl = legs.n, gf = legs.f, w = p.grabLeg;
-        drawGripHand(parts, side + 'hand', hand, norm(lerp2(gl.legAnt, gf.legAnt, w)), neg(norm(lerp2(gl.dSh, gf.dSh, w))));
+        drawGripHand(parts, side + 'hand', hand, norm(lerp2(gl.legAnt, gf.legAnt, w)), neg(norm(lerp2(gl.dSh, gf.dSh, w))), fdir);
       } else {
         const palm = grabPalm && p.grab > 0.5 ? grabPalm : armAnt;
-        drawHand(parts, side + 'hand', hand, dir(ha), palm, p.hg);
+        drawHand(parts, side + 'hand', hand, dir(ha), palm, p.hg, fdir, p.hdw);
       }
       (stage.arms || (stage.arms = {}))[side] = { sh, elb, hand, ant: armAnt }; // kept for checks
       contacts.push([hand, 3.5], [elb, 3]);
@@ -1114,8 +1139,8 @@
   // Builds the figure's SVG elements, back to front, and returns them keyed by name.
   const FIG_LAYERS = [
     ['far', [
-      ['fhand', 'skin'], ['fhandl', 'ln ln-skin'], // hand under the forearm so the wrist blends in
       ['fua', 'skin'], ['fuas', 'sh'], ['fsl', 'shirt'], ['fsls', 'sh'], ['fslhem', 'ln ln-shirt'],
+      ['fhand', 'skin hand'], ['fhandl', 'ln ln-hand'],
       ['fth', 'pants'], ['fths', 'sh'], ['fknee', 'kneecap', 'ellipse'], ['fsh', 'pants'], ['fshs', 'sh'],
       ['fsock', 'sock'], ['fshoe', 'shoe'], ['fsole', 'sole'], ['flace', 'ln ln-lace'],
     ]],
@@ -1130,8 +1155,8 @@
     ['near', [
       ['nth', 'pants'], ['nths', 'sh'], ['nthh', 'hi'], ['nseam', 'ln ln-seam'], ['ncrease', 'ln ln-crease'], ['nknee', 'kneecap', 'ellipse'],
       ['nsh', 'pants'], ['nshs', 'sh'], ['nshh', 'hi'], ['nsock', 'sock'], ['nsocks', 'sh'], ['nshoe', 'shoe'], ['nsole', 'sole'], ['nlace', 'ln ln-lace'],
-      ['nhand', 'skin'], ['nhandl', 'ln ln-skin'], // hand under the forearm so the wrist blends in
       ['nua', 'skin'], ['nuas', 'sh'], ['nuah', 'hi'], ['nsl', 'shirt'], ['nsls', 'sh'], ['nslh', 'hi'], ['nslhem', 'ln ln-shirt'],
+      ['nhand', 'skin hand'], ['nhandl', 'ln ln-hand'],
     ]],
   ];
   function buildFigure(fig, ex) {
