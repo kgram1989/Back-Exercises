@@ -1438,6 +1438,41 @@
 
   // ---------- Timeline ----------
   const MOVE_SCALE = 1.6; // movements play slower than the raw timings so they are easy to follow
+  // Spoken-line lengths come from voice/clips.json ({text: [offset, bytes, seconds]}) once it has loaded.
+  let VOICE_INDEX = null;
+  const voiceParts = (text) => text.split(/(\d+)/).map((p) => p.replace(/^[.\s]+/, '').trim()).filter(Boolean);
+  function speechSeconds(text) {
+    const idx = VOICE_INDEX;
+    if (idx) {
+      if (idx[text] && idx[text][2]) return idx[text][2];
+      const parts = voiceParts(text);
+      if (parts.every((p) => idx[p] && idx[p][2])) return parts.reduce((a, p) => a + idx[p][2] + 0.04, 0);
+    }
+    return 0.3 + text.length * 0.065; // estimate, close to the recorded voice's pace
+  }
+  // Lengthen steps whose spoken line wouldn't finish before the next line starts: a slower movement, or a longer
+  // hold. Counted holds keep their stated length ("Hold for 5 seconds"); their lines are short enough to fit.
+  const SPEECH_GAP = 0.35; // seconds of breathing room after each line
+  function fitSpeech(phases, ex, plan) {
+    const segs = [];
+    for (const ph of phases) {
+      if (ph.move > 0) segs.push({ ph, part: 'move', text: speechFor({ ph, holding: false, label: ph.label, remain: ph.move }, ex, plan) });
+      segs.push({ ph, part: 'hold', text: speechFor({ ph, holding: true, label: ph.holdLabel, remain: ph.hold }, ex, plan) });
+    }
+    for (let i = 0; i < segs.length; i++) {
+      const seg = segs[i];
+      if (!seg.text) continue;
+      let j = i + 1;
+      while (j < segs.length && !segs[j].text) j++;
+      if (j >= segs.length) break;
+      let room = 0;
+      for (let k = i; k < j; k++) room += segs[k].ph[segs[k].part];
+      const short = (speechSeconds(seg.text) + SPEECH_GAP) * 1000 - room;
+      if (short <= 0) continue;
+      if (seg.part === 'move') seg.ph.move += short;
+      else if (!seg.ph.counted || seg.ph.pause) seg.ph.hold += short;
+    }
+  }
   const REST_BETWEEN = 10000; // rest before each exercise after the first, in the guided workout
   const ROUND_PAUSE = 1000;   // short pause between rounds
   function buildPhases(ex, plan, mode) {
@@ -1465,6 +1500,7 @@
     if (mode === 'card') {
       phases.push({ from: prev, to: ex.start, move: prev === ex.start ? 0 : 2500, label: 'Set complete', hold: 4000, holdLabel: 'Nice work — starting again', moveStep: -1, holdStep: -1, rep: plan.reps - 1, done: true });
     }
+    fitSpeech(phases, ex, plan);
     let t = 0;
     for (const ph of phases) { ph.t0 = t; t += ph.move + ph.hold; ph.t1 = t; }
     return { phases, total: t };
@@ -1628,7 +1664,7 @@
     };
     card.restart.setAttribute('aria-label', `Restart ${ex.name} animation`);
     card.toggle.addEventListener('click', () => setCardPlaying(card, !card.pl.playing));
-    card.restart.addEventListener('click', () => { card.pl.time = 0; card.fresh = false; setCardPlaying(card, true); });
+    card.restart.addEventListener('click', () => { hush(); card.pl.time = 0; card.fresh = false; setCardPlaying(card, true); });
     return card;
   });
 
@@ -1639,7 +1675,9 @@
   }
   function setCardPlaying(c, on) {
     if (on) {
-      cards.forEach((o) => { if (o !== c && o.pl.playing) { o.pl.playing = false; updateToggle(o); renderCard(o); } });
+      let switched = false;
+      cards.forEach((o) => { if (o !== c && o.pl.playing) { o.pl.playing = false; switched = true; updateToggle(o); renderCard(o); } });
+      if (switched) hush(); // the other card's voice stops
       if (c.fresh) { c.pl.time = 0; c.fresh = false; }
     }
     c.pl.playing = on;
@@ -1924,21 +1962,21 @@
   // Recorded voice (voice/clips.bin + clips.json, made by tools/make-voice.py). It plays through Web Audio like
   // the beeps, so it follows the phone's media output (e.g. to a TV when screen-mirroring); the browser's
   // built-in speech often stays on the phone's own speaker. Any line without clips uses built-in speech.
-  const clips = { index: null, bin: null, loading: null, playing: [] };
+  const clips = { index: null, bin: null, loading: null, playing: [], chain: Promise.resolve(), endTime: 0 };
   function loadClips() {
-    if (clips.loading || clips.index || !window.fetch) return;
+    if (clips.loading || clips.bin || !window.fetch || location.protocol === 'file:') return; // can't fetch from a saved file
     clips.loading = Promise.all([fetch('voice/clips.json').then((r) => r.ok ? r.json() : Promise.reject()),
                                  fetch('voice/clips.bin').then((r) => r.ok ? r.arrayBuffer() : Promise.reject())])
-      .then(([index, bin]) => { clips.index = index; clips.bin = bin; })
+      .then(([index, bin]) => { clips.index = index; clips.bin = bin; if (!VOICE_INDEX) { VOICE_INDEX = index; voiceTimingChanged(); } })
       .catch(() => { /* use built-in speech; try again next time a workout starts */ })
       .then(() => { clips.loading = null; });
   }
   // Clip names for a line: the whole line if recorded, otherwise the pieces between numbers plus the numbers.
   function clipsForLine(text) {
     const idx = clips.index;
-    if (!idx || !actx) return null;
+    if (!idx || !clips.bin || !actx) return null;
     if (idx[text]) return [text];
-    const parts = text.split(/(\d+)/).map((p) => p.replace(/^[.\s]+/, '').trim()).filter(Boolean);
+    const parts = voiceParts(text);
     return parts.every((p) => idx[p]) ? parts : null;
   }
   function stopClips() {
@@ -1947,7 +1985,10 @@
       try { gain.gain.setValueAtTime(gain.gain.value, t); gain.gain.linearRampToValueAtTime(0, t + 0.08); src.stop(t + 0.1); } catch (e) { /* already stopped */ }
     }
     clips.playing = [];
+    clips.endTime = 0;
   }
+  // Lines play one after another: a new line waits for the one still speaking instead of cutting it off.
+  // Pause, Back, Skip and closing the workout still stop speech at once (hush).
   function playClips(names, token) {
     const decode = (name) => {
       const [off, len] = clips.index[name];
@@ -1956,52 +1997,62 @@
     };
     return Promise.all(names.map(decode)).then((bufs) => {
       if (token !== sayToken || !settings.voice) return;
-      let t = actx.currentTime + 0.02;
+      const now = actx.currentTime;
+      if (clips.endTime - now > 2) stopClips(); // too far behind: start fresh rather than drift
+      let t = Math.max(now + 0.02, clips.endTime + 0.12);
       for (const buf of bufs) {
         const src = actx.createBufferSource(), gain = actx.createGain();
         src.buffer = buf;
         src.connect(gain).connect(actx.destination);
         src.start(t);
-        clips.playing.push({ src, gain });
+        const entry = { src, gain };
+        src.onended = () => { clips.playing = clips.playing.filter((x) => x !== entry); };
+        clips.playing.push(entry);
         t += buf.duration + 0.04;
       }
+      clips.endTime = t - 0.04;
     });
   }
   function say(text) {
     live.textContent = text;
     if (!settings.voice) return;
-    if (clips.loading) { // the first line of a workout: give the clips up to 3 s to arrive
-      const token = ++sayToken;
-      stopClips();
+    const token = sayToken;
+    if (clips.loading) { // the first lines of a workout: give the clips up to 3 s to arrive
       Promise.race([clips.loading, new Promise((r) => setTimeout(r, 3000))])
-        .then(() => { if (token === sayToken && settings.voice) sayNow(text); });
+        .then(() => { if (token === sayToken && settings.voice) sayNow(text, token); });
       return;
     }
-    sayNow(text);
+    sayNow(text, token);
   }
-  function sayNow(text) {
+  function sayNow(text, token) {
     const names = clipsForLine(text);
     if (names) {
-      const token = ++sayToken;
-      stopClips();
-      try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) { /* ignore */ }
-      playClips(names, token).catch(() => { if (token === sayToken) speak(text); });
+      clips.chain = clips.chain.then(() => playClips(names, token)).catch(() => { if (token === sayToken) speak(text); });
       return;
     }
-    stopClips();
     speak(text);
   }
   function speak(text) {
     if (!('speechSynthesis' in window)) return;
     try {
-      speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text.replace(/[—–]/g, ', '));
       u.rate = 0.95;
       u.lang = document.documentElement.lang || 'en';
-      // Some browsers drop an utterance queued in the same tick as cancel(); speak on the next tick.
-      const token = ++sayToken;
+      // Built-in speech queues lines one after another; hush() cancels the queue.
+      const token = sayToken;
       setTimeout(() => { if (token === sayToken && settings.voice) speechSynthesis.speak(u); }, 30);
     } catch (e) { /* speech unavailable */ }
+  }
+  // Steps are timed to the recorded voice once its clip lengths (voice/clips.json) arrive; until then, estimates.
+  function voiceTimingChanged() {
+    applyPlan();
+    if (dlg.open) { W.totals = EXERCISES.map((ex) => buildPhases(ex, planFor(ex), 'workout').total); W.grand = W.totals.reduce((a, b) => a + b, 0); }
+  }
+  function loadVoiceIndex() {
+    if (!window.fetch || VOICE_INDEX || location.protocol === 'file:') return;
+    fetch('voice/clips.json').then((r) => (r.ok ? r.json() : null))
+      .then((idx) => { if (idx && !VOICE_INDEX) { VOICE_INDEX = idx; voiceTimingChanged(); } })
+      .catch(() => { /* keep the estimates */ });
   }
   const hush = () => { sayToken++; stopClips(); try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) { /* ignore */ } };
   let wakeLock = null;
@@ -2071,10 +2122,10 @@
   function speechFor(s, ex, plan) {
     if (s.ph.done) return !s.holding || s.ph.move === 0 ? 'Set complete. Starting again.' : ''; // exercise cards loop
     if (s.ph.rest) return `Rest for ${Math.max(1, Math.ceil(s.remain / 1000))} seconds. Next: ${ex.name}.`;
-    if (s.ph.pause) return ''; // short pause between rounds: the next round announces itself
+    if (s.ph.pause) return `Round ${s.ph.rep + 2}`; // said in the short pause before each new round
     if (s.ph.intro) return `Get ready: ${ex.name}. ${plan.reps} ${ex.unit}.`;
     if (s.holding && s.ph.move > 0 && s.ph.holdLabel === s.ph.label) return ''; // already said when the move began
-    if (!s.holding) return s.ph.first && s.ph.rep > 0 ? `Round ${s.ph.rep + 1}. ${s.label}` : s.label;
+    if (!s.holding) return s.label;
     if (!s.ph.counted) return s.label;
     const secs = Math.max(1, Math.ceil(s.remain / 1000));
     const label = s.label;
@@ -2144,8 +2195,8 @@
   }
   $('startWorkout').addEventListener('click', openWorkout);
   wk.play.addEventListener('click', () => setRunning(!W.running));
-  const goPrev = () => loadExercise(W.pl.time > 3000 ? W.idx : Math.max(0, W.idx - 1));
-  const goNext = () => { if (W.idx < EXERCISES.length - 1) loadExercise(W.idx + 1); else finishWorkout(); };
+  const goPrev = () => { hush(); loadExercise(W.pl.time > 3000 ? W.idx : Math.max(0, W.idx - 1)); };
+  const goNext = () => { hush(); if (W.idx < EXERCISES.length - 1) loadExercise(W.idx + 1); else finishWorkout(); };
   $('wkPrev').addEventListener('click', goPrev);
   $('wkNext').addEventListener('click', goNext);
   // TV remote and keyboard control inside the workout.
@@ -2208,6 +2259,7 @@
   applyTheme();
   applyTV();
   updateToggles();
+  loadVoiceIndex();
   renderTracker();
   applyPlan();
   cards.forEach(resetCard);
