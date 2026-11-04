@@ -1909,9 +1909,78 @@
   }
   const live = document.getElementById('wkLive');
   let sayToken = 0;
+  // Recorded voice (voice/clips.bin + clips.json, made by tools/make-voice.py). It plays through Web Audio like
+  // the beeps, so it follows the phone's media output (e.g. to a TV when screen-mirroring); the browser's
+  // built-in speech often stays on the phone's own speaker. Any line without clips uses built-in speech.
+  const clips = { index: null, bin: null, loading: null, playing: [] };
+  function loadClips() {
+    if (clips.loading || clips.index || !window.fetch) return;
+    clips.loading = Promise.all([fetch('voice/clips.json').then((r) => r.ok ? r.json() : Promise.reject()),
+                                 fetch('voice/clips.bin').then((r) => r.ok ? r.arrayBuffer() : Promise.reject())])
+      .then(([index, bin]) => { clips.index = index; clips.bin = bin; })
+      .catch(() => { /* use built-in speech; try again next time a workout starts */ })
+      .then(() => { clips.loading = null; });
+  }
+  // Clip names for a line: the whole line if recorded, otherwise the pieces between numbers plus the numbers.
+  function clipsForLine(text) {
+    const idx = clips.index;
+    if (!idx || !actx) return null;
+    if (idx[text]) return [text];
+    const parts = text.split(/(\d+)/).map((p) => p.replace(/^[.\s]+/, '').trim()).filter(Boolean);
+    return parts.every((p) => idx[p]) ? parts : null;
+  }
+  function stopClips() {
+    const t = actx ? actx.currentTime : 0;
+    for (const { src, gain } of clips.playing) {
+      try { gain.gain.setValueAtTime(gain.gain.value, t); gain.gain.linearRampToValueAtTime(0, t + 0.08); src.stop(t + 0.1); } catch (e) { /* already stopped */ }
+    }
+    clips.playing = [];
+  }
+  function playClips(names, token) {
+    const decode = (name) => {
+      const [off, len] = clips.index[name];
+      const data = clips.bin.slice(off, off + len); // decodeAudioData takes ownership of its buffer
+      return new Promise((res, rej) => actx.decodeAudioData(data, res, rej));
+    };
+    return Promise.all(names.map(decode)).then((bufs) => {
+      if (token !== sayToken || !settings.voice) return;
+      let t = actx.currentTime + 0.02;
+      for (const buf of bufs) {
+        const src = actx.createBufferSource(), gain = actx.createGain();
+        src.buffer = buf;
+        src.connect(gain).connect(actx.destination);
+        src.start(t);
+        clips.playing.push({ src, gain });
+        t += buf.duration + 0.04;
+      }
+    });
+  }
   function say(text) {
     live.textContent = text;
-    if (!settings.voice || !('speechSynthesis' in window)) return;
+    if (!settings.voice) return;
+    if (clips.loading) { // the first line of a workout: give the clips up to 3 s to arrive
+      const token = ++sayToken;
+      stopClips();
+      Promise.race([clips.loading, new Promise((r) => setTimeout(r, 3000))])
+        .then(() => { if (token === sayToken && settings.voice) sayNow(text); });
+      return;
+    }
+    sayNow(text);
+  }
+  function sayNow(text) {
+    const names = clipsForLine(text);
+    if (names) {
+      const token = ++sayToken;
+      stopClips();
+      try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) { /* ignore */ }
+      playClips(names, token).catch(() => { if (token === sayToken) speak(text); });
+      return;
+    }
+    stopClips();
+    speak(text);
+  }
+  function speak(text) {
+    if (!('speechSynthesis' in window)) return;
     try {
       speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text.replace(/[—–]/g, ', '));
@@ -1922,7 +1991,7 @@
       setTimeout(() => { if (token === sayToken && settings.voice) speechSynthesis.speak(u); }, 30);
     } catch (e) { /* speech unavailable */ }
   }
-  const hush = () => { sayToken++; try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) { /* ignore */ } };
+  const hush = () => { sayToken++; stopClips(); try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) { /* ignore */ } };
   let wakeLock = null;
   async function lockScreen() {
     try { if ('wakeLock' in navigator && !wakeLock) { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => { wakeLock = null; }); } } catch (e) { wakeLock = null; }
@@ -1953,7 +2022,7 @@
   function setRunning(on) {
     W.running = on;
     wk.play.innerHTML = on ? `${ICON_PAUSE}Pause` : `${ICON_PLAY}Resume`;
-    if (on) { ensureAudio(); lockScreen(); W.lastKey = ''; } else { hush(); unlockScreen(); }
+    if (on) { ensureAudio(); loadClips(); lockScreen(); W.lastKey = ''; } else { hush(); unlockScreen(); }
     if (W.pl) renderWorkout();
   }
   function openWorkout() {
