@@ -1438,9 +1438,14 @@
 
   // ---------- Timeline ----------
   const MOVE_SCALE = 1.6; // movements play slower than the raw timings so they are easy to follow
+  const REST_BETWEEN = 10000; // rest before each exercise after the first, in the guided workout
+  const ROUND_PAUSE = 1000;   // short pause between rounds
   function buildPhases(ex, plan, mode) {
     const phases = [];
     let prev = ex.start;
+    if (mode === 'workout' && EXERCISES.indexOf(ex) > 0) {
+      phases.push({ from: prev, to: prev, move: 0, label: '', hold: REST_BETWEEN, holdLabel: 'Rest', moveStep: -1, holdStep: -1, rep: 0, rest: true, counted: true });
+    }
     if (mode === 'workout') {
       phases.push({ from: prev, to: prev, move: 0, label: '', hold: 5000, holdLabel: `Get ready: ${ex.name}`, moveStep: -1, holdStep: -1, rep: 0, intro: true, counted: true });
     }
@@ -1450,6 +1455,7 @@
       prev = to;
     }
     for (let r = 0; r < plan.reps; r++) {
+      if (r > 0) phases.push({ from: prev, to: prev, move: 0, label: '', hold: ROUND_PAUSE, holdLabel: 'Next round', moveStep: -1, holdStep: -1, rep: r - 1, pause: true });
       ex.cycle.forEach((seg, i) => {
         const hold = seg.hold === 'H' ? plan.hold * 1000 : seg.hold;
         phases.push({ ...seg, hold, move: seg.move * MOVE_SCALE, from: prev, rep: r, first: i === 0, counted: hold >= 3000 && seg.holdLabel !== 'Rest' });
@@ -1982,7 +1988,9 @@
   }
   // What to say when a phase starts (or when resuming mid-phase). Returns '' for nothing.
   function speechFor(s, ex, plan) {
-    if (s.ph.intro) return `Next: ${ex.name}. ${plan.reps} ${ex.unit}.`;
+    if (s.ph.rest) return `Rest for ${Math.max(1, Math.ceil(s.remain / 1000))} seconds. Next: ${ex.name}.`;
+    if (s.ph.pause) return ''; // short pause between rounds: the next round announces itself
+    if (s.ph.intro) return `Get ready: ${ex.name}. ${plan.reps} ${ex.unit}.`;
     if (s.holding && s.ph.move > 0 && s.ph.holdLabel === s.ph.label) return ''; // already said when the move began
     if (!s.holding) return s.ph.first && s.ph.rep > 0 ? `Round ${s.ph.rep + 1}. ${s.label}` : s.label;
     if (!s.ph.counted) return s.label;
@@ -2019,10 +2027,10 @@
       if (W.running) {
         const text = speechFor(s, ex, pl.plan);
         if (text) say(text);
-        if (!s.holding || s.ph.move === 0) beep(990, 0.12);
+        if ((!s.holding || s.ph.move === 0) && !s.ph.pause) beep(990, 0.12);
       }
     }
-    const where = s.ph.intro ? 'Get ready' : s.ph.setup ? 'Setting up' : `Round ${s.ph.rep + 1} of ${pl.plan.reps}`;
+    const where = s.ph.rest ? 'Take a short break' : s.ph.intro ? 'Get ready' : s.ph.setup ? 'Setting up' : `Round ${s.ph.rep + 1} of ${pl.plan.reps}`;
     wk.sub.textContent = where + (W.running ? '' : ' · paused');
     const secLeft = Math.max(1, Math.ceil(s.remain / 1000));
     const counting = s.holding && s.ph.hold >= 2000;
