@@ -1964,7 +1964,7 @@
   // built-in speech often stays on the phone's own speaker. Any line without clips uses built-in speech.
   const clips = { index: null, bin: null, loading: null, playing: [], chain: Promise.resolve(), endTime: 0 };
   function loadClips() {
-    if (clips.loading || clips.bin || !window.fetch) return;
+    if (clips.loading || clips.bin || !window.fetch || location.protocol === 'file:') return; // can't fetch from a saved file
     clips.loading = Promise.all([fetch('voice/clips.json').then((r) => r.ok ? r.json() : Promise.reject()),
                                  fetch('voice/clips.bin').then((r) => r.ok ? r.arrayBuffer() : Promise.reject())])
       .then(([index, bin]) => { clips.index = index; clips.bin = bin; if (!VOICE_INDEX) { VOICE_INDEX = index; voiceTimingChanged(); } })
@@ -2049,7 +2049,7 @@
     if (dlg.open) { W.totals = EXERCISES.map((ex) => buildPhases(ex, planFor(ex), 'workout').total); W.grand = W.totals.reduce((a, b) => a + b, 0); }
   }
   function loadVoiceIndex() {
-    if (!window.fetch || VOICE_INDEX) return;
+    if (!window.fetch || VOICE_INDEX || location.protocol === 'file:') return;
     fetch('voice/clips.json').then((r) => (r.ok ? r.json() : null))
       .then((idx) => { if (idx && !VOICE_INDEX) { VOICE_INDEX = idx; voiceTimingChanged(); } })
       .catch(() => { /* keep the estimates */ });
