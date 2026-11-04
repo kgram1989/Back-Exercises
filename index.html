@@ -678,7 +678,7 @@
   // ---------- Body model ----------
   const L = { torso: 72, neck: 10, head: 11, ua: 30, fa: 28, th: 44, sh: 42, foot: 12 };
   // Body build: how thick the torso and limbs are (1 = slim), and head / hand / foot size.
-  const BUILD = 1.3, HEAD_S = 1.12, HAND_S = 1.15, SHOE_S = 1.08;
+  const BUILD = 1.3, HEAD_S = 1.12, HAND_S = 1.25, SHOE_S = 1.08;
   const RAD = Math.PI / 180;
   const dir = (deg) => [Math.cos(deg * RAD), Math.sin(deg * RAD)];
   const add = (p, v, s) => [p[0] + v[0] * s, p[1] + v[1] * s];
@@ -701,7 +701,7 @@
     return [mid, [mid[0] + b * Math.cos(l), mid[1] + b * Math.sin(l)]];
   }
   // Overlapping action: the hips and torso lead, the head, arms and hands follow a little later.
-  const DELAY = { n: 0.12, nh: 0.08, fh: 0.1, nA: 0.08, fA: 0.1, hd: 0.1, hdw: 0.1, hg: 0.2, nf: 0.05, ff: 0.07, g: 0.1, m2: 0.1 };
+  const DELAY = { n: 0.12, nh: 0.08, fh: 0.1, nA: 0.08, fA: 0.1, hd: 0.1, hdw: 0.1, hg: 0.25, grab: 0.15, nf: 0.05, ff: 0.07, g: 0.1, m2: 0.1 };
   // x is the linear progress (0..1) of the move; each field eases on its own slightly delayed clock.
   function lerpPose(a, b, x, easeFn = ease) {
     const out = {};
@@ -764,9 +764,9 @@
 
   // A body part as a ribbon around a centre line (P points, N normals; +N side uses widths wl).
   // Returns the outline, a shadow strip on the side away from the light, and a highlight strip on the lit side.
-  function ribbon(P, N, wl, wr) {
+  function ribbon(P, N, wl, wr, lfOverride) {
     const n = P.length, mid = n >> 1;
-    const Lf = P.map((p, i) => add(p, N[i], wl[i])), Rt = P.map((p, i) => add(p, N[i], -wr[i]));
+    const Lf = lfOverride || P.map((p, i) => add(p, N[i], wl[i])), Rt = P.map((p, i) => add(p, N[i], -wr[i]));
     const tE = norm(sub(P[n - 1], P[n - 2])), tS = norm(sub(P[0], P[1]));
     const capE = add(P[n - 1], tE, (wl[n - 1] + wr[n - 1]) * 0.9);
     const capS = add(P[0], tS, (wl[0] + wr[0]) * 0.9);
@@ -853,18 +853,58 @@
   // Shoe outline in the foot's frame (u = toward the toes, v = toward the top of the foot).
   const SHOE = [[-4.3, -3.3], [-4.9, -0.6], [-4.0, 2.6], [-1.4, 4.4], [2.2, 4.3], [6.0, 3.0], [9.6, 1.6], [11.9, -0.2], [11.6, -2.4], [9.0, -3.4], [2.0, -3.5]];
 
-  function drawHand(parts, k, wrist, hdir, ant, grip) {
-    const s = dot(perpOf(hdir), ant) >= 0 ? 1 : -1; // rotate toward the palm side
-    const S = HAND_S;
-    const palmEnd = add(wrist, hdir, 5.2 * S);
-    const fdir = rotVec(hdir, s * grip * 80);
-    const tip = add(palmEnd, fdir, 5.0 * S);
-    const tdir = rotVec(hdir, s * 38);
-    const tBase = add(add(wrist, hdir, 1.6 * S), ant, 1.4 * S);
-    parts[k].setAttribute('d', capsule(add(wrist, hdir, -0.6), palmEnd, 2.5 * S, 2.4 * S) + capsule(palmEnd, tip, 2.2 * S, 1.6 * S) + capsule(tBase, add(tBase, tdir, 3.6 * S), 1.25 * S, 1.0 * S));
-    const n = perpOf(fdir);
-    parts[k + 'l'].setAttribute('d', `M${pt(add(add(palmEnd, n, 0.75), fdir, 0.4))}L${pt(add(add(tip, n, 0.6), fdir, -1.2))}M${pt(add(add(palmEnd, n, -0.75), fdir, 0.4))}L${pt(add(add(tip, n, -0.6), fdir, -1.2))}`);
+  // Hand outline in its own frame: u runs from the wrist to the fingertips, v points to the palm side.
+  // Points past the knuckles (u > 5.2) are the fingers; they curl toward the palm with the grip.
+  const HAND = [[-0.6, -2.2], [2.6, -2.6], [5.2, -2.4], [7.4, -1.9], [9.2, -1.2], [9.9, -0.2], [9.5, 0.9], [7.6, 1.5], [5.4, 1.9], [2.8, 2.5], [-0.6, 2.2]];
+  function drawHand(parts, k, wrist, hdir, palm, grip) {
+    let side = perpOf(hdir);
+    if (dot(side, palm) < 0) side = neg(side);
+    const W = loc(wrist, [hdir[0] * HAND_S, hdir[1] * HAND_S], [side[0] * HAND_S, side[1] * HAND_S]);
+    const curl = grip * 85 * RAD, c = Math.cos(curl), sn = Math.sin(curl);
+    const bend = ([u, v]) => (u <= 5.2 ? [u, v] : [5.2 + (u - 5.2) * c - v * sn, (u - 5.2) * sn + v * c]);
+    const outline = closedSpline(HAND.map(bend).map(W));
+    // Thumb: lies along the palm side and tucks over the fingers as the hand closes.
+    const tA = W([1.0, 1.9]), tB = W([lerp(4.6, 5.6, grip), lerp(3.0, 1.0, grip)]);
+    parts[k].setAttribute('d', outline + capsule(tA, tB, 1.2 * HAND_S, 0.95 * HAND_S));
+    parts[k + 'l'].setAttribute('d', `M${pt(W([5.0, -2.0]))}Q${pt(W([5.6, 0]))} ${pt(W([5.2, 1.7]))}`);
+    parts[k + 'l'].setAttribute('opacity', clamp01(grip * 1.4).toFixed(2));
   }
+  // One continuous arm outline from shoulder to wrist, with a rounded elbow on the outside of the bend.
+  function armRibbon(sh, elb, hand, ant) {
+    const d1 = norm(sub(elb, sh)), d2 = norm(sub(hand, elb));
+    let n1 = perpOf(d1); if (dot(n1, ant) < 0) n1 = neg(n1);
+    let n2 = perpOf(d2); if (dot(n2, n1) < 0) n2 = neg(n2);
+    const P = [], N = [], wl = [], wr = [];
+    for (const f of [0, 0.2, 0.4, 0.6, 0.8]) { P.push(lerp2(sh, elb, f)); N.push(n1); wl.push(widthAt(LIMB.upper.f, f)); wr.push(widthAt(LIMB.upper.b, f)); }
+    const fold = Math.acos(Math.max(-1, Math.min(1, dot(d1, d2)))) / Math.PI; // 0 straight → 1 fully bent
+    for (const k of [0, 0.5, 1]) {
+      P.push(elb); N.push(norm(lerp2(n1, n2, k)));
+      wl.push(lerp(widthAt(LIMB.upper.f, 1), widthAt(LIMB.fore.f, 0), k) * (1 - 0.45 * fold)); // inside of the bend folds in
+      wr.push(lerp(widthAt(LIMB.upper.b, 1), widthAt(LIMB.fore.b, 0), k) * 1.04);              // elbow point
+    }
+    for (const f of [0.2, 0.4, 0.6, 0.8, 1]) { P.push(lerp2(elb, hand, f)); N.push(n2); wl.push(widthAt(LIMB.fore.f, f)); wr.push(widthAt(LIMB.fore.b, f)); }
+    // Inside of a bent elbow: both edges meet at one crease point instead of crossing over each other.
+    let Lf = null;
+    if (fold > 0.06) {
+      const a = wl[5], b = wl[7];
+      const rx = n2[0] * b - n1[0] * a, ry = n2[1] * b - n1[1] * a;    // solve d1·s − d2·u = n2·b − n1·a
+      const det = d1[0] * -d2[1] - d1[1] * -d2[0];
+      if (Math.abs(det) > 1e-3) {
+        const sx = (rx * -d2[1] - ry * -d2[0]) / det, ux = (d1[0] * ry - d1[1] * rx) / det;
+        if (Math.abs(sx) < 18 && Math.abs(ux) < 18) {
+          const X = add(add(elb, n1, a), d1, sx);
+          Lf = P.map((q, i) => {
+            const e = add(q, N[i], wl[i]);
+            if (i >= 5 && i <= 7) return X;
+            if (i < 5) return dot(sub(q, elb), d1) > sx ? X : e;
+            return dot(sub(q, elb), d2) < ux ? X : e;
+          });
+        }
+      }
+    }
+    return ribbon(P, N, wl, wr, Lf);
+  }
+  const FAR_OFF = [2, -2.2]; // the far-side limbs are drawn shifted by this much
 
   // Draw a pose. `t` is the player's own clock (null = no idle motion) so a paused figure stays still.
   function drawPose(stage, ex, p, t) {
@@ -927,32 +967,9 @@
     parts.earIn.setAttribute('d', spline([[-1.3, 1.6], [-2.9, 0.2], [-1.6, -1.6]].map(H)));
 
     const contacts = [[hip, 11], [sh, 9], [hc, 7]];
+    const legs = {};
     for (const side of ['n', 'f']) {
-      // Arm
-      const ang = p[side + 'A'];
-      let elb, hand;
-      if (ang) { elb = add(sh, dir(ang[0]), L.ua); hand = add(elb, dir(ang[1]), L.fa); }
-      else [elb, hand] = ik(sh, p[side + 'h'], L.ua, L.fa, ex.sign[side + 'h']);
-      const eOff = sub(elb, lerp2(sh, hand, 0.5));
-      const armAnt = Math.hypot(eOff[0], eOff[1]) > 1.5 ? neg(norm(eOff)) : front;
-      setRib(parts, side + 'ua', limbRibbon(sh, elb, LIMB.upper, armAnt));
-      setRib(parts, side + 'sl', limbRibbon(sh, elb, LIMB.sleeve, armAnt, -0.06, 0.46));
-      const ud = norm(sub(elb, sh)), un = perpOf(ud);
-      const hemC = add(sh, ud, L.ua * 0.46);
-      parts[side + 'slhem'].setAttribute('d', `M${pt(add(hemC, un, 5.0 * BUILD))}L${pt(add(hemC, un, -5.0 * BUILD))}`);
-      setCircle(parts[side + 'elb'], add(elb, armAnt, -1.4 * BUILD), 3.1 * BUILD);
-      setRib(parts, side + 'fa', limbRibbon(elb, hand, LIMB.fore, armAnt));
-      const fdir = norm(sub(hand, elb));
-      const a0 = angOf(fdir);
-      let diff = ((p.hd - a0 + 540) % 360) - 180;
-      if (diff > 150) diff -= 360; // a half-turn goes over the top, never through the floor
-      let ha = a0 + diff * p.hdw;
-      // Floor guard: a hand resting near the floor can't point down into it.
-      const room = clamp01((197.5 - hand[1]) / 10), sy = Math.sin(ha * RAD);
-      if (sy > room) ha = Math.cos(ha * RAD) >= 0 ? Math.asin(room) / RAD : 180 - Math.asin(room) / RAD;
-      drawHand(parts, side + 'hand', hand, dir(ha), armAnt, p.hg);
-
-      // Leg
+      // Legs first, so the hands can hold them.
       const [knee, ank] = ik(hip, p[side + 'k'], L.th, L.sh, ex.sign[side + 'k']);
       const kOff = sub(knee, lerp2(hip, ank, 0.5));
       const legAnt = Math.hypot(kOff[0], kOff[1]) > 1.5 ? norm(kOff) : front;
@@ -978,7 +995,58 @@
       parts[side + 'shoe'].setAttribute('d', closedSpline(SHOE.map(F)));
       parts[side + 'sole'].setAttribute('d', spline([[-4.5, -3.4], [2, -3.7], [9, -3.6], [11.7, -2.3]].map(F)) + spline([[11.2, -1.0], [9, -2.2], [2, -2.3], [-4.6, -2.0]].map(F), 'L') + 'Z');
       parts[side + 'lace'].setAttribute('d', `M${pt(F([2.4, 4.0]))}L${pt(F([3.6, 2.4]))}M${pt(F([4.8, 3.4]))}L${pt(F([5.9, 2.0]))}M${pt(F([8.8, -2.6]))}Q${pt(F([9.4, 0.6]))} ${pt(F([10.8, 1.0]))}`);
-      contacts.push([hand, 3.5], [ank, 4], [F([9, -3]), 4], [knee, 5], [elb, 3]);
+      // Where the hands hold this leg when hugging it: the front of the shin just below the knee (as drawn on screen).
+      const off = side === 'f' ? FAR_OFF : [0, 0];
+      const surf = add(add(knee, dSh, L.sh * 0.28), legAnt, widthAt(LIMB.shin.f, 0.28) + 0.8);
+      legs[side] = { legAnt, dSh, grab: [surf[0] + off[0], surf[1] + off[1]] };
+      contacts.push([ank, 4], [F([9, -3]), 4], [knee, 5]);
+    }
+
+    // Arms
+    const down = neg(td); // from the shoulders toward the hips
+    for (const side of ['n', 'f']) {
+      const ang = p[side + 'A'];
+      let elb, hand, target = p[side + 'h'];
+      // Hugging a knee: aim the wrist at the front of the shin so the hand wraps across it.
+      let grabDir = null, grabPalm = null;
+      if (!ang && p.grab > 0.001) {
+        const gl = legs.n, gf = legs.f, w = p.grabLeg;
+        const gpt = lerp2(gl.grab, gf.grab, w);
+        const lAnt = norm(lerp2(gl.legAnt, gf.legAnt, w)), lSh = norm(lerp2(gl.dSh, gf.dSh, w));
+        grabDir = norm(add(neg(lAnt), lSh, 0.35));
+        grabPalm = neg(lSh);
+        const own = side === 'f' ? FAR_OFF : [0, 0];
+        target = lerp2(target, [gpt[0] - own[0], gpt[1] - own[1]], p.grab);
+      }
+      if (ang) { elb = add(sh, dir(ang[0]), L.ua); hand = add(elb, dir(ang[1]), L.fa); }
+      else [elb, hand] = ik(sh, target, L.ua, L.fa, ex.sign[side + 'h']);
+      // The arm's front (biceps side) turns with the arm: front of the body when the arm hangs toward the hips.
+      const ud0 = norm(sub(elb, sh));
+      const raise = Math.atan2(down[0] * ud0[1] - down[1] * ud0[0], dot(down, ud0)) / RAD;
+      const armAnt = rotVec(front, raise);
+      // Elbows only bend one way: if the solution bends backwards, keep the arm straight instead.
+      if (!ang && dot(norm(sub(hand, elb)), armAnt) < -0.09) {
+        const dT = norm(sub(target, sh));
+        elb = add(sh, dT, L.ua); hand = add(elb, dT, L.fa);
+      }
+      setRib(parts, side + 'ua', armRibbon(sh, elb, hand, armAnt));
+      setRib(parts, side + 'sl', limbRibbon(sh, elb, LIMB.sleeve, armAnt, -0.06, 0.46));
+      const ud = norm(sub(elb, sh)), un = perpOf(ud);
+      const hemC = add(sh, ud, L.ua * 0.46);
+      parts[side + 'slhem'].setAttribute('d', `M${pt(add(hemC, un, 5.0 * BUILD))}L${pt(add(hemC, un, -5.0 * BUILD))}`);
+      const fdir = norm(sub(hand, elb));
+      const a0 = angOf(fdir);
+      let diff = ((p.hd - a0 + 540) % 360) - 180;
+      if (diff > 150) diff -= 360; // a half-turn goes over the top, never through the floor
+      let ha = a0 + diff * p.hdw;
+      if (grabDir) { let gd = ((angOf(grabDir) - ha + 540) % 360) - 180; ha += gd * p.grab; }
+      // Floor guard: a hand resting near the floor can't point down into it.
+      const room = clamp01((197.5 - hand[1]) / 10), sy = Math.sin(ha * RAD);
+      if (sy > room) ha = Math.cos(ha * RAD) >= 0 ? Math.asin(room) / RAD : 180 - Math.asin(room) / RAD;
+      const palm = grabPalm && p.grab > 0.5 ? grabPalm : armAnt;
+      drawHand(parts, side + 'hand', hand, dir(ha), palm, p.hg);
+      (stage.arms || (stage.arms = {}))[side] = { sh, elb, hand, ant: armAnt }; // kept for checks
+      contacts.push([hand, 3.5], [elb, 3]);
     }
 
     // Soft contact shadows: darker the closer each body part is to the floor.
@@ -1023,8 +1091,8 @@
   // Builds the figure's SVG elements, back to front, and returns them keyed by name.
   const FIG_LAYERS = [
     ['far', [
-      ['fua', 'skin'], ['fuas', 'sh'], ['fsl', 'shirt'], ['fsls', 'sh'], ['fslhem', 'ln ln-shirt'], ['felb', 'skin', 'circle'],
-      ['ffa', 'skin'], ['ffas', 'sh'], ['fhand', 'skin'], ['fhandl', 'ln ln-skin'],
+      ['fua', 'skin'], ['fuas', 'sh'], ['fsl', 'shirt'], ['fsls', 'sh'], ['fslhem', 'ln ln-shirt'],
+      ['fhand', 'skin'], ['fhandl', 'ln ln-skin'],
       ['fth', 'pants'], ['fths', 'sh'], ['fknee', 'kneecap', 'ellipse'], ['fsh', 'pants'], ['fshs', 'sh'],
       ['fsock', 'sock'], ['fshoe', 'shoe'], ['fsole', 'sole'], ['flace', 'ln ln-lace'],
     ]],
@@ -1039,8 +1107,8 @@
     ['near', [
       ['nth', 'pants'], ['nths', 'sh'], ['nthh', 'hi'], ['nseam', 'ln ln-seam'], ['ncrease', 'ln ln-crease'], ['nknee', 'kneecap', 'ellipse'],
       ['nsh', 'pants'], ['nshs', 'sh'], ['nshh', 'hi'], ['nsock', 'sock'], ['nsocks', 'sh'], ['nshoe', 'shoe'], ['nsole', 'sole'], ['nlace', 'ln ln-lace'],
-      ['nua', 'skin'], ['nuas', 'sh'], ['nuah', 'hi'], ['nelb', 'skin', 'circle'], ['nsl', 'shirt'], ['nsls', 'sh'], ['nslh', 'hi'], ['nslhem', 'ln ln-shirt'],
-      ['nfa', 'skin'], ['nfas', 'sh'], ['nfah', 'hi'], ['nhand', 'skin'], ['nhandl', 'ln ln-skin'],
+      ['nua', 'skin'], ['nuas', 'sh'], ['nuah', 'hi'], ['nsl', 'shirt'], ['nsls', 'sh'], ['nslh', 'hi'], ['nslhem', 'ln ln-shirt'],
+      ['nhand', 'skin'], ['nhandl', 'ln ln-skin'],
     ]],
   ];
   function buildFigure(fig, ex) {
@@ -1078,10 +1146,10 @@
 
   // ---------- Exercises ----------
   // Pose fields: hx,hy hip; t torso angle (deg, 0 = right, 90 = down); b spine bend; n neck angle;
-  // nh/fh hand targets; nk/fk ankle targets; nf/ff foot angles; g/m2 muscle highlights; pt pelvis tilt; a1/a2 arrow cues;
+  // nh/fh hand targets; grab/grabLeg hug the near (0) or far (1) leg's shin; nk/fk ankle targets; nf/ff foot angles; g/m2 muscle highlights; pt pelvis tilt; a1/a2 arrow cues;
   // bl/bt lower/upper back bend (from b); hg hand grip 0..1; hd/hdw hand angle and how much it overrides the forearm.
   const P = (o, extra) => Object.assign({}, o, extra || {});
-  const base = { b: 0, g: 0, pt: 0, a1: 0, a2: 0, m2: 0, hg: 0.2, hd: 0, hdw: 0 };
+  const base = { b: 0, g: 0, pt: 0, a1: 0, a2: 0, m2: 0, hg: 0.2, hd: 0, hdw: 0, grab: 0, grabLeg: 0 };
   const supineFlat = P(base, { hx: 210, hy: 189.5, t: 180, n: 190, nh: [195, 193], fh: [195, 193], nk: [296, 193], fk: [296, 193], nf: -70, ff: -70 });
   const supineBent = P(base, { hx: 210, hy: 189.5, t: 180, n: 190, nh: [195, 194], fh: [195, 194], nk: [266, 192], fk: [266, 192], nf: 0, ff: 0 });
   const prone      = P(base, { hx: 220, hy: 188.5, t: 180, n: 187, nh: [205, 194], fh: [205, 194], nk: [306, 193], fk: [306, 193], nf: 15, ff: 15 });
@@ -1098,8 +1166,9 @@
       labels: { g: 'Stretch: lower back, buttock' },
       poses: {
         rest: supineFlat,
-        near: P(supineFlat, { nk: [218, 180], nf: -40, nh: [186, 163], fh: [186, 163], g: 1, hg: 1 }),
-        far:  P(supineFlat, { fk: [218, 180], ff: -40, nh: [186, 163], fh: [186, 163], g: 1, hg: 1 }),
+        // Knee pulled right up over the chest so the elbows bend and the hands wrap the shin.
+        near: P(supineFlat, { nk: [212, 172], nf: -55, g: 1, hg: 0.75, grab: 1, grabLeg: 0 }),
+        far:  P(supineFlat, { fk: [212, 172], ff: -55, g: 1, hg: 0.75, grab: 1, grabLeg: 1 }),
       },
       start: 'rest',
       cycle: [
@@ -1242,8 +1311,9 @@
         // Arms use joint angles [upper arm, forearm] so the forearm swings up and over the chest.
         flat: P(supineFlat, { nA: [0, 0], fA: [0, 0] }),
         bent: P(supineBent, { nA: [0, 0], fA: [0, 0] }),
-        down: P(supineBent, { nA: [1.2, -153.3], fA: [1.2, -153.3], hg: 0.5 }),
-        up:   P(supineBent, { nA: [16.2, -138.3], fA: [16.2, -138.3], t: 195, bl: 0, bt: 9, n: 206, g: 1, a1: 1, hg: 0.5 }),
+        // Crossed arms: hands rest flat on the chest, fingers toward the opposite shoulder.
+        down: P(supineBent, { nA: [1.2, -153.3], fA: [1.2, -153.3], hg: 0.15, hd: 182, hdw: 1 }),
+        up:   P(supineBent, { nA: [16.2, -138.3], fA: [16.2, -138.3], t: 195, bl: 0, bt: 9, n: 206, g: 1, a1: 1, hg: 0.15, hd: 197, hdw: 1 }),
       },
       start: 'flat',
       cycle: [
