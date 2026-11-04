@@ -794,7 +794,9 @@
   // ---------- Body model ----------
   const L = { torso: 72, neck: 10, head: 11, ua: 30, fa: 28, th: 44, sh: 42, foot: 12 };
   // Body build: how thick the torso and limbs are (1 = slim), and head / hand / foot size.
-  const BUILD = 1.3, HEAD_S = 1.12, HAND_S = 1.25, SHOE_S = 1.08;
+  // Average build: limbs (BUILD), and a fuller chest and belly (TORSO_F) than back (TORSO_B), so a figure lying
+  // on its back still rests on the mat.
+  const BUILD = 1.45, TORSO_F = 1.62, TORSO_B = 1.42, HEAD_S = 1.14, HAND_S = 1.28, SHOE_S = 1.1;
   const RAD = Math.PI / 180;
   const dir = (deg) => [Math.cos(deg * RAD), Math.sin(deg * RAD)];
   const add = (p, v, s) => [p[0] + v[0] * s, p[1] + v[1] * s];
@@ -931,8 +933,8 @@
   const cub = (H, C1, C2, S, t) => { const u = 1 - t; return [0, 1].map((k) => u * u * u * H[k] + 3 * u * u * t * C1[k] + 3 * u * t * t * C2[k] + t * t * t * S[k]); };
   const cubD = (H, C1, C2, S, t) => { const u = 1 - t; return norm([0, 1].map((k) => 3 * u * u * (C1[k] - H[k]) + 6 * u * t * (C2[k] - C1[k]) + 3 * t * t * (S[k] - C2[k]))); };
   // Torso half-widths along the spine (0 = hips, 1 = shoulders): front (chest/belly) and back (glutes/shoulder blades).
-  const TORSO_FRONT = [[0, 7.6], [0.3, 7.2], [0.5, 7.6], [0.72, 9.0], [0.9, 8.2], [1, 6.6]].map(([t, w]) => [t, w * BUILD]);
-  const TORSO_BACK  = [[0, 9.0], [0.18, 8.0], [0.38, 6.6], [0.7, 7.4], [0.84, 8.0], [0.94, 7.4], [1, 6.6]].map(([t, w]) => [t, w * BUILD]);
+  const TORSO_FRONT = [[0, 7.6], [0.3, 7.2], [0.5, 7.6], [0.72, 9.0], [0.9, 8.2], [1, 6.6]].map(([t, w]) => [t, w * TORSO_F]);
+  const TORSO_BACK  = [[0, 9.0], [0.18, 8.0], [0.38, 6.6], [0.7, 7.4], [0.84, 8.0], [0.94, 7.4], [1, 6.6]].map(([t, w]) => [t, w * TORSO_B]);
   function torsoRibbon(g, t0, t1, breath, tilt, face) {
     const P = [], N = [], wl = [], wr = [];
     for (let i = 0; i <= 10; i++) {
@@ -2132,7 +2134,7 @@
 
   // ---------- Stage (one SVG scene) ----------
   const stageTpl = document.getElementById('stageTpl'), stageTplGym = document.getElementById('stageTplGym');
-  const VIEW_FLOOR = [50, 39, 290, 181.25], VIEW_STAND = [-8, -42, 419.2, 262]; // gym views share one shape (1.6 : 1)
+  const VIEW_FLOOR = [50, 39, 290, 181.25], VIEW_STAND = [12, -34, 393.6, 246]; // gym views share one shape (1.6 : 1)
   let uid = 0;
   function createStage(host, ex) {
     const gymScene = ex.scene === 'gym';
