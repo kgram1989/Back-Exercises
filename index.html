@@ -1643,6 +1643,7 @@
       if (c.fresh) { c.pl.time = 0; c.fresh = false; }
     }
     c.pl.playing = on;
+    if (on) { ensureAudio(); loadClips(); } else hush();
     updateToggle(c);
     renderCard(c);
   }
@@ -1658,9 +1659,20 @@
       else if (!c.pl.playing) subText = 'Paused · ' + subText;
       c.subEl.textContent = subText;
       c.stepEls.forEach((li, i) => li.classList.toggle('active', !c.fresh && i === s.step));
+      // A playing card speaks and beeps like the guided workout.
+      if (c.pl.playing && !c.fresh && !dlg.open) {
+        const text = speechFor(s, c.ex, c.pl.plan);
+        if (text) say(text);
+        if ((!s.holding || s.ph.move === 0) && !s.ph.pause) beep(990, 0.12);
+      }
     }
     c.countEl.textContent = !c.fresh && s.holding && s.ph.hold >= 2000 ? Math.max(1, Math.ceil(s.remain / 1000)) : '';
     setRing(c.progEl, c.fresh ? 1 : s.frac, c.fresh || s.holding);
+    const secLeft = Math.max(1, Math.ceil(s.remain / 1000));
+    if (c.pl.playing && !c.fresh && !dlg.open && s.holding && s.ph.counted && secLeft <= 3) {
+      const bk = `${key}|${secLeft}`;
+      if (bk !== c.beepKey) { c.beepKey = bk; beep(660, 0.1); }
+    }
   }
 
   // ---------- Plan UI ----------
@@ -2057,6 +2069,7 @@
   }
   // What to say when a phase starts (or when resuming mid-phase). Returns '' for nothing.
   function speechFor(s, ex, plan) {
+    if (s.ph.done) return !s.holding || s.ph.move === 0 ? 'Set complete. Starting again.' : ''; // exercise cards loop
     if (s.ph.rest) return `Rest for ${Math.max(1, Math.ceil(s.remain / 1000))} seconds. Next: ${ex.name}.`;
     if (s.ph.pause) return ''; // short pause between rounds: the next round announces itself
     if (s.ph.intro) return `Get ready: ${ex.name}. ${plan.reps} ${ex.unit}.`;
