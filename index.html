@@ -16,6 +16,7 @@
 <meta property="og:image:alt" content="An illustrated person doing the cat–cow and bridge back exercises on a mat">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232f6f5e'/%3E%3Cpath d='M8 22c4-8 12-8 16 0' stroke='white' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='16' cy='10' r='3.5' fill='white'/%3E%3C/svg%3E">
+<script>document.documentElement.dataset.prog = /[?&]w=gym\b/.test(location.search) ? 'gym' : 'back';</script>
 <style>
   :root {
     --bg: #f6f4ef; --surface: #ffffff; --surface-2: #f0ede6; --text: #1f2321; --muted: #5d6460; --border: #e2ddd3;
@@ -114,6 +115,27 @@
   .week .bar i { position: absolute; left: 0; right: 0; bottom: 0; background: var(--accent); border-radius: 6px 6px 0 0; }
   .week .is-today { color: var(--text); font-weight: 700; }
 
+  html[data-prog="gym"] [data-prog="back"], html:not([data-prog="gym"]) [data-prog="gym"] { display: none !important; }
+  .prog-nav { display: flex; flex-wrap: wrap; gap: 4px; background: var(--surface-2); border-radius: 999px; padding: 4px; margin: 0 0 18px; width: fit-content; max-width: 100%; }
+  .prog-nav a { text-decoration: none; color: var(--muted); font-weight: 600; font-size: 0.9rem; padding: 6px 14px; border-radius: 999px; min-height: 32px; display: inline-flex; align-items: center; }
+  .prog-nav a[aria-current="page"] { background: var(--surface); color: var(--accent); box-shadow: 0 1px 2px rgba(0,0,0,.15); }
+  .prog-nav a:hover { color: var(--text); }
+  .prog-nav a:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .plan-sub { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 700; margin: 12px 0 6px; }
+  .plan-table.gym td:first-child { width: auto; }
+  html[data-prog="gym"] .me-grid { grid-template-columns: 1fr; }
+  html[data-prog="gym"] .plan { max-width: 760px; }
+  .plan-table.gym td { white-space: nowrap; }
+  @media (max-width: 520px) { .plan-table.gym { font-size: 0.85rem; } .plan-table.gym td, .plan-table.gym th { padding: 4px 3px; } .plan-table.gym input { width: 3em; padding: 4px; } .plan-table.gym input.wt { width: 4.4em; } .plan-table.gym td:first-child { white-space: normal; } }
+  .plan-table.gym input { width: 3.6em; }
+  .plan-table.gym input.wt { width: 5.2em; }
+  .plan-table .unit { font-size: 0.78rem; color: var(--muted); margin-left: 2px; }
+  .pick-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+  .pick-list li { display: flex; align-items: center; gap: 8px; padding: 4px 6px; border-top: 1px solid var(--border); font-size: 0.92rem; }
+  .pick-list label { flex: 1; display: flex; gap: 8px; align-items: center; cursor: pointer; }
+  .pick-list input { width: 18px; height: 18px; accent-color: var(--accent); }
+  .pick-list .from { font-size: 0.75rem; color: var(--muted); }
+  .pick-list button { min-height: 28px; padding: 2px 8px; }
   .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin: 0 0 14px; }
   .toolbar h2 { margin: 0; font-size: 1.35rem; }
   .toolbar .btns { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -197,6 +219,17 @@
     --plant: #3f7a4a; --plant-dk: #2f5d39; --pot: #8d5a3e;
   }
   .scene { shape-rendering: geometricPrecision; }
+  /* gym equipment */
+  :root { --metal: #8c969d; --metal-lo: #636c72; --metal-hi: #c9d0d4; --pad: #33383c; --pad-hi: #50575d; --iron: #2b2f33; --iron-hi: #5a6167; --clock: #fbf8f2; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --metal: #6f797f; --metal-lo: #4c5459; --metal-hi: #949ea4; --pad: #121517; --pad-hi: #2c3236; --iron: #0f1113; --iron-hi: #3c4247; --clock: #2f3634; } }
+  :root[data-theme="dark"] { --metal: #6f797f; --metal-lo: #4c5459; --metal-hi: #949ea4; --pad: #121517; --pad-hi: #2c3236; --iron: #0f1113; --iron-hi: #3c4247; --clock: #2f3634; }
+  .eq-metal { fill: var(--metal); } .eq-metal-lo { fill: var(--metal-lo); } .eq-metal-hi { fill: var(--metal-hi); }
+  .eq-pad { fill: var(--pad); } .eq-pad-hi { fill: var(--pad-hi); } .eq-iron { fill: var(--iron); } .eq-iron-hi { fill: var(--iron-hi); }
+  .eq-cable { fill: none; stroke: var(--iron); stroke-width: 0.8; stroke-linecap: round; }
+  .eq-edge { stroke: rgba(0, 0, 0, 0.25); stroke-width: 0.4; stroke-linejoin: round; }
+  .clock-face { fill: var(--clock); stroke: var(--metal-lo); stroke-width: 1.4; } .clock-hand { stroke: var(--iron); stroke-width: 1.1; stroke-linecap: round; fill: none; }
+  .clock-tick { stroke: var(--metal-lo); stroke-width: 0.8; }
+  .fig .db { fill: var(--iron); stroke: rgba(255, 255, 255, 0.14); stroke-width: 0.5; fill-rule: nonzero; }
   .fig .skin, .fig .shirt, .fig .pants, .fig .shoe, .fig .sock, .fig .hair { stroke: rgba(0, 0, 0, 0.22); stroke-width: 0.4; stroke-linejoin: round; }
   .skin { fill: var(--skin); } .far .skin { fill: var(--skin-far); }
   .shirt { fill: var(--shirt); } .far .shirt { fill: var(--shirt-far); }
@@ -329,6 +362,7 @@
   html.tv #startWorkout { font-size: 1.25rem; min-height: 3.4rem; padding: 0.6rem 1.8rem; }
   html.tv #printBtn { display: none; }
   html.tv .wrap { display: flex; flex-direction: column; }
+  html.tv .prog-nav { order: -3; }
   html.tv .site-head { order: -2; }
   html.tv .toolbar { order: -1; margin-bottom: 1.4rem; }
   html.tv button svg { width: 0.9em; height: 0.9em; }
@@ -404,10 +438,15 @@
   </defs>
 </svg>
 <div class="wrap">
+  <nav class="prog-nav" aria-label="Choose a page">
+    <a href="./" data-prog-link="back">Back exercises</a>
+    <a href="./?w=gym" data-prog-link="gym">Gym workout</a>
+  </nav>
   <header class="site-head">
     <div>
-      <h1>Back Exercises</h1>
-      <p class="lede">Seven exercises to strengthen your trunk and keep your lower back flexible. Watch each one, or press <strong>Start workout</strong> to be guided through them one at a time with spoken cues.</p>
+      <h1 id="pageTitle">Back Exercises</h1>
+      <p class="lede" data-prog="gym">A full-body gym plan with two workouts, A and B, of eight exercises each, 3 sets per exercise. Goal: lose fat, build muscle and keep your energy up through the day. Watch each exercise, or press <strong>Start workout</strong> for a guided session with rest timers and spoken cues.</p>
+      <p class="lede" data-prog="back">Seven exercises to strengthen your trunk and keep your lower back flexible. Watch each one, or press <strong>Start workout</strong> to be guided through them one at a time with spoken cues.</p>
     </div>
     <div class="head-btns">
       <button type="button" class="tv-btn" id="tvBtn" aria-pressed="false">
@@ -419,7 +458,22 @@
     </div>
   </header>
 
-  <section class="info-grid" aria-label="How often and safety">
+  <section class="info-grid" aria-label="Warm-up, cardio and safety" data-prog="gym">
+    <div class="panel">
+      <h2>Around the workout</h2>
+      <ul>
+        <li><strong>Warm up and cool down:</strong> rower for 3&ndash;5 minutes, or cardio of your choice.</li>
+        <li><strong>Cardio:</strong> elliptical, treadmill, rower or bike, 3&ndash;5 days a week for 20&ndash;35 minutes, on its own or after weights.</li>
+        <li><strong>Flexibility:</strong> lower back holds, hip flexor stretch and foam roller.</li>
+        <li>Alternate Workout A and Workout B.</li>
+      </ul>
+    </div>
+    <div class="panel warn" role="note">
+      <h2>Before you start</h2>
+      <p style="margin:0">Pick a weight you can lift with good form for every rep, and breathe out as you push or pull. <strong>Stop right away</strong> if you feel sharp pain. If you have back pain, check with your provider first and keep doing your back exercises.</p>
+    </div>
+  </section>
+  <section class="info-grid" aria-label="How often and safety" data-prog="back">
     <div class="panel">
       <h2>How often</h2>
       <ul>
@@ -438,19 +492,30 @@
   <section class="me-grid" aria-label="Your plan and progress">
     <div class="panel plan">
       <h2 id="planH">Your plan</h2>
+      <div data-prog="gym">
+        <div class="plan-sub" id="wkSelH">Workout</div>
+        <div class="seg" role="radiogroup" aria-labelledby="wkSelH" id="workoutSeg"></div>
+        <div id="pickBox" hidden>
+          <ul class="pick-list" id="pickList"></ul>
+          <p class="hint">Tick the exercises you want and use the arrows to change the order.</p>
+        </div>
+        <div class="plan-sub" id="repSelH">Reps</div>
+      </div>
       <div class="seg" role="radiogroup" aria-labelledby="planH" id="levelSeg">
         <button type="button" role="radio" data-level="beginner">Beginner</button>
         <button type="button" role="radio" data-level="standard">Standard</button>
         <button type="button" role="radio" data-level="max">Max</button>
         <button type="button" role="radio" data-level="custom">Custom</button>
       </div>
-      <table class="plan-table">
-        <thead><tr><th scope="col">Exercise</th><th scope="col">Repeats</th><th scope="col">Hold (seconds)</th></tr></thead>
+      <table class="plan-table" id="planTable">
+        <thead id="planHead"><tr><th scope="col">Exercise</th><th scope="col">Repeats</th><th scope="col">Hold (seconds)</th></tr></thead>
         <tbody id="planBody"></tbody>
       </table>
-      <p class="hint">The ranges come from your handout. Pick the numbers your provider told you &mdash; typing a number switches to Custom. Saved on this device.</p>
+      <div class="row" data-prog="gym" style="margin-top:10px"><label>Rest between sets <select id="restSel"><option value="30">30 s</option><option value="45">45 s</option><option value="60">60 s</option><option value="90">90 s</option></select></label></div>
+      <p class="hint" data-prog="gym">Card is your trainer's numbers. 8, 10 or 12 sets every rep exercise to that count; timed exercises keep their seconds. Typing a number switches to Custom; 0 skips a set. Weight is a note for you. Saved on this device.</p>
+      <p class="hint" data-prog="back">The ranges come from your handout. Pick the numbers your provider told you &mdash; typing a number switches to Custom. Saved on this device.</p>
     </div>
-    <div class="panel">
+    <div class="panel" data-prog="back">
       <h2>Today</h2>
       <div class="today">
         <span class="big" id="todayCount">0</span><span id="todayOf">of 2 sessions</span>
@@ -477,7 +542,7 @@
 
   <main class="grid" id="grid"></main>
 
-  <section class="help">
+  <section class="help" data-prog="back">
     <div class="panel warn">
       <h2>Contact your provider if</h2>
       <ul>
@@ -651,6 +716,55 @@
         <rect class="mat-edge" x="81" y="199.3" width="248" height="0.9" rx="0.45"/>
         <g class="shadows"></g>
         <g class="fig"></g>
+      </g>
+      <g class="cues"></g>
+      <g class="inset">
+        <circle class="inset-mark" r="9"/>
+        <path class="inset-mark inset-link"/>
+        <circle class="inset-bg" r="24"/>
+        <g class="inset-view"><use class="inset-use"/></g>
+        <circle class="inset-ring" r="24"/>
+        <text class="inset-label" text-anchor="middle"></text>
+      </g>
+    </svg>
+    <div class="form-note"><b class="tag"></b><span class="txt"></span></div>
+  </div>
+</template>
+
+<template id="stageTplGym">
+  <div class="stage">
+    <svg class="scene" viewBox="50 39 290 181.25" role="img">
+      <title></title>
+      <defs><clipPath class="inset-clip"><circle r="24"/></clipPath></defs>
+      <g class="scene-root">
+        <rect class="wall" x="-120" y="-140" width="640" height="341" fill="url(#wallGrad)"/>
+        <g class="window">
+          <rect class="win-frame" x="30" y="26" width="84" height="122" rx="2"/>
+          <rect class="win-sky" x="34" y="30" width="36.5" height="55" fill="url(#skyGrad)"/>
+          <rect class="win-sky" x="73.5" y="30" width="36.5" height="55" fill="url(#skyGrad)"/>
+          <rect class="win-sky" x="34" y="89" width="36.5" height="55" fill="url(#skyGrad)"/>
+          <rect class="win-sky" x="73.5" y="89" width="36.5" height="55" fill="url(#skyGrad)"/>
+          <rect class="win-sill" x="26" y="147" width="92" height="3.4" rx="1.2"/>
+        </g>
+        <path class="beam" d="M34 150L114 150L210 201L118 201Z" fill="url(#beamGrad)"/>
+        <g class="clock">
+          <circle class="clock-face" cx="318" cy="58" r="10"/>
+          <path class="clock-tick" d="M318 49.5V51.5M318 64.5V66.5M309.5 58H311.5M324.5 58H326.5"/>
+          <path class="clock-hand" d="M318 58V52.4M318 58L322 60.4"/>
+        </g>
+        <rect class="skirting" x="-120" y="195.5" width="640" height="5.5"/>
+        <rect class="floor" x="-120" y="201" width="640" height="40"/>
+        <path class="floor-lines" d="M-120 206.5H520M-120 213H520M-120 224H520M-114 201L-345 241M-94 201L-311 241M-74 201L-276 241M-54 201L-241 241M-34 201L-206 241M-14 201L-172 241M6 201L-137 241M26 201L-102 241M46 201L-67 241M66 201L-33 241M86 201L2 241M106 201L37 241M126 201L71 241M146 201L106 241M166 201L141 241M186 201L176 241M206 201L210 241M226 201L245 241M246 201L280 241M266 201L315 241M286 201L349 241M306 201L384 241M326 201L419 241M346 201L454 241M366 201L488 241M386 201L523 241M406 201L558 241M426 201L593 241M446 201L627 241M466 201L662 241M486 201L697 241M506 201L732 241"/>
+        <g class="mat-g">
+          <path class="mat-side" d="M84 201.5h242a3 3 0 0 1 3 3v1.5a3 3 0 0 1-3 3H84a3 3 0 0 1-3-3v-1.5a3 3 0 0 1 3-3z"/>
+          <rect class="mat-top" x="81" y="199.5" width="248" height="4" rx="2"/>
+          <rect x="81" y="199.5" width="248" height="4" rx="2" fill="url(#matTex)"/>
+          <rect class="mat-edge" x="81" y="199.3" width="248" height="0.9" rx="0.45"/>
+        </g>
+        <g class="props-back"></g>
+        <g class="shadows"></g>
+        <g class="fig"></g>
+        <g class="props-front"></g>
       </g>
       <g class="cues"></g>
       <g class="inset">
@@ -945,6 +1059,33 @@
     return ribbon(P, N, wl, wr, Lf, 0.3); // short end at the wrist: the hand covers it
   }
   const FAR_OFF = [2, -2.2]; // the far-side limbs are drawn shifted by this much
+  // Limb muscle highlights: [limb, side (1 front, -1 back, 0 whole width), from, to along the limb].
+  const LIMB_MUSCLES = {
+    quads: ['thigh', 1, 0.1, 0.9], hams: ['thigh', -1, 0.1, 0.9], calves: ['shin', -1, 0.12, 0.6],
+    biceps: ['arm', 1, 0.22, 0.88], triceps: ['arm', -1, 0.22, 0.88], delts: ['arm', 0, -0.08, 0.36],
+  };
+  // A band along one side of a limb, inset from its outline (side 0: the whole width).
+  function limbBand(A, B, prof, ant, side, fa, fb, inA, inB) {
+    let N = perpOf(norm(sub(B, A)));
+    if (dot(N, ant) < 0) N = neg(N);
+    const outer = [], inner = [];
+    for (const f of FRACS) {
+      const ff = fa + (fb - fa) * f, P = lerp2(A, B, ff);
+      if (side === 0) { outer.push(add(P, N, widthAt(prof.f, ff) * 0.92)); inner.push(add(P, N, -widthAt(prof.b, ff) * 0.92)); continue; }
+      const w = widthAt(side > 0 ? prof.f : prof.b, ff), n = side > 0 ? N : neg(N);
+      outer.push(add(P, n, w - inA)); inner.push(add(P, n, w - inB));
+    }
+    return { d: spline(outer) + spline(inner.slice().reverse(), 'L') + 'Z', outer, inner };
+  }
+  // Dumbbell held in a fist: `ang` is the handle's direction on screen, `off` slides it along the handle,
+  // `endOn` (0..1) shows it end-on (handle pointing at the viewer) as a round weight.
+  function dumbbellPath(c, ang, off, endOn) {
+    const ax = dir(ang), F = loc(add(c, ax, off), ax, perpOf(ax));
+    if (endOn > 0.5) return closedSpline([0, 45, 90, 135, 180, 225, 270, 315].map((a) => F([5.2 * Math.cos(a * RAD), 5.2 * Math.sin(a * RAD)]))) +
+      closedSpline([0, 60, 120, 180, 240, 300].map((a) => F([1.7 * Math.cos(a * RAD), 1.7 * Math.sin(a * RAD)])));
+    const head = (u0, u1) => `M${pt(F([u0, -4.6]))}L${pt(F([u1, -4.6]))}Q${pt(F([u1 + 0.9, -4.6]))} ${pt(F([u1 + 0.9, -3.6]))}L${pt(F([u1 + 0.9, 3.6]))}Q${pt(F([u1 + 0.9, 4.6]))} ${pt(F([u1, 4.6]))}L${pt(F([u0, 4.6]))}Q${pt(F([u0 - 0.9, 4.6]))} ${pt(F([u0 - 0.9, 3.6]))}L${pt(F([u0 - 0.9, -3.6]))}Q${pt(F([u0 - 0.9, -4.6]))} ${pt(F([u0, -4.6]))}Z`;
+    return head(-9.6, -5.6) + head(5.6, 9.6) + `M${pt(F([-5.8, -1.2]))}L${pt(F([5.8, -1.2]))}L${pt(F([5.8, 1.2]))}L${pt(F([-5.8, 1.2]))}Z`;
+  }
 
   // Draw a pose. `t` is the player's own clock (null = no idle motion) so a paused figure stays still.
   function drawPose(stage, ex, p, t) {
@@ -1008,6 +1149,7 @@
 
     const contacts = [[hip, 11], [sh, 9], [hc, 7]];
     const legs = {};
+    const J = { hip, sh, hc, td, front, n: {}, f: {} }; // joint positions, for equipment and muscle highlights
     for (const side of ['n', 'f']) {
       // Legs first, so the hands can hold them.
       const [knee, ank] = ik(hip, p[side + 'k'], L.th, L.sh, ex.sign[side + 'k']);
@@ -1042,6 +1184,7 @@
       if (dot(shinAnt, legAnt) < 0) shinAnt = neg(shinAnt); // the shin's own front (the shinbone side)
       const surf = add(add(knee, dSh, L.sh * 0.32), shinAnt, widthAt(LIMB.shin.f, 0.32) - 6.3 * GRIP_S);
       legs[side] = { legAnt: shinAnt, dSh, grab: [surf[0] + off[0], surf[1] + off[1]] };
+      Object.assign(J[side], { knee, ank, legAnt, heel: F([-4, -3]), toe: F([11, -2]) });
       contacts.push([ank, 4], [F([9, -3]), 4], [knee, 5]);
     }
 
@@ -1061,7 +1204,9 @@
         const own = side === 'f' ? FAR_OFF : [0, 0];
         target = lerp2(target, [gpt[0] - own[0], gpt[1] - own[1]], p.grab);
       }
-      if (ang) { elb = add(sh, dir(ang[0]), L.ua); hand = add(elb, dir(ang[1]), L.fa); }
+      // Optional length factor: an arm pointing toward the viewer looks shorter (e.g. lateral raises).
+      const ls = p[side + 'Ls'] ?? 1;
+      if (ang) { elb = add(sh, dir(ang[0]), L.ua * ls); hand = add(elb, dir(ang[1]), L.fa * ls); }
       else [elb, hand] = ik(sh, target, L.ua, L.fa, ex.sign[side + 'h']);
       // The arm's front (biceps side) turns with the arm: front of the body when the arm hangs toward the hips.
       const ud0 = norm(sub(elb, sh));
@@ -1094,6 +1239,13 @@
         drawHand(parts, side + 'hand', hand, dir(ha), palm, p.hg, fdir, p.hdw);
       }
       (stage.arms || (stage.arms = {}))[side] = { sh, elb, hand, ant: armAnt }; // kept for checks
+      const grip = add(hand, dir(ha), 3.4 * HAND_S);
+      Object.assign(J[side], { elb, hand, ha, armAnt, grip });
+      const dbEl = parts[side + 'db'];
+      if (dbEl) {
+        if ((p.db || 0) > 0.02) { dbEl.setAttribute('d', dumbbellPath(grip, p.dbA || 0, p.dbO || 0, p.dbE || 0)); dbEl.setAttribute('opacity', clamp01(p.db).toFixed(2)); }
+        else dbEl.setAttribute('d', '');
+      }
       contacts.push([hand, 3.5], [elb, 3]);
     }
 
@@ -1129,9 +1281,20 @@
         const b = torsoBand(g, -0.03, 0.22, -1, 0.3, 6.0, ex.face);
         m.p.setAttribute('d', b.d);
         m.f.setAttribute('d', [1, 3, 5, 7].map((i) => `M${pt(b.outer[i])}L${pt(b.inner[Math.min(8, i + 1)])}`).join(''));
+      } else if (k === 'chest') {
+        const b = torsoBand(g, m.def.from ?? 0.68, m.def.to ?? 0.95, 1, 0.5, 4.6, ex.face);
+        m.p.setAttribute('d', b.d);
+        m.f.setAttribute('d', [0.35, 0.7].map((q) => spline(b.outer.map((o, i) => lerp2(o, b.inner[i], q)))).join(''));
+      } else if (LIMB_MUSCLES[k]) {
+        // A band on one side of a near limb (thigh, shin or upper arm), drawn over the limb.
+        const [seg, side, fa, fb] = LIMB_MUSCLES[k], j = J[m.def.side || 'n'];
+        const [A, B, prof, ant] = seg === 'thigh' ? [hip, j.knee, LIMB.thigh, j.legAnt] : seg === 'shin' ? [j.knee, j.ank, LIMB.shin, j.legAnt] : [sh, j.elb, LIMB.upper, j.armAnt];
+        const b = limbBand(A, B, prof, ant, side, fa, fb, side === 0 ? 0 : 0.5, side === 0 ? 0 : 4.4);
+        m.p.setAttribute('d', b.d);
+        m.f.setAttribute('d', [0.35, 0.65].map((q) => spline(b.outer.map((o, i) => lerp2(o, b.inner[i], q)))).join(''));
       }
     }
-    return { hip, c1, c2, sh, front, contacts };
+    return { hip, c1, c2, sh, front, contacts, J };
   }
   // A point on the body: `at` along the spine (0 hips → 1 shoulders), `off` toward the belly (negative = toward the back).
   const bodyPoint = (geo, at, off) => add(cub(geo.hip, geo.c1, geo.c2, geo.sh, at), geo.front, off);
@@ -1140,7 +1303,7 @@
   const FIG_LAYERS = [
     ['far', [
       ['fua', 'skin'], ['fuas', 'sh'], ['fsl', 'shirt'], ['fsls', 'sh'], ['fslhem', 'ln ln-shirt'],
-      ['fhand', 'skin hand'], ['fhandl', 'ln ln-hand'],
+      ['fdb', 'db'], ['fhand', 'skin hand'], ['fhandl', 'ln ln-hand'],
       ['fth', 'pants'], ['fths', 'sh'], ['fknee', 'kneecap', 'ellipse'], ['fsh', 'pants'], ['fshs', 'sh'],
       ['fsock', 'sock'], ['fshoe', 'shoe'], ['fsole', 'sole'], ['flace', 'ln ln-lace'],
     ]],
@@ -1156,17 +1319,19 @@
       ['nth', 'pants'], ['nths', 'sh'], ['nthh', 'hi'], ['nseam', 'ln ln-seam'], ['ncrease', 'ln ln-crease'], ['nknee', 'kneecap', 'ellipse'],
       ['nsh', 'pants'], ['nshs', 'sh'], ['nshh', 'hi'], ['nsock', 'sock'], ['nsocks', 'sh'], ['nshoe', 'shoe'], ['nsole', 'sole'], ['nlace', 'ln ln-lace'],
       ['nua', 'skin'], ['nuas', 'sh'], ['nuah', 'hi'], ['nsl', 'shirt'], ['nsls', 'sh'], ['nslh', 'hi'], ['nslhem', 'ln ln-shirt'],
-      ['nhand', 'skin hand'], ['nhandl', 'ln ln-hand'],
+      ['ndb', 'db'], ['nhand', 'skin hand'], ['nhandl', 'ln ln-hand'],
     ]],
+    ['muscles2', []], // limb muscles, drawn over the near limbs
   ];
   function buildFigure(fig, ex) {
     const parts = {};
-    let muscleG = null;
+    let muscleG = null, muscleG2 = null;
     for (const [group, items] of FIG_LAYERS) {
       const g = document.createElementNS(SVGNS, 'g');
       g.setAttribute('class', group);
       if (group === 'far') g.setAttribute('transform', 'translate(2,-2.2)');
       if (group === 'muscles') muscleG = g;
+      if (group === 'muscles2') muscleG2 = g;
       for (const [key, cls, tag = 'path'] of items) {
         const el = document.createElementNS(SVGNS, tag);
         el.setAttribute('class', cls);
@@ -1186,7 +1351,7 @@
       g.setAttribute('opacity', '0');
       const p = document.createElementNS(SVGNS, 'path'), f = document.createElementNS(SVGNS, 'path');
       p.setAttribute('class', 'm-fill'); f.setAttribute('class', 'm-fib');
-      g.append(p, f); muscleG.appendChild(g);
+      g.append(p, f); (LIMB_MUSCLES[def.kind] ? muscleG2 : muscleG).appendChild(g);
       return { def, g, p, f };
     });
     return { parts, muscles };
@@ -1204,7 +1369,7 @@
   const quad       = P(base, { hx: 252, hy: 150, t: 188, n: 188, nh: [181, 196], fh: [181, 196], nk: [294, 195], fk: [294, 195], nf: 5, ff: 5 });
 
   // hold: 'H' = the hold time from "Your plan"; otherwise milliseconds.
-  const EXERCISES = [
+  const BACK_EXERCISES = [
     {
       id: 'knee', name: 'Single knee to chest', repsText: '3–5 times, each leg', unit: 'times each leg',
       range: { reps: [3, 5], hold: [10, 30] }, face: 1, key: 'near',
@@ -1406,8 +1571,443 @@
     },
   ];
 
+  // ---------- Gym exercises ----------
+  // Same pose fields as above, plus: db (0..1) dumbbells in both fists, dbA handle angle on screen, dbO offset
+  // along the handle, dbE (0/1) end-on; nLs/fLs arm length factor (an arm pointing at the viewer looks shorter).
+  // kind: 'reps' (card = reps per set) or 'time' (card = seconds per set; hold 'H' = that many seconds).
+  // view: 'floor' (close-up on the mat) or 'stand' (whole standing figure and machines).
+  const gbase = P(base, { db: 0, dbA: 0, dbO: 0, dbE: 0, nLs: 1, fLs: 1 });
+  const G = (o, extra) => P(P(gbase, o), extra);
+  const stand = G({ hx: 198, hy: 112.6, t: 270, n: 270, nA: [91, 90], fA: [89, 90], nk: [201, 197.2], fk: [201, 197.2], nf: 0, ff: 0, hg: 0.45 });
+  const plankBase = G({ hx: 211, hy: 176.8, t: 188.2, n: 192, nA: [90, 180], fA: [90, 180], nk: [295, 189.5], fk: [295, 189.5], nf: 118, ff: 118, hd: 180, hdw: 1, hg: 0.55 });
+  const supG = G(supineFlat);
+  const mk = (g, tag, cls, attrs = {}) => {
+    const e = document.createElementNS(SVGNS, tag);
+    e.setAttribute('class', cls);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    g.appendChild(e);
+    return e;
+  };
+  const rrect = (x, y, w, h, r = 1.5) => `M${x + r} ${y}H${x + w - r}Q${x + w} ${y} ${x + w} ${y + r}V${y + h - r}Q${x + w} ${y + h} ${x + w - r} ${y + h}H${x + r}Q${x} ${y + h} ${x} ${y + h - r}V${y + r}Q${x} ${y} ${x + r} ${y}Z`;
+  const rod = (A, B, w) => capsule(A, B, w / 2, w / 2);
+  // A weight stack in a column: returns a function that lifts the top `n` plates by dy.
+  function weightStack(g, x, y0, n = 9, lift = 3) {
+    mk(g, 'path', 'eq-metal eq-edge', { d: rrect(x, y0 - 6, 14, 207 - y0 + 6 - 6, 1.5) });
+    mk(g, 'path', 'eq-iron', { d: rrect(x + 2.5, y0, 9, 195 - y0, 1) });
+    mk(g, 'path', 'eq-metal-lo', { d: `M${x + 6.5} ${y0}V${195}H${x + 7.5}V${y0}Z` });
+    const top = mk(g, 'g', 'stack-top');
+    for (let i = 0; i < n; i++) mk(i < lift ? top : g, 'path', 'eq-iron-hi eq-edge', { d: rrect(x + 3, 195 - (n - i) * 4.2, 8, 3.6, 0.8) });
+    return (dy) => top.setAttribute('transform', `translate(0 ${f1(-Math.max(0, dy))})`);
+  }
+
+  const GYM_EXERCISES = [
+    {
+      id: 'plank', name: 'Planks', kind: 'time', card: [25, 25, 25], weightNote: 'bodyweight', view: 'floor', mat: true,
+      face: -1, key: 'plank', sign: { nh: -1, fh: -1, nk: -1, fk: -1 },
+      muscles: [{ kind: 'abs' }], labels: { g: 'Working: belly (core)' },
+      poses: {
+        down: G(plankBase, { hx: 208.6, hy: 188.5, t: 197.8, n: 200, nk: [294, 193], fk: [294, 193], nf: 15, ff: 15 }),
+        plank: P(plankBase, { g: 1 }),
+      },
+      start: 'down',
+      setup: [['Forearms on the mat, elbows under your shoulders', 0, 3000]],
+      cycle: [
+        { to: 'plank', move: 1500, label: 'Lift into a plank', hold: 'H', holdLabel: 'Hold, body in one straight line', moveStep: 1, holdStep: 2, form: 'Hips level with your shoulders — no sagging' },
+        { to: 'down', move: 1300, label: 'Lower down and rest', hold: 1500, holdLabel: 'Lower down and rest', moveStep: 3, holdStep: 3 },
+      ],
+      steps: [
+        'Lie face-down with your forearms on the mat and elbows under your shoulders.',
+        'Tighten your belly and lift your hips so you rest on your forearms and toes.',
+        'Hold with your body in one straight line from head to heels. Breathe evenly.',
+        'Lower down and rest.',
+      ],
+      tip: 'Too hard? Rest on your knees instead of your toes.',
+    },
+    {
+      id: 'pyramid', name: 'Plank pyramids', kind: 'reps', card: [8, 8, 8], weightNote: 'bodyweight', view: 'floor', mat: true,
+      face: -1, key: 'pike', sign: { nh: -1, fh: -1, nk: -1, fk: -1 },
+      muscles: [{ kind: 'abs' }, { kind: 'delts', key: 'm2' }], labels: { g: 'Working: belly, shoulders' },
+      poses: {
+        plank: G(plankBase, { hx: 213, hy: 177 }),
+        pike: G(plankBase, { hx: 226, hy: 140.6, t: 154.2, n: 150, nA: [126.9, 180], fA: [126.9, 180], nk: [296, 189.5], fk: [296, 189.5], nf: 128, ff: 128, g: 1, m2: 1, a1: 1 }),
+      },
+      cues: [{ key: 'a1', from: [0.05, -14], to: [0.05, -30] }],
+      start: 'plank',
+      setup: [['Start in a forearm plank', 0, 3000]],
+      cycle: [
+        { to: 'pike', move: 1500, label: 'Push your hips up high', hold: 300, holdLabel: 'Push your hips up high', moveStep: 1, holdStep: 1, form: 'Hips up into an upside-down V, forearms stay down' },
+        { to: 'plank', move: 1500, label: 'Lower back to a plank', hold: 400, holdLabel: 'Lower back to a plank', moveStep: 2, holdStep: 2, form: 'Body straight again — hips level' },
+      ],
+      steps: [
+        'Start in a forearm plank: elbows under your shoulders, body in a straight line.',
+        'Tighten your belly and push your hips up toward the ceiling into an upside-down V.',
+        'Slowly lower back into the plank without letting your hips sag.',
+        'Repeat 8 times.',
+      ],
+    },
+    {
+      id: 'gbridge', name: 'Glute bridges', kind: 'reps', card: [12, 12, 12], weightNote: 'bodyweight', view: 'floor', mat: true,
+      face: 1, key: 'up', sign: { nh: -1, fh: -1, nk: -1, fk: -1 },
+      muscles: [{ kind: 'glutes' }, { kind: 'hams', key: 'g' }], labels: { g: 'Working: buttocks, backs of thighs' },
+      cues: [{ key: 'a1', from: [0.08, 12], to: [0.08, 28] }],
+      poses: {
+        down: G(supineBent),
+        up: G(supineBent, { hx: 206, hy: 157, t: 152.7, g: 1, a1: 1 }),
+      },
+      start: 'down',
+      setup: [['Lie on your back, knees bent, feet flat', 0, 2500]],
+      cycle: [
+        { to: 'up', move: 1200, label: 'Squeeze your buttocks and lift your hips', hold: 700, holdLabel: 'Squeeze your buttocks and lift your hips', moveStep: 1, holdStep: 1, form: 'Straight line from knees to shoulders' },
+        { to: 'down', move: 1300, label: 'Lower slowly', hold: 500, holdLabel: 'Lower slowly', moveStep: 2, holdStep: 2 },
+      ],
+      steps: [
+        'Lie on your back, knees bent, feet flat and hip-width apart, arms by your sides.',
+        'Squeeze your buttocks and lift your hips until your body is straight from knees to shoulders.',
+        'Pause, then lower slowly. Repeat 12 times.',
+      ],
+    },
+    {
+      id: 'goblet', name: 'Goblet squats', kind: 'reps', card: [8, 8, 8], view: 'stand',
+      face: 1, key: 'down', sign: { nh: -1, fh: -1, nk: -1, fk: -1 },
+      muscles: [{ kind: 'quads' }, { kind: 'glutes' }], labels: { g: 'Working: thighs, buttocks' },
+      poses: {
+        // Arms by joint angles: elbows down in front, forearms up, so the hands hold the top of the dumbbell at the chest.
+        up: G(stand, { nA: [80, -65], fA: [78, -67], hg: 0.75, db: 1, dbA: 90, dbO: 6 }),
+        down: G(stand, { hx: 178, hy: 150.5, t: 302, n: 290, nA: [112, -33], fA: [110, -35], hg: 0.75, db: 1, dbA: 90, dbO: 6, g: 1 }),
+      },
+      start: 'up',
+      setup: [['Hold one dumbbell at your chest, feet shoulder-width apart', 0, 3000]],
+      cycle: [
+        { to: 'down', move: 2000, label: 'Sit back and down', hold: 300, holdLabel: 'Sit back and down', moveStep: 1, holdStep: 1, form: 'Chest up, knees in line with your toes' },
+        { to: 'up', move: 1500, label: 'Push through your heels to stand', hold: 600, holdLabel: 'Push through your heels to stand', moveStep: 2, holdStep: 2 },
+      ],
+      steps: [
+        'Hold one dumbbell upright against your chest with both hands. Feet shoulder-width apart, toes slightly out.',
+        'Push your hips back and bend your knees to sit down until your thighs are about level with the floor. Keep your chest up.',
+        'Push through your heels to stand back up. Repeat 8 times.',
+      ],
+    },
+    {
+      id: 'hammerpress', name: 'Hammer curl + press', kind: 'reps', card: [10, 10, 10], view: 'stand',
+      face: 1, key: 'press', sign: { nh: 1, fh: 1, nk: -1, fk: -1 },
+      muscles: [{ kind: 'biceps' }, { kind: 'delts', key: 'm2' }], labels: { g: 'Working: front of arms', m2: 'Working: shoulders' },
+      poses: {
+        side: G(stand, { nA: [91, 90], fA: [89, 90], hg: 0.9, db: 1, dbA: 0 }),
+        curl: G(stand, { nA: [84, -80], fA: [82, -80], hg: 0.9, db: 1, dbA: 10, g: 1 }),
+        press: G(stand, { nA: [-91, -92], fA: [-93, -94], hg: 0.9, db: 1, dbA: 2, m2: 1 }),
+      },
+      start: 'side',
+      setup: [['Stand tall with a dumbbell in each hand, palms facing in', 0, 3000]],
+      cycle: [
+        { to: 'curl', move: 1200, label: 'Curl the weights up', hold: 200, holdLabel: 'Curl the weights up', moveStep: 1, holdStep: 1, form: 'Elbows stay by your sides' },
+        { to: 'press', move: 1400, label: 'Press them overhead', hold: 300, holdLabel: 'Press them overhead', moveStep: 2, holdStep: 2, form: 'Arms straight up — don’t arch your back' },
+        { to: 'curl', move: 1400, label: 'Lower to your shoulders', hold: 150, holdLabel: 'Lower to your shoulders', moveStep: 3, holdStep: 3 },
+        { to: 'side', move: 1300, label: 'Lower to your sides', hold: 400, holdLabel: 'Lower to your sides', moveStep: 3, holdStep: 3 },
+      ],
+      steps: [
+        'Stand tall with a dumbbell in each hand at your sides, palms facing in.',
+        'Keeping your elbows by your sides, curl the weights up to your shoulders.',
+        'Press them straight overhead, palms still facing in. Keep your belly tight.',
+        'Lower to your shoulders, then back to your sides. Repeat 10 times.',
+      ],
+    },
+    {
+      id: 'latpull', name: 'Lat pulldown machine', kind: 'reps', card: [10, 10, 10], view: 'stand',
+      face: 1, key: 'down', sign: { nh: 1, fh: 1, nk: -1, fk: -1 },
+      muscles: [{ kind: 'lowerBack', from: 0.5, to: 0.9 }, { kind: 'biceps' }], labels: { g: 'Working: upper back' },
+      poses: {
+        up: G(stand, { nA: null, fA: null, hx: 192, hy: 154, t: 258, n: 262, nk: [240, 197.2], fk: [240, 197.2], nh: [186, 29], fh: [186, 29], hg: 0.9, hd: 270, hdw: 0 }),
+        down: G(stand, { nA: null, fA: null, hx: 192, hy: 154, t: 253, n: 258, nk: [240, 197.2], fk: [240, 197.2], nh: [198, 82], fh: [198, 82], hg: 0.9, hd: 290, hdw: 0.4, g: 1 }),
+      },
+      start: 'up',
+      setup: [['Sit with your thighs under the pad and grip the bar wide', 0, 3000]],
+      cycle: [
+        { to: 'down', move: 1500, label: 'Pull the bar down to your upper chest', hold: 400, holdLabel: 'Pull the bar down to your upper chest', moveStep: 1, holdStep: 1, form: 'Squeeze your shoulder blades down and back' },
+        { to: 'up', move: 2000, label: 'Slowly let it rise', hold: 300, holdLabel: 'Slowly let it rise', moveStep: 2, holdStep: 2 },
+      ],
+      steps: [
+        'Sit facing the machine with your thighs under the pad. Grip the bar a little wider than your shoulders.',
+        'Lean back slightly and pull the bar down to your upper chest, bringing your elbows down and back.',
+        'Slowly let the bar rise until your arms are straight. Repeat 10 times.',
+      ],
+      props(back, front) {
+        const stack = weightStack(back, 262, 4);
+        mk(back, 'path', 'eq-metal eq-edge', { d: rrect(176, -26, 102, 7, 2) });
+        mk(back, 'circle', 'eq-metal-lo', { cx: 186, cy: -14, r: 4.2 });
+        const cable = mk(back, 'path', 'eq-cable');
+        mk(back, 'path', 'eq-metal eq-edge', { d: rrect(150, 197, 128, 4, 1.5) });
+        mk(back, 'path', 'eq-metal eq-edge', { d: rrect(189, 168, 6, 30, 1) });
+        mk(back, 'path', 'eq-pad eq-edge', { d: rrect(164, 162.5, 52, 7, 3) });
+        mk(back, 'path', 'eq-metal eq-edge', { d: rrect(233, 120.5, 30, 4, 1.5) });
+        const barG = mk(back, 'g', '');
+        mk(barG, 'path', 'eq-metal-hi eq-edge', { d: rrect(-1.8, -2, 3.6, 7, 1.6) });
+        mk(barG, 'circle', 'eq-iron', { cx: 0, cy: 0, r: 2.6 });
+        mk(front, 'circle', 'eq-pad eq-edge', { cx: 233, cy: 124.5, r: 5.6 });
+        mk(front, 'circle', 'eq-metal', { cx: 233, cy: 124.5, r: 1.6 });
+        return (J) => {
+          const g = J.n.grip;
+          barG.setAttribute('transform', `translate(${pt(g)})`);
+          cable.setAttribute('d', `M${pt(g)}L186 -14M186 -18H269V4`);
+          stack((g[1] - 29) * 0.45);
+        };
+      },
+    },
+    {
+      id: 'hamcurl', name: 'Seated hamstring curls', kind: 'reps', card: [12, 12, 12], view: 'stand',
+      face: 1, key: 'curl', sign: { nh: 1, fh: 1, nk: -1, fk: -1 },
+      muscles: [{ kind: 'hams' }], labels: { g: 'Working: backs of thighs' },
+      poses: {
+        out: G(stand, { nA: null, fA: null, hx: 186, hy: 141, t: 255, n: 262, nk: [271, 147], fk: [271, 147], nf: -78, ff: -78, nh: [204, 151], fh: [204, 151], hg: 0.85, hd: 0, hdw: 0.5 }),
+        curl: G(stand, { nA: null, fA: null, hx: 186, hy: 141, t: 255, n: 262, nk: [222, 182], fk: [222, 182], nf: 15, ff: 15, nh: [204, 151], fh: [204, 151], hg: 0.85, hd: 0, hdw: 0.5, g: 1 }),
+      },
+      start: 'out',
+      setup: [['Sit back, pad on top of your thighs, heels on the roller', 0, 3000]],
+      cycle: [
+        { to: 'curl', move: 1500, label: 'Curl your heels down and back', hold: 500, holdLabel: 'Curl your heels down and back', moveStep: 1, holdStep: 1, form: 'Hips stay down on the seat' },
+        { to: 'out', move: 2000, label: 'Slowly straighten your legs', hold: 300, holdLabel: 'Slowly straighten your legs', moveStep: 2, holdStep: 2 },
+      ],
+      steps: [
+        'Sit with your back against the pad, the thigh pad just above your knees and the roller under your lower calves.',
+        'Hold the handles and curl your heels down and back as far as is comfortable.',
+        'Slowly straighten your legs. Repeat 12 times.',
+      ],
+      props(back, front) {
+        const stack = weightStack(back, 112, 40);
+        mk(back, 'path', 'eq-metal eq-edge', { d: rrect(112, 197, 170, 4, 1.5) });
+        mk(back, 'path', 'eq-metal eq-edge', { d: rrect(183, 156, 6, 42, 1) });
+        mk(back, 'path', 'eq-metal eq-edge', { d: rrect(140, 152, 50, 4, 1.5) });
+        mk(back, 'path', 'eq-pad eq-edge', { d: 'M158 151L176 151L160 78L150 80Z' });
+        mk(back, 'path', 'eq-pad eq-edge', { d: rrect(160, 150, 52, 7, 3) });
+        mk(back, 'path', 'eq-metal eq-edge', { d: rod([228, 150], [228, 198], 5) });
+        const arm = mk(front, 'path', 'eq-metal eq-edge');
+        mk(front, 'path', 'eq-metal eq-edge', { d: rod([231, 147], [226, 127], 3.2) });
+        mk(front, 'path', 'eq-pad eq-edge', { d: rrect(214, 121, 20, 8, 3.5) });
+        const roller = mk(front, 'circle', 'eq-pad eq-edge', { r: 5.6 });
+        const hub = mk(front, 'circle', 'eq-metal', { r: 1.6 });
+        mk(front, 'circle', 'eq-metal-lo eq-edge', { cx: 231, cy: 147, r: 3.2 });
+        return (J) => {
+          const { knee, ank, legAnt } = J.n;
+          let n = perpOf(norm(sub(ank, knee)));
+          if (dot(n, legAnt) < 0) n = neg(n);
+          const c = add(add(ank, n, -8.2), norm(sub(ank, knee)), -3);
+          setCircle(roller, c); setCircle(hub, c);
+          arm.setAttribute('d', rod([231, 147], c, 3.2));
+        };
+      },
+    },
+    {
+      id: 'vup', name: 'V-ups', kind: 'reps', card: [10, 10, 10], weightNote: 'bodyweight', view: 'floor', mat: true,
+      face: 1, key: 'v', sign: { nh: 1, fh: 1, nk: -1, fk: -1 },
+      muscles: [{ kind: 'abs' }], labels: { g: 'Working: belly' },
+      poses: {
+        flat: G(supG, { nA: [180, 180], fA: [180, 180], hd: 180, hdw: 0, hg: 0.2 }),
+        v: G(supG, { hx: 200, hy: 188.5, t: 225, n: 236, nA: [338, 338], fA: [338, 338], nk: [253, 121], fk: [253, 121], nf: -40, ff: -40, hg: 0.2, g: 1 }),
+      },
+      start: 'flat',
+      setup: [['Lie on your back, arms stretched overhead', 0, 3000]],
+      cycle: [
+        { to: 'v', move: 1300, label: 'Lift your arms and legs to meet in a V', hold: 400, holdLabel: 'Lift your arms and legs to meet in a V', moveStep: 1, holdStep: 1, form: 'Reach for your shins, legs as straight as you can' },
+        { to: 'flat', move: 1500, label: 'Lower slowly', hold: 400, holdLabel: 'Lower slowly', moveStep: 2, holdStep: 2 },
+      ],
+      steps: [
+        'Lie on your back with your legs straight and arms stretched overhead.',
+        'Tighten your belly and lift your arms and legs together, reaching for your shins so your body makes a V.',
+        'Lower slowly back down. Repeat 10 times.',
+      ],
+      tip: 'Too hard? Bend your knees a little, or lift one leg at a time.',
+    },
+    {
+      id: 'sideplank', name: 'Side planks', kind: 'time', card: [15, 15, 15], weightNote: 'bodyweight', view: 'floor', mat: true,
+      face: -1, key: 'up', sign: { nh: -1, fh: -1, nk: -1, fk: -1 },
+      muscles: [{ kind: 'abs' }], labels: { g: 'Working: sides of your belly' },
+      poses: {
+        down: G(plankBase, { hx: 208, hy: 190, t: 199.1, n: 200, nA: [90, 180], fA: [19, 19], nk: [294, 193], fk: [294, 193], nf: 70, ff: 70, hg: 0.3, hd: 180, hdw: 1 }),
+        up: G(plankBase, { hx: 211, hy: 178.2, t: 189.4, n: 190, nA: [90, 180], fA: [-88, -90], nk: [295, 192], fk: [295, 192], nf: 70, ff: 70, hg: 0.3, hd: 180, hdw: 1, g: 1 }),
+      },
+      start: 'down',
+      setup: [['Lie on your side, propped on one forearm, legs stacked', 0, 3000]],
+      cycle: [
+        { to: 'up', move: 1400, label: 'Lift your hips off the mat', hold: 'H', holdLabel: 'Hold, body in one straight line', moveStep: 1, holdStep: 2, form: 'Hips up — straight line from head to feet' },
+        { to: 'down', move: 1200, label: 'Lower your hip and switch sides', hold: 2900, holdLabel: 'Lower your hip and switch sides', moveStep: 3, holdStep: 3 },
+        { to: 'up', move: 1400, label: 'Now the other side: lift your hips', hold: 'H', holdLabel: 'Hold, body in one straight line', moveStep: 1, holdStep: 2, form: 'Hips up — straight line from head to feet' },
+        { to: 'down', move: 1200, label: 'Lower down and rest', hold: 1500, holdLabel: 'Lower down and rest', moveStep: 3, holdStep: 3 },
+      ],
+      steps: [
+        'Lie on your side, propped on your forearm with your elbow under your shoulder. Stack your legs.',
+        'Lift your hips so your body makes a straight line from head to feet. Reach your top arm up, or rest it on your hip.',
+        'Hold, breathing evenly.',
+        'Lower down, then do the other side.',
+      ],
+      tip: 'Too hard? Bend your knees and rest on your bottom knee.',
+    },
+    {
+      id: 'airsquat', name: 'Air squats', kind: 'reps', card: [10, 10, 10], weightNote: 'bodyweight', view: 'stand',
+      face: 1, key: 'down', sign: { nh: 1, fh: 1, nk: -1, fk: -1 },
+      muscles: [{ kind: 'quads' }, { kind: 'glutes' }], labels: { g: 'Working: thighs, buttocks' },
+      poses: {
+        up: G(stand, { nA: [91, 90], fA: [89, 90], hg: 0.3 }),
+        down: G(stand, { hx: 178, hy: 150.5, t: 302, n: 292, nA: [2, 0], fA: [0, -2], hg: 0.2, hd: 0, hdw: 0.5, g: 1 }),
+      },
+      start: 'up',
+      setup: [['Stand with your feet shoulder-width apart', 0, 2500]],
+      cycle: [
+        { to: 'down', move: 1800, label: 'Sit back and down, arms forward', hold: 300, holdLabel: 'Sit back and down, arms forward', moveStep: 1, holdStep: 1, form: 'Chest up, heels down, knees in line with your toes' },
+        { to: 'up', move: 1400, label: 'Stand back up', hold: 500, holdLabel: 'Stand back up', moveStep: 2, holdStep: 2 },
+      ],
+      steps: [
+        'Stand with your feet shoulder-width apart, toes slightly out.',
+        'Push your hips back and bend your knees as if sitting in a chair, raising your arms in front for balance.',
+        'Go down until your thighs are about level with the floor, then push through your heels to stand. Repeat 10 times.',
+      ],
+    },
+    {
+      id: 'dbdeadlift', name: 'Dumbbell deadlifts', kind: 'reps', card: [10, 10, 10], view: 'stand',
+      face: 1, key: 'down', sign: { nh: 1, fh: 1, nk: -1, fk: -1 },
+      muscles: [{ kind: 'hams' }, { kind: 'glutes' }], labels: { g: 'Working: backs of thighs, buttocks' },
+      poses: {
+        up: G(stand, { nA: [86, 88], fA: [84, 88], hg: 0.9, db: 1, dbE: 1 }),
+        down: G(stand, { hx: 170, hy: 121, t: 322, n: 336, nk: [201, 197.2], fk: [201, 197.2], nA: [99, 98], fA: [97, 96], hg: 0.9, db: 1, dbE: 1, g: 1 }),
+      },
+      start: 'up',
+      setup: [['Stand tall, a dumbbell in each hand in front of your thighs', 0, 3000]],
+      cycle: [
+        { to: 'down', move: 2200, label: 'Push your hips back, weights slide down your legs', hold: 300, holdLabel: 'Push your hips back, weights slide down your legs', moveStep: 1, holdStep: 1, form: 'Back flat, knees soft, weights close to your legs' },
+        { to: 'up', move: 1600, label: 'Squeeze your buttocks and stand tall', hold: 500, holdLabel: 'Squeeze your buttocks and stand tall', moveStep: 2, holdStep: 2 },
+      ],
+      steps: [
+        'Stand tall with a dumbbell in each hand in front of your thighs, knees slightly bent.',
+        'Keeping your back flat, push your hips back and lower the weights down the front of your legs until you feel a stretch in the backs of your thighs.',
+        'Squeeze your buttocks and stand back up. Repeat 10 times.',
+      ],
+      tip: 'Keep the weights close to your legs the whole way, and don’t round your back.',
+    },
+    {
+      id: 'midrow', name: 'Mid-row machine', kind: 'reps', card: [12, 12, 12], view: 'stand',
+      face: 1, key: 'pull', sign: { nh: 1, fh: 1, nk: -1, fk: -1 },
+      muscles: [{ kind: 'lowerBack', from: 0.55, to: 0.92 }, { kind: 'biceps' }], labels: { g: 'Working: upper back' },
+      poses: {
+        reach: G(stand, { nA: null, fA: null, hx: 186, hy: 150, t: 276, n: 274, nk: [232, 196], fk: [232, 196], nh: [247, 92], fh: [247, 92], hg: 0.9, hd: 270, hdw: 0.6 }),
+        pull: G(stand, { nA: null, fA: null, hx: 186, hy: 150, t: 272, n: 272, nk: [232, 196], fk: [232, 196], nh: [218, 95], fh: [218, 95], hg: 0.9, hd: 270, hdw: 0.6, g: 1 }),
+      },
+      start: 'reach',
+      setup: [['Sit tall, chest against the pad, hands on the handles', 0, 3000]],
+      cycle: [
+        { to: 'pull', move: 1500, label: 'Pull the handles back, squeeze your shoulder blades', hold: 500, holdLabel: 'Pull the handles back, squeeze your shoulder blades', moveStep: 1, holdStep: 1, form: 'Elbows go back, chest stays on the pad' },
+        { to: 'reach', move: 1800, label: 'Slowly straighten your arms', hold: 300, holdLabel: 'Slowly straighten your arms', moveStep: 2, holdStep: 2 },
+      ],
+      steps: [
+        'Sit tall with your chest against the pad and feet flat. Hold the handles with your arms straight.',
+        'Pull the handles back, bringing your elbows past your sides, and squeeze your shoulder blades together.',
+        'Slowly straighten your arms. Repeat 12 times.',
+      ],
+      props(back, front) {
+        mk(back, 'path', 'eq-metal eq-edge', { d: rrect(150, 197, 160, 4, 1.5) });
+        mk(back, 'path', 'eq-metal eq-edge', { d: rrect(288, 18, 9, 181, 2) });
+        mk(back, 'path', 'eq-metal eq-edge', { d: rrect(183, 164, 6, 34, 1) });
+        mk(back, 'path', 'eq-pad eq-edge', { d: rrect(162, 158.5, 46, 7, 3) });
+        mk(back, 'path', 'eq-metal eq-edge', { d: rrect(250, 100, 5, 98, 1) });
+        mk(back, 'path', 'eq-metal eq-edge', { d: rrect(219, 101, 35, 4, 1.5) });
+        mk(back, 'path', 'eq-metal eq-edge', { d: rrect(270, 186, 10, 12, 2) });
+        const lever = mk(back, 'path', 'eq-metal eq-edge');
+        const grip = mk(back, 'path', 'eq-iron eq-edge');
+        mk(back, 'circle', 'eq-metal-lo eq-edge', { cx: 292.5, cy: 26, r: 4.5 });
+        mk(front, 'path', 'eq-pad eq-edge', { d: rrect(211, 84, 9, 38, 4) });
+        return (J) => {
+          const g = J.n.grip;
+          lever.setAttribute('d', rod([292.5, 26], add(g, [0, -4], 1), 3.6));
+          grip.setAttribute('d', rod(add(g, [0, -5], 1), add(g, [0, 5], 1), 3));
+        };
+      },
+    },
+    {
+      id: 'pushup', name: 'Assisted push-ups', kind: 'reps', card: [12, 12, 12], weightNote: 'bodyweight', view: 'floor', mat: true,
+      face: -1, key: 'down', sign: { nh: -1, fh: -1, nk: 1, fk: 1 },
+      muscles: [{ kind: 'chest' }, { kind: 'triceps' }], labels: { g: 'Working: chest, backs of arms' },
+      poses: {
+        up: G(plankBase, { nA: null, fA: null, hx: 204, hy: 174.5, t: 207.7, n: 212, nh: [134, 196], fh: [134, 196], nk: [281, 179], fk: [281, 179], nf: 330, ff: 330, hd: 180, hdw: 1, hg: 0 }),
+        down: G(plankBase, { nA: null, fA: null, hx: 200.5, hy: 185, t: 194, n: 199, nh: [134, 196], fh: [134, 196], nk: [281, 179], fk: [281, 179], nf: 330, ff: 330, hd: 180, hdw: 1, hg: 0, g: 1 }),
+      },
+      start: 'up',
+      setup: [['Knees on the mat, hands under your shoulders', 0, 3000]],
+      cycle: [
+        { to: 'down', move: 1600, label: 'Bend your elbows and lower your chest', hold: 300, holdLabel: 'Bend your elbows and lower your chest', moveStep: 1, holdStep: 1, form: 'Straight line from knees to head' },
+        { to: 'up', move: 1300, label: 'Push back up', hold: 500, holdLabel: 'Push back up', moveStep: 2, holdStep: 2 },
+      ],
+      steps: [
+        'Kneel on the mat with your hands under your shoulders, a little wider than shoulder-width. Walk your hands forward until your body is straight from knees to head.',
+        'Bend your elbows to lower your chest toward the mat.',
+        'Push back up. Repeat 12 times.',
+      ],
+      tip: 'Easier: hands on a bench. Harder: up on your toes.',
+    },
+    {
+      id: 'latraise', name: 'Lateral raises', kind: 'reps', card: [10, 10, 10], view: 'stand',
+      face: 1, key: 'up', sign: { nh: 1, fh: 1, nk: -1, fk: -1 },
+      muscles: [{ kind: 'delts' }], labels: { g: 'Working: shoulders' },
+      poses: {
+        side: G(stand, { nA: [91, 90], fA: [89, 90], hg: 0.9, db: 1, dbA: 0 }),
+        // Arms rising out to the sides come toward the viewer, so they look shorter and point forward.
+        mid: G(stand, { nA: [54, 50], fA: [52, 48], nLs: 0.62, fLs: 0.6, hg: 0.9, db: 1, dbA: 0, g: 0.6 }),
+        up: G(stand, { nA: [2, -2], fA: [0, -4], nLs: 0.42, fLs: 0.4, hg: 0.9, db: 1, dbA: 0, g: 1 }),
+      },
+      start: 'side',
+      setup: [['Stand tall with a dumbbell in each hand at your sides', 0, 3000]],
+      cycle: [
+        { to: 'mid', move: 700, label: 'Raise your arms out to the sides', hold: 0, holdLabel: 'Raise your arms out to the sides', moveStep: 1, holdStep: 1 },
+        { to: 'up', move: 700, label: 'Raise your arms out to the sides', hold: 300, holdLabel: 'Raise your arms out to the sides', moveStep: 1, holdStep: 1, quiet: true, form: 'Up to shoulder height, elbows slightly bent' },
+        { to: 'side', move: 1600, label: 'Lower slowly', hold: 400, holdLabel: 'Lower slowly', moveStep: 2, holdStep: 2 },
+      ],
+      steps: [
+        'Stand tall with a dumbbell in each hand at your sides, palms facing in and elbows slightly bent.',
+        'Raise your arms out to the sides until your hands are at shoulder height.',
+        'Lower slowly. Repeat 10 times.',
+      ],
+      tip: 'Use a light weight. Lead with your elbows and don’t shrug your shoulders.',
+    },
+    {
+      id: 'flutter', name: 'Flutter kicks', kind: 'time', card: [20, 20, 20], weightNote: 'bodyweight', view: 'floor', mat: true,
+      face: 1, key: 'up', sign: { nh: -1, fh: -1, nk: -1, fk: -1 },
+      muscles: [{ kind: 'abs', from: 0.2, to: 0.6 }], labels: { g: 'Working: lower belly' },
+      poses: {
+        flat: G(supG),
+        up: G(supG, { t: 182, n: 198, nk: [291, 163], fk: [291, 163], nf: -50, ff: -50, g: 1 }),
+      },
+      start: 'flat',
+      setup: [['Lie on your back, arms by your sides', 0, 2500]],
+      cycle: [
+        { to: 'up', move: 1200, label: 'Lift your legs a little off the mat', hold: 'H', holdLabel: 'Flutter your legs', moveStep: 1, holdStep: 2, form: 'Lower back pressed into the mat',
+          // Small quick kicks: each leg swings up and down around the hip, opposite to the other.
+          wobble: (p, ms) => {
+            const w = Math.sin(ms / 110), hip = [p.hx, p.hy];
+            return { ...p, nk: add(hip, dir(-18 + 6 * w), 86), fk: add(hip, dir(-18 - 6 * w), 86) };
+          } },
+        { to: 'flat', move: 1200, label: 'Lower your legs and rest', hold: 1500, holdLabel: 'Lower your legs and rest', moveStep: 3, holdStep: 3 },
+      ],
+      steps: [
+        'Lie on your back with your legs straight and arms by your sides (or hands under your hips).',
+        'Press your lower back into the mat and lift your legs a few inches off the floor.',
+        'Kick your legs up and down in small, quick movements, keeping them straight.',
+        'Lower your legs and rest.',
+      ],
+    },
+  ];
+  const GYM_A = ['plank', 'pyramid', 'gbridge', 'goblet', 'hammerpress', 'latpull', 'hamcurl', 'vup'];
+  const GYM_B = ['sideplank', 'gbridge', 'airsquat', 'dbdeadlift', 'midrow', 'pushup', 'latraise', 'flutter'];
+
+  // ---------- Exercise library and workouts ----------
+  // Every exercise is self-contained: `type` picks its plan (back: repeats + hold; gym: sets) and voice pack,
+  // `scene` its room. A workout is just a list of ids, so exercises of any type can be mixed in one list.
+  for (const ex of BACK_EXERCISES) Object.assign(ex, { type: 'back', scene: 'room', pack: 'clips' });
+  for (const ex of GYM_EXERCISES) Object.assign(ex, { type: 'gym', scene: 'gym', pack: 'gym' });
+  const LIBRARY = Object.fromEntries([...BACK_EXERCISES, ...GYM_EXERCISES].map((ex) => [ex.id, ex]));
+  const PROG = document.documentElement.dataset.prog === 'gym' ? 'gym' : 'back';
+  const BACK_LIST = BACK_EXERCISES.map((ex) => ex.id);
+  const GYM_WORKOUTS = { a: GYM_A, b: GYM_B };
+  const GYM_ALL = [...new Set([...GYM_A, ...GYM_B])]; // what the Custom picker offers
+  let EXERCISES = [];
+
   // Fill in derived pose fields so every pose of an exercise has the same keys (needed for blending).
-  for (const ex of EXERCISES) {
+  for (const ex of Object.values(LIBRARY)) {
     for (const p of Object.values(ex.poses)) {
       if (p.bl == null) p.bl = (p.b || 0) * 2 / 3;
       if (p.bt == null) p.bt = (p.b || 0) * 2 / 3;
@@ -1424,7 +2024,30 @@
   if (typeof settings.custom !== 'object' || !settings.custom) settings.custom = {};
   const saveSettings = () => store.set('backex.settings', settings);
   const presetValue = ([lo, hi], level) => level === 'max' ? hi : level === 'standard' ? Math.round((lo + hi) / 2) : lo;
+  // Gym page: which workout (A, B or a custom pick), rep preset, custom sets, weights and rest.
+  const gym = Object.assign({ workout: 'a', level: 'card', custom: {}, weights: {}, rest: 45, order: GYM_ALL.slice(), picked: GYM_A.slice() }, store.get('backex.gym', {}));
+  if (!['a', 'b', 'custom'].includes(gym.workout)) gym.workout = 'a';
+  if (!['card', '8', '10', '12', 'custom'].includes(gym.level)) gym.level = 'card';
+  if (![30, 45, 60, 90].includes(Number(gym.rest))) gym.rest = 45;
+  gym.order = [...new Set([...(gym.order || []).filter((id) => GYM_ALL.includes(id)), ...GYM_ALL])];
+  gym.picked = (gym.picked || []).filter((id) => GYM_ALL.includes(id));
+  if (!gym.picked.length) gym.picked = GYM_A.slice();
+  for (const k of ['custom', 'weights']) if (typeof gym[k] !== 'object' || !gym[k]) gym[k] = {};
+  const saveGym = () => store.set('backex.gym', gym);
+  const workoutIds = () => PROG === 'back' ? BACK_LIST : gym.workout === 'custom' ? gym.order.filter((id) => gym.picked.includes(id)) : GYM_WORKOUTS[gym.workout];
+  // Gym plan: one value per set (reps, or seconds for timed exercises); 0 skips a set.
+  function gymPlan(ex) {
+    let sets = ex.card.slice();
+    if (ex.kind === 'reps' && ['8', '10', '12'].includes(gym.level)) sets = sets.map(() => Number(gym.level));
+    if (gym.level === 'custom') {
+      const c = gym.custom[ex.id];
+      if (Array.isArray(c)) sets = sets.map((v, i) => (Number.isFinite(c[i]) ? c[i] : v));
+    }
+    const done = sets.filter((v) => v > 0);
+    return { sets, done: done.length ? done : [sets[0] || 1], reps: done[0] || 1, hold: ex.kind === 'time' ? done[0] || 1 : 0, weight: gym.weights[ex.id] || '' };
+  }
   function planFor(ex) {
+    if (ex.type === 'gym') return gymPlan(ex);
     const lvl = settings.level === 'custom' ? 'beginner' : settings.level;
     let reps = presetValue(ex.range.reps, lvl);
     let hold = ex.range.hold ? presetValue(ex.range.hold, lvl) : ex.range.fixedHold || 0;
@@ -1441,6 +2064,43 @@
   const REST_BETWEEN = 10000; // rest before each exercise after the first, in the guided workout
   const ROUND_PAUSE = 1000;   // short pause between rounds
   function buildPhases(ex, plan, mode) {
+    return ex.type === 'gym' ? buildGymPhases(ex, plan, mode) : buildBackPhases(ex, plan, mode);
+  }
+  const restMs = (ex) => ex.type === 'gym' ? Number(gym.rest) * 1000 : REST_BETWEEN;
+  // Gym exercise: get ready, setup, then each set (with a rest between sets). A card plays one set and loops.
+  function buildGymPhases(ex, plan, mode) {
+    const phases = [];
+    let prev = ex.start;
+    const sets = plan.done, nSets = mode === 'card' ? 1 : sets.length;
+    if (mode === 'workout' && EXERCISES.indexOf(ex) > 0) {
+      phases.push({ from: prev, to: prev, move: 0, label: '', hold: restMs(ex), holdLabel: 'Rest', moveStep: -1, holdStep: -1, rep: 0, set: 0, sets: nSets, rest: true, counted: true });
+    }
+    if (mode === 'workout') {
+      phases.push({ from: prev, to: prev, move: 0, label: '', hold: 5000, holdLabel: `Get ready: ${ex.name}`, moveStep: -1, holdStep: -1, rep: 0, set: 0, sets: nSets, intro: true, counted: true });
+    }
+    for (const [text, step, hold, to = prev, move = 0] of ex.setup) {
+      phases.push({ from: prev, to, move, label: text, hold, holdLabel: text, moveStep: step, holdStep: step, rep: 0, set: 0, sets: nSets, setup: true });
+      prev = to;
+    }
+    for (let k = 0; k < nSets; k++) {
+      if (k > 0) phases.push({ from: prev, to: prev, move: 0, label: '', hold: restMs(ex), holdLabel: 'Rest', moveStep: -1, holdStep: -1, rep: 0, set: k, sets: nSets, rest: true, setRest: true, counted: true });
+      const reps = ex.kind === 'time' ? 1 : sets[k];
+      for (let r = 0; r < reps; r++) {
+        ex.cycle.forEach((seg, i) => {
+          const hold = seg.hold === 'H' ? sets[k] * 1000 : seg.hold;
+          phases.push({ ...seg, hold, from: prev, rep: r, reps, set: k, sets: nSets, card: mode === 'card', first: i === 0, counted: hold >= 3000 && seg.holdLabel !== 'Rest' });
+          prev = seg.to;
+        });
+      }
+    }
+    if (mode === 'card') {
+      phases.push({ from: prev, to: ex.start, move: prev === ex.start ? 0 : 2000, label: 'Set complete', hold: 4000, holdLabel: 'Nice work — starting again', moveStep: -1, holdStep: -1, rep: 0, set: 0, sets: 1, done: true });
+    }
+    let t = 0;
+    for (const ph of phases) { ph.t0 = t; t += ph.move + ph.hold; ph.t1 = t; }
+    return { phases, total: t };
+  }
+  function buildBackPhases(ex, plan, mode) {
     const phases = [];
     let prev = ex.start;
     if (mode === 'workout' && EXERCISES.indexOf(ex) > 0) {
@@ -1471,11 +2131,17 @@
   }
 
   // ---------- Stage (one SVG scene) ----------
-  const stageTpl = document.getElementById('stageTpl');
+  const stageTpl = document.getElementById('stageTpl'), stageTplGym = document.getElementById('stageTplGym');
+  const VIEW_FLOOR = [50, 39, 290, 181.25], VIEW_STAND = [-8, -42, 419.2, 262]; // gym views share one shape (1.6 : 1)
   let uid = 0;
   function createStage(host, ex) {
-    const el = stageTpl.content.firstElementChild.cloneNode(true);
+    const gymScene = ex.scene === 'gym';
+    const el = (gymScene ? stageTplGym : stageTpl).content.firstElementChild.cloneNode(true);
     const id = ++uid;
+    if (gymScene) {
+      el.querySelector('svg').setAttribute('viewBox', (ex.view === 'stand' ? VIEW_STAND : ex.view === 'floor' || !ex.view ? VIEW_FLOOR : ex.view).join(' '));
+      if (!ex.mat) el.querySelector('.mat-g').remove();
+    }
     el.querySelector('title').textContent = `Illustration: ${ex.name}`;
     const { parts, muscles } = buildFigure(el.querySelector('.fig'), ex);
     const shadowG = el.querySelector('.shadows');
@@ -1505,7 +2171,9 @@
       insetG.remove();
     }
     host.replaceChildren(el);
-    return { el, parts, muscles, shadows, cues, inset, formEl: el.querySelector('.form-note') };
+    // Equipment: ex.props builds its shapes once and returns an update function called on every frame.
+    const props = ex.props ? ex.props(el.querySelector('.props-back'), el.querySelector('.props-front')) : null;
+    return { el, parts, muscles, shadows, cues, inset, props, formEl: el.querySelector('.form-note') };
   }
 
   // ---------- Player: a timeline bound to a stage ----------
@@ -1528,7 +2196,8 @@
     const local = t - ph.t0;
     const holding = local >= ph.move;
     const a = pl.ex.poses[ph.from], b = pl.ex.poses[ph.to];
-    const pose = holding ? b : lerpPose(a, b, local / ph.move, ph.move >= 1200 ? easeCubic : ease);
+    let pose = holding ? b : lerpPose(a, b, local / ph.move, ph.move >= 1200 ? easeCubic : ease);
+    if (holding && ph.wobble) pose = ph.wobble(pose, local - ph.move); // e.g. flutter kicks during a timed hold
     const remain = holding ? ph.hold - (local - ph.move) : ph.move - local;
     const frac = holding ? remain / ph.hold : 1 - local / ph.move;
     return { idx, ph, holding, pose, remain, frac, label: holding ? ph.holdLabel : ph.label, step: holding ? ph.holdStep : ph.moveStep };
@@ -1562,6 +2231,7 @@
     const live = idle && !reduceMotion;
     const pose = followThrough(pl, s.pose, live);
     const geo = drawPose(pl.stage, pl.ex, pose, live ? pl.time : null);
+    if (pl.stage.props) pl.stage.props(geo.J, pose);
     for (const { c, p } of pl.stage.cues) {
       const op = s.pose[c.key] || 0;
       if (op < 0.02) { p.setAttribute('opacity', '0'); continue; }
@@ -1604,12 +2274,23 @@
   }
   const ICON_PLAY = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5v11l9-5.5z"/></svg>';
   const ICON_PAUSE = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5h3v11H4zM9 2.5h3v11H9z"/></svg>';
-  const planText = (ex, plan) => `Your plan: ${plan.reps} ${ex.unit}` + (plan.hold ? ` · hold ${plan.hold} s` : '');
+  function planText(ex, plan) {
+    if (ex.type !== 'gym') return `Your plan: ${plan.reps} ${ex.unit}` + (plan.hold ? ` · hold ${plan.hold} s` : '');
+    const d = plan.done, same = d.every((v) => v === d[0]), u = ex.kind === 'time' ? ' s' : '';
+    return `Your plan: ${d.length} set${d.length > 1 ? 's' : ''} × ` + (same ? `${d[0]}${u}` : d.map((v) => v + u).join(' · ')) + (ex.kind === 'reps' ? ' reps' : '') + (plan.weight ? ` · ${plan.weight}` : ex.weightNote ? ` · ${ex.weightNote}` : '');
+  }
+  // "Round 2 of 5" for back exercises; "Set 1 of 3 · Rep 4 of 8" for gym ones.
+  function roundText(ex, s, plan) {
+    if (ex.type !== 'gym') return `Round ${s.ph.rep + 1} of ${plan.reps}`;
+    const rep = ex.kind === 'reps' ? `Rep ${s.ph.rep + 1} of ${s.ph.reps}` : '';
+    return s.ph.card ? rep || 'Hold' : `Set ${s.ph.set + 1} of ${s.ph.sets}` + (rep ? ` · ${rep}` : '');
+  }
 
   // ---------- Cards ----------
   const grid = document.getElementById('grid');
   const cardTpl = document.getElementById('cardTpl');
-  const cards = EXERCISES.map((ex, i) => {
+  let cards = [];
+  function makeCard(ex, i) {
     const node = cardTpl.content.firstElementChild.cloneNode(true);
     node.querySelector('.num').textContent = String(i + 1).padStart(2, '0');
     node.querySelector('h3').textContent = ex.name;
@@ -1630,7 +2311,12 @@
     card.toggle.addEventListener('click', () => setCardPlaying(card, !card.pl.playing));
     card.restart.addEventListener('click', () => { card.pl.time = 0; card.fresh = false; setCardPlaying(card, true); });
     return card;
-  });
+  }
+  function buildCards() {
+    cards.forEach((c) => { if (c.pl.playing) hush(); io.unobserve(c.node); c.node.remove(); });
+    cards = EXERCISES.map(makeCard);
+    cards.forEach((c) => { io.observe(c.node); resetCard(c); });
+  }
 
   function resetCard(c) { c.pl.playing = false; c.fresh = true; c.pl.time = c.pl.keyTime; updateToggle(c); renderCard(c); }
   function updateToggle(c) {
@@ -1649,7 +2335,7 @@
   }
   function renderCard(c) {
     const s = drawPlayer(c.pl, c.pl.playing);
-    const rep = `Round ${s.ph.rep + 1} of ${c.pl.plan.reps}`;
+    const rep = roundText(c.ex, s, c.pl.plan);
     const key = `${s.idx}|${s.holding}|${c.pl.playing}|${c.fresh}`;
     if (key !== c.lastKey) {
       c.lastKey = key;
@@ -1677,25 +2363,29 @@
 
   // ---------- Plan UI ----------
   const planBody = document.getElementById('planBody');
+  const planHead = document.getElementById('planHead');
   const levelSeg = document.getElementById('levelSeg');
-  const planInputs = {};
-  EXERCISES.forEach((ex) => {
+  let planInputs = {};
+  const clampInt = (v, lo, hi) => Math.min(hi, Math.max(lo, Math.round(v)));
+  const numInput = (label, min, max) => {
+    const el = document.createElement('input');
+    Object.assign(el, { type: 'number', min, max, step: 1, inputMode: 'numeric' });
+    el.setAttribute('aria-label', label);
+    return el;
+  };
+  function backPlanRow(ex) {
     const tr = document.createElement('tr');
     const r = ex.range;
     const td0 = document.createElement('td'); td0.textContent = ex.name;
     const td1 = document.createElement('td');
-    const repIn = document.createElement('input');
-    Object.assign(repIn, { type: 'number', min: 1, max: 30, step: 1, inputMode: 'numeric' });
-    repIn.setAttribute('aria-label', `${ex.name} repeats`);
+    const repIn = numInput(`${ex.name} repeats`, 1, 30);
     const repRange = document.createElement('span'); repRange.className = 'range';
     repRange.textContent = r.reps[0] === r.reps[1] ? `(${r.reps[0]})` : `(${r.reps[0]}–${r.reps[1]})`;
     td1.append(repIn, repRange);
     const td2 = document.createElement('td');
     let holdIn = null;
     if (r.hold) {
-      holdIn = document.createElement('input');
-      Object.assign(holdIn, { type: 'number', min: 1, max: 60, step: 1, inputMode: 'numeric' });
-      holdIn.setAttribute('aria-label', `${ex.name} hold in seconds`);
+      holdIn = numInput(`${ex.name} hold in seconds`, 1, 60);
       const hr = document.createElement('span'); hr.className = 'range'; hr.textContent = `(${r.hold[0]}–${r.hold[1]})`;
       td2.append(holdIn, hr);
     } else {
@@ -1703,15 +2393,13 @@
       td2.style.color = 'var(--muted)';
     }
     tr.append(td0, td1, td2);
-    planBody.appendChild(tr);
     planInputs[ex.id] = { repIn, holdIn };
     const onChange = () => {
       const custom = {};
-      EXERCISES.forEach((e) => { custom[e.id] = planFor(e); });
-      const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, Math.round(v)));
+      BACK_EXERCISES.forEach((e) => { custom[e.id] = planFor(e); });
       const reps = parseFloat(repIn.value), hold = holdIn ? parseFloat(holdIn.value) : NaN;
-      if (Number.isFinite(reps)) custom[ex.id].reps = clamp(reps, 1, 30);
-      if (holdIn && Number.isFinite(hold)) custom[ex.id].hold = clamp(hold, 1, 60);
+      if (Number.isFinite(reps)) custom[ex.id].reps = clampInt(reps, 1, 30);
+      if (holdIn && Number.isFinite(hold)) custom[ex.id].hold = clampInt(hold, 1, 60);
       settings.level = 'custom';
       settings.custom = custom;
       saveSettings();
@@ -1719,30 +2407,167 @@
     };
     repIn.addEventListener('change', onChange);
     if (holdIn) holdIn.addEventListener('change', onChange);
-  });
+    return tr;
+  }
+  function gymPlanRow(ex) {
+    const tr = document.createElement('tr');
+    const td0 = document.createElement('td'); td0.textContent = ex.name;
+    tr.appendChild(td0);
+    const timed = ex.kind === 'time';
+    const setIns = [0, 1, 2].map((i) => {
+      const td = document.createElement('td');
+      const inp = numInput(`${ex.name} set ${i + 1} ${timed ? 'seconds' : 'reps'}`, 0, timed ? 60 : 30);
+      td.appendChild(inp);
+      if (timed) { const u = document.createElement('span'); u.className = 'unit'; u.textContent = 's'; td.appendChild(u); }
+      tr.appendChild(td);
+      inp.addEventListener('change', () => {
+        const custom = {};
+        GYM_ALL.forEach((id) => { custom[id] = gymPlan(LIBRARY[id]).sets.slice(); });
+        const v = parseFloat(inp.value);
+        if (Number.isFinite(v)) custom[ex.id][i] = clampInt(v, 0, timed ? 60 : 30);
+        gym.level = 'custom';
+        gym.custom = custom;
+        saveGym();
+        applyPlan();
+      });
+      return inp;
+    });
+    const tdw = document.createElement('td');
+    const wtIn = document.createElement('input');
+    Object.assign(wtIn, { type: 'text', maxLength: 14, placeholder: ex.weightNote ? 'bw' : 'lb', className: 'wt' });
+    wtIn.setAttribute('aria-label', `${ex.name} weight`);
+    wtIn.addEventListener('change', () => { gym.weights[ex.id] = wtIn.value.trim(); saveGym(); applyPlan(); });
+    tdw.appendChild(wtIn);
+    tr.appendChild(tdw);
+    planInputs[ex.id] = { setIns, wtIn };
+    return tr;
+  }
+  const PLAN_HEAD = {
+    back: ['Exercise', 'Repeats', 'Hold (seconds)'],
+    gym: ['Exercise', 'Set 1', 'Set 2', 'Set 3', 'Weight'],
+  };
+  const LEVELS = {
+    back: [['beginner', 'Beginner'], ['standard', 'Standard'], ['max', 'Max'], ['custom', 'Custom']],
+    gym: [['card', 'Card'], ['8', '8 reps'], ['10', '10 reps'], ['12', '12 reps'], ['custom', 'Custom']],
+  };
+  function segButtons(seg, items, attr) {
+    seg.replaceChildren(...items.map(([v, label]) => {
+      const b = document.createElement('button');
+      Object.assign(b, { type: 'button', textContent: label });
+      b.setAttribute('role', 'radio');
+      b.dataset[attr] = v;
+      return b;
+    }));
+  }
+  function buildPlanRows() {
+    planInputs = {};
+    planHead.replaceChildren(Object.assign(document.createElement('tr'), {}));
+    PLAN_HEAD[PROG].forEach((h) => { const th = document.createElement('th'); th.scope = 'col'; th.textContent = h; planHead.firstChild.appendChild(th); });
+    document.getElementById('planTable').classList.toggle('gym', PROG === 'gym');
+    planBody.replaceChildren(...EXERCISES.map((ex) => (ex.type === 'gym' ? gymPlanRow(ex) : backPlanRow(ex))));
+  }
+  segButtons(levelSeg, LEVELS[PROG], 'level');
+  if (PROG === 'gym') levelSeg.setAttribute('aria-labelledby', 'repSelH');
   levelSeg.addEventListener('click', (e) => {
     const b = e.target.closest('button[data-level]');
     if (!b) return;
-    if (b.dataset.level === 'custom' && settings.level !== 'custom') {
-      const custom = {};
-      EXERCISES.forEach((ex) => { custom[ex.id] = planFor(ex); });
-      settings.custom = Object.assign(custom, settings.custom);
+    const lv = b.dataset.level;
+    if (PROG === 'gym') {
+      if (lv === 'custom' && gym.level !== 'custom') {
+        const custom = {};
+        GYM_ALL.forEach((id) => { custom[id] = gymPlan(LIBRARY[id]).sets.slice(); });
+        gym.custom = custom;
+      }
+      gym.level = lv;
+      saveGym();
+    } else {
+      if (lv === 'custom' && settings.level !== 'custom') {
+        const custom = {};
+        BACK_EXERCISES.forEach((ex) => { custom[ex.id] = planFor(ex); });
+        settings.custom = Object.assign(custom, settings.custom);
+      }
+      settings.level = lv;
+      saveSettings();
     }
-    settings.level = b.dataset.level;
-    saveSettings();
     applyPlan();
   });
+
+  // Gym page: Workout A / B / Custom, and the custom exercise picker.
+  const workoutSeg = document.getElementById('workoutSeg');
+  const pickBox = document.getElementById('pickBox'), pickList = document.getElementById('pickList');
+  segButtons(workoutSeg, [['a', 'Workout A'], ['b', 'Workout B'], ['custom', 'Custom']], 'workout');
+  workoutSeg.addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-workout]');
+    if (!b || b.dataset.workout === gym.workout) return;
+    gym.workout = b.dataset.workout;
+    saveGym();
+    setWorkout();
+  });
+  function renderPicker() {
+    pickBox.hidden = gym.workout !== 'custom';
+    if (pickBox.hidden) return;
+    const inWhich = (id) => [GYM_A.includes(id) && 'A', GYM_B.includes(id) && 'B'].filter(Boolean).join(' · ');
+    pickList.replaceChildren(...gym.order.map((id, i) => {
+      const ex = LIBRARY[id], li = document.createElement('li');
+      const lab = document.createElement('label');
+      const cb = Object.assign(document.createElement('input'), { type: 'checkbox', checked: gym.picked.includes(id) });
+      const from = Object.assign(document.createElement('span'), { className: 'from', textContent: inWhich(id) });
+      lab.append(cb, document.createTextNode(ex.name), from);
+      cb.addEventListener('change', () => {
+        if (!cb.checked && gym.picked.length === 1) { cb.checked = true; return; } // keep at least one exercise
+        gym.picked = cb.checked ? [...gym.picked, id] : gym.picked.filter((x) => x !== id);
+        saveGym();
+        setWorkout(id);
+      });
+      const move = (d, label, sym) => {
+        const btn = Object.assign(document.createElement('button'), { type: 'button', textContent: sym, disabled: i + d < 0 || i + d >= gym.order.length });
+        btn.setAttribute('aria-label', `Move ${ex.name} ${label}`);
+        btn.addEventListener('click', () => {
+          const o = gym.order; [o[i], o[i + d]] = [o[i + d], o[i]];
+          saveGym();
+          setWorkout(id, d < 0 ? 'up' : 'down');
+        });
+        return btn;
+      };
+      li.append(lab, move(-1, 'up', '↑'), move(1, 'down', '↓'));
+      return li;
+    }));
+  }
+  const restSel = document.getElementById('restSel');
+  restSel.value = String(gym.rest);
+  restSel.addEventListener('change', () => { gym.rest = Number(restSel.value); saveGym(); applyPlan(); });
+  // Sets the exercise list from the page and the chosen workout, then rebuilds the cards and plan rows.
+  function setWorkout(focusId, focusBtn) {
+    EXERCISES = workoutIds().map((id) => LIBRARY[id]);
+    workoutSeg.querySelectorAll('button').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.workout === gym.workout)));
+    renderPicker();
+    buildPlanRows();
+    buildCards();
+    applyPlan();
+    if (focusId) { // keep focus in the picker after it is rebuilt
+      const li = pickList.children[gym.order.indexOf(focusId)];
+      const el = li && (focusBtn ? li.querySelectorAll('button')[focusBtn === 'up' ? 0 : 1] : li.querySelector('input'));
+      if (el && !el.disabled) el.focus(); else if (li) li.querySelector('input').focus();
+    }
+  }
   function workoutMinutes() {
     let ms = 0;
     EXERCISES.forEach((ex) => { ms += buildPhases(ex, planFor(ex), 'workout').total; });
     return Math.max(1, Math.round(ms / 60000));
   }
   function applyPlan() {
-    levelSeg.querySelectorAll('button').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.level === settings.level)));
+    const level = PROG === 'gym' ? gym.level : settings.level;
+    levelSeg.querySelectorAll('button').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.level === level)));
     EXERCISES.forEach((ex) => {
       const plan = planFor(ex), inp = planInputs[ex.id];
-      inp.repIn.value = plan.reps;
-      if (inp.holdIn) inp.holdIn.value = plan.hold;
+      if (!inp) return;
+      if (ex.type === 'gym') {
+        inp.setIns.forEach((el, i) => { el.value = plan.sets[i]; });
+        inp.wtIn.value = plan.weight;
+      } else {
+        inp.repIn.value = plan.reps;
+        if (inp.holdIn) inp.holdIn.value = plan.hold;
+      }
     });
     cards.forEach((c) => {
       setPlan(c.pl);
@@ -1827,8 +2652,8 @@
     saveSettings();
     applyTV();
   });
-  function enterFullscreen() {
-    const el = document.documentElement;
+  // Full screen goes on the workout dialog itself: a full-screen page would be drawn over the open dialog.
+  function enterFullscreen(el = document.documentElement) {
     try {
       const req = el.requestFullscreen || el.webkitRequestFullscreen;
       if (req && !document.fullscreenElement) { const r = req.call(el); if (r && r.catch) r.catch(() => {}); }
@@ -1924,22 +2749,30 @@
   // Recorded voice (voice/clips.bin + clips.json, made by tools/make-voice.py). It plays through Web Audio like
   // the beeps, so it follows the phone's media output (e.g. to a TV when screen-mirroring); the browser's
   // built-in speech often stays on the phone's own speaker. Any line without clips uses built-in speech.
-  const clips = { index: null, bin: null, loading: null, playing: [] };
+  // Voice packs by exercise type (voice/<pack>.json + .bin); a workout loads the packs its exercises use.
+  const clips = { index: {}, bins: {}, loaded: new Set(), loading: null, playing: [] };
   function loadClips() {
-    if (clips.loading || clips.index || !window.fetch) return;
-    clips.loading = Promise.all([fetch('voice/clips.json').then((r) => r.ok ? r.json() : Promise.reject()),
-                                 fetch('voice/clips.bin').then((r) => r.ok ? r.arrayBuffer() : Promise.reject())])
-      .then(([index, bin]) => { clips.index = index; clips.bin = bin; })
-      .catch(() => { /* use built-in speech; try again next time a workout starts */ })
+    if (clips.loading || !window.fetch) return;
+    const need = [...new Set(EXERCISES.map((ex) => ex.pack))].filter((p) => !clips.loaded.has(p));
+    if (!need.length) return;
+    clips.loading = Promise.all(need.map((pack) =>
+      Promise.all([fetch(`voice/${pack}.json`).then((r) => r.ok ? r.json() : Promise.reject()),
+                   fetch(`voice/${pack}.bin`).then((r) => r.ok ? r.arrayBuffer() : Promise.reject())])
+        .then(([index, bin]) => {
+          clips.bins[pack] = bin;
+          for (const k in index) if (!clips.index[k]) clips.index[k] = [pack, ...index[k]];
+          clips.loaded.add(pack);
+        })
+        .catch(() => { /* use built-in speech; try again next time */ })))
       .then(() => { clips.loading = null; });
   }
   // Clip names for a line: the whole line if recorded, otherwise the pieces between numbers plus the numbers.
   function clipsForLine(text) {
     const idx = clips.index;
-    if (!idx || !actx) return null;
+    if (!actx) return null;
     if (idx[text]) return [text];
     const parts = text.split(/(\d+)/).map((p) => p.replace(/^[.\s]+/, '').trim()).filter(Boolean);
-    return parts.every((p) => idx[p]) ? parts : null;
+    return parts.length && parts.every((p) => idx[p]) ? parts : null;
   }
   function stopClips() {
     const t = actx ? actx.currentTime : 0;
@@ -1950,8 +2783,8 @@
   }
   function playClips(names, token) {
     const decode = (name) => {
-      const [off, len] = clips.index[name];
-      const data = clips.bin.slice(off, off + len); // decodeAudioData takes ownership of its buffer
+      const [pack, off, len] = clips.index[name];
+      const data = clips.bins[pack].slice(off, off + len); // decodeAudioData takes ownership of its buffer
       return new Promise((res, rej) => actx.decodeAudioData(data, res, rej));
     };
     return Promise.all(names.map(decode)).then((bufs) => {
@@ -2044,7 +2877,7 @@
     W.played = 0;
     wk.body.hidden = false; wk.controls.hidden = false; wk.done.hidden = true;
     if (!dlg.open) dlg.showModal();
-    if (isTV()) enterFullscreen();
+    if (isTV()) enterFullscreen(dlg);
     loadExercise(0);
     setRunning(true);
     wk.play.focus(); // the remote's OK button pauses / resumes
@@ -2056,6 +2889,13 @@
     wk.bar.style.width = '100%';
     // Only count the session if most of the workout was actually played (not just skipped through).
     const counted = W.played >= W.grand * 0.6;
+    if (PROG === 'gym') {
+      $('wkDoneText').textContent = `All ${EXERCISES.length} exercises finished. Cool down on the rower for 3–5 minutes, then stretch your lower back and hip flexors.`;
+      beep(880, 0.15); setTimeout(() => beep(1175, 0.25), 180);
+      say(counted ? 'Workout complete. Well done.' : 'Workout ended.');
+      $('wkFinish').focus();
+      return;
+    }
     if (counted) addSession(1);
     const n = log[dayKey(new Date())] || 0;
     const goal = `${n} of ${settings.target} session${settings.target > 1 ? 's' : ''} today`;
@@ -2069,6 +2909,7 @@
   }
   // What to say when a phase starts (or when resuming mid-phase). Returns '' for nothing.
   function speechFor(s, ex, plan) {
+    if (ex.type === 'gym') return gymSpeech(s, ex, plan);
     if (s.ph.done) return !s.holding || s.ph.move === 0 ? 'Set complete. Starting again.' : ''; // exercise cards loop
     if (s.ph.rest) return `Rest for ${Math.max(1, Math.ceil(s.remain / 1000))} seconds. Next: ${ex.name}.`;
     if (s.ph.pause) return ''; // short pause between rounds: the next round announces itself
@@ -2083,6 +2924,28 @@
       return `Hold for ${secs} seconds.` + (rest ? ` ${rest.charAt(0).toUpperCase()}${rest.slice(1)}.` : '');
     }
     return /hold/i.test(label) ? `${label} for ${secs} seconds.` : `${label}. Hold for ${secs} seconds.`;
+  }
+  // Gym: full instructions on the first rep of a set, then just the rep number.
+  function gymSpeech(s, ex, plan) {
+    const secs = Math.max(1, Math.ceil(s.remain / 1000));
+    if (s.ph.done) return !s.holding || s.ph.move === 0 ? 'Set complete. Starting again.' : '';
+    if (s.ph.rest) return s.ph.setRest ? `Rest for ${secs} seconds. Next: set ${s.ph.set + 1} of ${s.ph.sets}.` : `Rest for ${secs} seconds. Next: ${ex.name}.`;
+    if (s.ph.intro) {
+      const d = plan.done, n = `${d.length} set${d.length > 1 ? 's' : ''}`;
+      const unit = ex.kind === 'time' ? ' seconds' : '';
+      return `Get ready: ${ex.name}. ` + (d.every((v) => v === d[0]) ? `${n} of ${d[0]}${unit}.` : `${n}.`);
+    }
+    if (s.holding && s.ph.move > 0 && s.ph.holdLabel === s.ph.label) return '';
+    if (s.ph.quiet) return '';
+    if (!s.ph.setup && s.ph.rep > 0) return s.ph.first && (!s.holding || s.ph.move === 0) ? String(s.ph.rep + 1) : '';
+    if (!s.holding) return s.label;
+    if (!s.ph.counted) return s.label;
+    const label = s.label;
+    if (/^Hold\b/.test(label)) {
+      const rest = label.replace(/^Hold,?\s*/, '');
+      return `Hold for ${secs} seconds.` + (rest ? ` ${rest.charAt(0).toUpperCase()}${rest.slice(1)}.` : '');
+    }
+    return `${label} for ${secs} seconds.`;
   }
   // The next instruction (or next exercise) for the "Up next" line in TV mode.
   function upNextText(pl, s) {
@@ -2112,7 +2975,7 @@
         if ((!s.holding || s.ph.move === 0) && !s.ph.pause) beep(990, 0.12);
       }
     }
-    const where = s.ph.rest ? 'Take a short break' : s.ph.intro ? 'Get ready' : s.ph.setup ? 'Setting up' : `Round ${s.ph.rep + 1} of ${pl.plan.reps}`;
+    const where = s.ph.rest ? (s.ph.setRest ? `Rest before set ${s.ph.set + 1} of ${s.ph.sets}` : 'Take a short break') : s.ph.intro ? 'Get ready' : s.ph.setup ? 'Setting up' : roundText(ex, s, pl.plan);
     wk.sub.textContent = where + (W.running ? '' : ' · paused');
     const secLeft = Math.max(1, Math.ceil(s.remain / 1000));
     const counting = s.holding && s.ph.hold >= 2000;
@@ -2189,7 +3052,6 @@
   const io = new IntersectionObserver((entries) => {
     for (const e of entries) { const c = cards.find((x) => x.node === e.target); if (c) c.visible = e.isIntersecting; }
   }, { threshold: 0.15 });
-  cards.forEach((c) => io.observe(c.node));
   let last = performance.now();
   function frame(now) {
     const dt = Math.min(100, now - last);
@@ -2209,12 +3071,16 @@
   applyTV();
   updateToggles();
   renderTracker();
-  applyPlan();
-  cards.forEach(resetCard);
+  if (PROG === 'gym') {
+    document.title = 'Gym Workout';
+    document.getElementById('pageTitle').textContent = 'Gym Workout';
+  }
+  document.querySelectorAll('[data-prog-link]').forEach((a) => { if (a.dataset.progLink === PROG) a.setAttribute('aria-current', 'page'); });
+  setWorkout();
   requestAnimationFrame(frame);
   if (isTV()) document.getElementById('startWorkout').focus({ preventScroll: true });
 
-  if (/[?&]debug\b/.test(location.search)) window.__backExercises = { cards, renderCard, W, EXERCISES, tick: tickWorkout, spatialMove, focusables };
+  if (/[?&]debug\b/.test(location.search)) window.__backExercises = { get cards() { return cards; }, renderCard, W, get EXERCISES() { return EXERCISES; }, LIBRARY, setWorkout, tick: tickWorkout, spatialMove, focusables };
 })();
 </script>
 </body>

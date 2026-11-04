@@ -1,29 +1,32 @@
 """Records the guided workout's voice clips with Piper and packs them for the app.
 
-  node tools/voice-lines.js > voice-lines.json
-  python tools/make-voice.py voice-lines.json en_US-ljspeech-high.onnx voice/
+  node tools/voice-lines.js back > back-lines.json
+  python tools/make-voice.py back-lines.json en_US-ljspeech-high.onnx voice/clips 60
+  node tools/voice-lines.js gym > gym-lines.json
+  python tools/make-voice.py gym-lines.json en_US-ljspeech-high.onnx voice/gym 90
 
-Writes voice/clips.bin (separate MP3 files, back to back) and voice/clips.json ({text: [offset, length]}).
-Clips: every whole line from the three presets, every fragment between numbers, and the numbers 1-60, so the
+Writes <prefix>.bin (separate MP3 files, back to back) and <prefix>.json ({text: [offset, length]}).
+Clips: every whole line from the presets, every fragment between numbers, and the numbers 1..N, so the
 app can join any line for a custom plan. Needs piper-tts (pip) and ffmpeg. Voice: en_US-ljspeech-high
 (LJSpeech, public domain) from https://huggingface.co/rhasspy/piper-voices.
 """
 import json, os, re, struct, subprocess, sys, tempfile, wave
 from piper import PiperVoice
 
-lines_json, model, out_dir = sys.argv[1:4]
+lines_json, model, prefix = sys.argv[1:4]
+max_n = int(sys.argv[4]) if len(sys.argv) > 4 else 60
 d = json.load(open(lines_json))
 norm = lambda s: re.sub(r'^[.\s]+', '', s).strip()
-texts = list(dict.fromkeys(d['lines'] + [norm(f) for f in d['fragments'] if norm(f)] + [str(n) for n in range(1, 61)]))
+texts = list(dict.fromkeys(d['lines'] + [norm(f) for f in d['fragments'] if norm(f)] + [str(n) for n in range(1, max_n + 1)]))
 
 voice = PiperVoice.load(model)
 tmp = tempfile.mkdtemp(prefix='clips-')
-os.makedirs(out_dir, exist_ok=True)
+os.makedirs(os.path.dirname(prefix) or '.', exist_ok=True)
 index, blob = {}, bytearray()
 for i, text in enumerate(texts):
     raw_wav = os.path.join(tmp, 'raw.wav')
     with wave.open(raw_wav, 'wb') as w:
-        voice.synthesize_wav(text.replace('—', ',').replace('–', ' '), w)
+        voice.synthesize_wav(text.replace('—', ',').replace('–', ' ').replace(' + ', ' and '), w)
     with wave.open(raw_wav, 'rb') as r:
         rate, data = r.getframerate(), r.readframes(r.getnframes())
     s = struct.unpack(f'<{len(data) // 2}h', data)
@@ -41,6 +44,6 @@ for i, text in enumerate(texts):
     chunk = open(mp3, 'rb').read()
     index[text] = [len(blob), len(chunk)]
     blob += chunk
-open(os.path.join(out_dir, 'clips.bin'), 'wb').write(blob)
-json.dump(index, open(os.path.join(out_dir, 'clips.json'), 'w'), ensure_ascii=False, separators=(',', ':'))
+open(prefix + '.bin', 'wb').write(blob)
+json.dump(index, open(prefix + '.json', 'w'), ensure_ascii=False, separators=(',', ':'))
 print(f'{len(index)} clips, {len(blob) / 1e6:.2f} MB')

@@ -19,20 +19,33 @@ Live site: https://kgram1989.github.io/Back-Exercises/
 
 Plan, progress and preferences are stored only in the browser on each device.
 
+## Gym workout
+
+The **Gym workout** link at the top (`?w=gym`) opens a second page with a full-body gym plan in the same style: animated cards, a guided workout with rest timers between sets, TV mode and the recorded voice.
+
+- **Workout A:** planks, plank pyramids, glute bridges, goblet squats, hammer curl + press, lat pulldown machine, seated hamstring curls, V-ups.
+- **Workout B:** side planks, glute bridges, air squats, dumbbell deadlifts, mid-row machine, assisted push-ups, lateral raises, flutter kicks.
+- **Custom:** tick any of these exercises and put them in your own order.
+- **Reps:** *Card* (the trainer's numbers), 8, 10 or 12 reps per set, or *Custom* reps or seconds for each set (0 skips a set), with a weight note per exercise and a choice of rest between sets.
+
+Exercises live in one library. Each one carries its own plan type, scene and voice pack, and a workout is a list of exercise ids, so back and gym exercises can be mixed in one workout later.
+
 ## Workout video
 
 [`video/Back-Exercises-Beginner-Workout.mp4`](video/Back-Exercises-Beginner-Workout.mp4) is the full Beginner guided workout as a video (1080p, 11 min 13 s, with voice and beeps), for playing on a TV without the app.
 
 ## Recorded voice
 
-The workout's voice is in `voice/clips.bin` and `voice/clips.json` (about 2 MB, loaded when a workout starts). It was made with [Piper](https://github.com/rhasspy/piper) and the public-domain LJSpeech voice (`en_US-ljspeech-high`). Each line plays as a whole clip when it was recorded. Otherwise, as with custom plan numbers, it's joined from pieces and number clips (1–60). If the clips can't load, the browser's built-in speech is used instead.
+The voice is in `voice/clips.*` for the back exercises and `voice/gym.*` for the gym page (about 2–2.5 MB each, loaded when a workout or exercise starts). It was made with [Piper](https://github.com/rhasspy/piper) and the public-domain LJSpeech voice (`en_US-ljspeech-high`). Each line plays as a whole clip when it was recorded. Otherwise, as with custom plan numbers, it's joined from pieces and number clips (1–60). If the clips can't load, the browser's built-in speech is used instead.
 
 After changing any spoken wording, re-record the clips:
 
 ```
-node tools/voice-lines.js > voice-lines.json        # needs Playwright + Chromium
 pip install piper-tts                                # plus en_US-ljspeech-high.onnx(.json) from huggingface.co/rhasspy/piper-voices
-python tools/make-voice.py voice-lines.json en_US-ljspeech-high.onnx voice/
+node tools/voice-lines.js back > back-lines.json     # needs Playwright + Chromium
+python tools/make-voice.py back-lines.json en_US-ljspeech-high.onnx voice/clips 60
+node tools/voice-lines.js gym > gym-lines.json
+python tools/make-voice.py gym-lines.json en_US-ljspeech-high.onnx voice/gym 90
 ```
 
 ## Deploy with GitHub Pages
