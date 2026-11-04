@@ -19,6 +19,10 @@ Live site: https://kgram1989.github.io/Back-Exercises/
 
 Plan, progress and preferences are stored only in the browser on each device.
 
+## Workout video
+
+[`video/Back-Exercises-Beginner-Workout.mp4`](video/Back-Exercises-Beginner-Workout.mp4) is the full Beginner guided workout as a video (1080p, 11 min 13 s, with voice and beeps), for playing on a TV without the app.
+
 ## Recorded voice
 
 The workout's voice is in `voice/clips.bin` and `voice/clips.json` (about 2 MB, loaded when a workout starts). It was made with [Piper](https://github.com/rhasspy/piper) and the public-domain LJSpeech voice (`en_US-ljspeech-high`). Each line plays as a whole clip when it was recorded. Otherwise, as with custom plan numbers, it's joined from pieces and number clips (1–60). If the clips can't load, the browser's built-in speech is used instead.
