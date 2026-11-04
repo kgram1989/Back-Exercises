@@ -36,7 +36,7 @@ Exercises live in one library. Each one carries its own plan type, scene and voi
 
 ## Recorded voice
 
-The voice is in `voice/clips.*` for the back exercises and `voice/gym.*` for the gym page (about 2–2.5 MB each, loaded when a workout or exercise starts). It was made with [Piper](https://github.com/rhasspy/piper) and the public-domain LJSpeech voice (`en_US-ljspeech-high`). Each line plays as a whole clip when it was recorded. Otherwise, as with custom plan numbers, it's joined from pieces and number clips (1–60). If the clips can't load, the browser's built-in speech is used instead.
+The voice is in `voice/clips.*` for the back exercises and `voice/gym.*` for the gym page (about 2–2.5 MB each, loaded when a workout or exercise starts). It was made with [Piper](https://github.com/rhasspy/piper) and the public-domain LJSpeech voice (`en_US-ljspeech-high`). Each line plays as a whole clip when it was recorded. Otherwise, as with custom plan numbers, it's joined from pieces and number clips (1–60 for back, 1–90 for gym). If the clips can't load, the browser's built-in speech is used instead.
 
 After changing any spoken wording, re-record the clips:
 
