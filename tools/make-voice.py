@@ -3,7 +3,8 @@
   node tools/voice-lines.js > voice-lines.json
   python tools/make-voice.py voice-lines.json en_US-ljspeech-high.onnx voice/
 
-Writes voice/clips.bin (separate MP3 files, back to back) and voice/clips.json ({text: [offset, length]}).
+Writes voice/clips.bin (separate MP3 files, back to back) and voice/clips.json ({text: [offset, length, seconds]}).
+The app uses the seconds to give every step enough time for its spoken line.
 Clips: every whole line from the three presets, every fragment between numbers, and the numbers 1-60, so the
 app can join any line for a custom plan. Needs piper-tts (pip) and ffmpeg. Voice: en_US-ljspeech-high
 (LJSpeech, public domain) from https://huggingface.co/rhasspy/piper-voices.
@@ -39,7 +40,9 @@ for i, text in enumerate(texts):
     subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', trimmed, '-c:a', 'libmp3lame', '-b:a', '40k',
                     '-map_metadata', '-1', '-id3v2_version', '0', mp3], check=True)
     chunk = open(mp3, 'rb').read()
-    index[text] = [len(blob), len(chunk)]
+    secs = float(subprocess.run(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', mp3],
+                                capture_output=True, text=True, check=True).stdout.strip())
+    index[text] = [len(blob), len(chunk), round(secs, 3)]
     blob += chunk
 open(os.path.join(out_dir, 'clips.bin'), 'wb').write(blob)
 json.dump(index, open(os.path.join(out_dir, 'clips.json'), 'w'), ensure_ascii=False, separators=(',', ':'))
