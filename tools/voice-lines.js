@@ -37,6 +37,7 @@ const { chromium } = require('playwright');
   // Lines the app can say that the run above may not reach.
   lines.add('Workout complete. Well done.');
   lines.add('Workout ended.');
+  lines.add('Set complete. Starting again.'); // end of each loop on an exercise card
   const fragments = new Set();
   for (const l of lines) l.split(/\d+/).map((s) => s.trim()).filter(Boolean).forEach((f) => fragments.add(f));
   process.stdout.write(JSON.stringify({ lines: [...lines].sort(), fragments: [...fragments].sort() }, null, 1));

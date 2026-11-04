@@ -7,7 +7,7 @@ Live site: https://kgram1989.github.io/Back-Exercises/
 ## Features
 
 - **Detailed animations.** An illustrated person in a small room: shaded body and clothes, hands, face and shoes. The spine bends at several points, and the head and arms follow through naturally. Working muscles are highlighted (red) or stretched (blue) during each hold.
-- **Exercise cards** show each exercise's main position. Press play to watch the full animation, with the matching step highlighted, a hold timer, arrows for the direction of movement, a form check for each position, and close-ups for small movements.
+- **Exercise cards** show each exercise's main position. Press play to watch the full animation, with spoken instructions and beeps like the guided workout, the matching step highlighted, a hold timer, arrows for the direction of movement, a form check for each position, and close-ups for small movements.
 - **Guided workout** takes you through all seven exercises one at a time. It has spoken instructions (recorded clips, so the voice follows your phone's sound to a TV when screen-mirroring), countdown beeps, Back / Pause / Skip and an "Up next" line, and it keeps the screen awake.
 - **TV mode** gives a big-screen layout you can read from the sofa.
   - It switches on automatically in smart-TV browsers (Samsung, LG, Fire TV, Android TV), or with the **TV mode** button, or by adding `?tv=1` to the address.
