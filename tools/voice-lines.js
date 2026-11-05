@@ -1,6 +1,6 @@
 // Lists every line a page's guided workout speaks, by fast-forwarding the real app in headless Chromium.
 //   node tools/voice-lines.js back > back-lines.json   (Back exercises: Beginner, Standard and Max plans)
-//   node tools/voice-lines.js gym > gym-lines.json     (Gym page: Home and Gym, Workouts A and B, full and timed)
+//   node tools/voice-lines.js gym > gym-lines.json     (Gym page: Home and Gym, Workouts A, B, Upper, Lower and Core, full and timed)
 // Output: { lines: [...whole lines], fragments: [...] }. Fragments are the pieces between numbers
 // ("Rest for", "seconds. Next: Pelvic tilt."), so any plan's line can be joined from fragments and number clips.
 const path = require('path');
@@ -9,7 +9,7 @@ const { chromium } = require('playwright');
 const prog = process.argv[2] === 'gym' ? 'gym' : 'back';
 const RUNS = prog === 'gym'
   // Home and Gym, Workouts A and B: the full card, and a short timed session (lower reps, fewer sets, 20-30 s rests).
-  ? ['home', 'gym'].flatMap((where) => ['a', 'b'].flatMap((workout) => [{ time: 'full', level: 'card' }, { time: 15, level: 'auto' }, { time: 10, level: 'auto' }]
+  ? ['home', 'gym'].flatMap((where) => ['a', 'b', 'upper', 'lower', 'core'].flatMap((workout) => [{ time: 'full', level: 'card' }, { time: 15, level: 'auto' }, { time: 10, level: 'auto' }]
     .map((t) => ({ key: 'backex.gym', value: { v: 2, where, workout, ...t } }))))
   : ['beginner', 'standard', 'max'].map((level) => ({ key: 'backex.settings', value: { level, voice: true, sound: false } }));
 

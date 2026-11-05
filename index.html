@@ -235,6 +235,9 @@
   .eq-edge { stroke: rgba(0, 0, 0, 0.25); stroke-width: 0.4; stroke-linejoin: round; }
   .clock-face { fill: var(--clock); stroke: var(--metal-lo); stroke-width: 1.4; } .clock-hand { stroke: var(--iron); stroke-width: 1.1; stroke-linecap: round; fill: none; }
   .clock-tick { stroke: var(--metal-lo); stroke-width: 0.8; }
+  .eq-box { fill: #c99a63; } .eq-box-top { fill: #b2834f; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .eq-box { fill: #8a6a45; } :root:not([data-theme="light"]) .eq-box-top { fill: #75583a; } }
+  :root[data-theme="dark"] .eq-box { fill: #8a6a45; } :root[data-theme="dark"] .eq-box-top { fill: #75583a; }
   .eq-towel { fill: #f3efe7; stroke: rgba(0, 0, 0, 0.2); stroke-width: 0.4; }
   .fig .db { fill: var(--iron); stroke: rgba(255, 255, 255, 0.14); stroke-width: 0.5; fill-rule: nonzero; }
   .fig .skin, .fig .shirt, .fig .pants, .fig .shoe, .fig .sock, .fig .hair { stroke: rgba(0, 0, 0, 0.22); stroke-width: 0.4; stroke-linejoin: round; }
@@ -472,7 +475,7 @@
         <li><strong>Warm up first:</strong> 3&ndash;5 minutes of marching on the spot, arm circles and a few slow squats (or the rower at the gym). Cool down the same way.</li>
         <li><strong>Cardio:</strong> elliptical, treadmill, rower or bike, 3&ndash;5 days a week for 20&ndash;35 minutes, on its own or after weights.</li>
         <li><strong>Flexibility:</strong> lower back holds, hip flexor stretch and foam roller.</li>
-        <li>Alternate Workout A and Workout B. <strong>Home</strong> swaps the three machines for dumbbell and floor exercises.</li>
+        <li><strong>3 days a week:</strong> alternate Workout A and Workout B. <strong>4 days:</strong> Upper, Lower, Upper, Lower. Add <strong>Core</strong> on another day if you like. <strong>Home</strong> swaps the three machines for dumbbell and floor exercises.</li>
       </ul>
     </div>
     <div class="panel warn" role="note">
@@ -2099,9 +2102,172 @@
       ],
       tip: 'Keep your neck in line with your back and look at the floor a little ahead of your feet.',
     },
+    // ---------- Upper / Lower / Core days ----------
+    {
+      id: 'floorpress', name: 'Dumbbell floor press', kind: 'reps', card: [10, 10, 10], view: 'floor', mat: true,
+      face: 1, key: 'up', sign: { nh: 1, fh: 1, nk: -1, fk: -1 },
+      muscles: [{ kind: 'chest' }, { kind: 'triceps' }], labels: { g: 'Working: chest, backs of arms' },
+      poses: {
+        // Upper arms rest on the floor, forearms straight up, then the weights press up over the chest.
+        down: G(supineBent, { nA: [12, -90], fA: [10, -90], hg: 0.9, db: 1, dbA: 0 }),
+        up: G(supineBent, { nA: [-82, -88], fA: [-84, -90], hg: 0.9, db: 1, dbA: 0, g: 1 }),
+      },
+      start: 'down',
+      setup: [['Lie on your back, knees bent, a dumbbell in each hand, elbows on the floor', 0, 3000]],
+      cycle: [
+        { to: 'up', move: 1300, label: 'Press the weights up over your chest', hold: 300, holdLabel: 'Press the weights up over your chest', moveStep: 1, holdStep: 1, form: 'Wrists straight, weights over your chest' },
+        { to: 'down', move: 1700, label: 'Lower until your elbows touch the floor', hold: 400, holdLabel: 'Lower until your elbows touch the floor', moveStep: 2, holdStep: 2 },
+      ],
+      steps: [
+        'Lie on your back with your knees bent and feet flat. Hold a dumbbell in each hand, palms facing in, upper arms resting on the floor at about 45° from your body.',
+        'Press the weights straight up over your chest until your arms are straight.',
+        'Lower slowly until your elbows touch the floor. Repeat 10 times.',
+      ],
+      tip: 'The floor stops your elbows, which keeps this easy on the shoulders.',
+    },
+    {
+      id: 'revfly', name: 'Reverse fly', kind: 'reps', card: [12, 12, 12], view: 'stand',
+      face: 1, key: 'up', sign: { nh: 1, fh: 1, nk: -1, fk: -1 },
+      muscles: [{ kind: 'lowerBack', from: 0.6, to: 0.95 }, { kind: 'delts' }], labels: { g: 'Working: upper back, back of shoulders' },
+      poses: {
+        stand: G(stand, { nA: [91, 90], fA: [89, 90], hg: 0.9, db: 1, dbA: 0 }),
+        hang: G(stand, { hx: 172, hy: 120, t: 318, n: 334, nA: [92, 91], fA: [90, 89], hg: 0.9, db: 1, dbA: 0 }),
+        // Arms open out to the sides, toward the viewer, so they look shorter as they rise.
+        mid: G(stand, { hx: 172, hy: 120, t: 318, n: 334, nA: [100, 97], fA: [98, 95], nLs: 0.66, fLs: 0.64, hg: 0.9, db: 1, dbA: 0, g: 0.6 }),
+        up: G(stand, { hx: 172, hy: 120, t: 318, n: 334, nA: [116, 108], fA: [114, 106], nLs: 0.36, fLs: 0.34, hg: 0.9, db: 1, dbA: 0, g: 1 }),
+      },
+      start: 'stand',
+      setup: [['Hinge forward with a flat back, light dumbbells hanging down', 0, 2500, 'hang', 1500]],
+      cycle: [
+        { to: 'mid', move: 700, label: 'Open your arms out to the sides', hold: 0, holdLabel: 'Open your arms out to the sides', moveStep: 1, holdStep: 1 },
+        { to: 'up', move: 700, label: 'Open your arms out to the sides', hold: 400, holdLabel: 'Open your arms out to the sides', moveStep: 1, holdStep: 1, quiet: true, form: 'Squeeze your shoulder blades, elbows soft' },
+        { to: 'hang', move: 1600, label: 'Lower slowly', hold: 300, holdLabel: 'Lower slowly', moveStep: 2, holdStep: 2 },
+      ],
+      steps: [
+        'Hold a light dumbbell in each hand. Bend your knees slightly and hinge forward with a flat back, arms hanging down, palms facing in.',
+        'With a slight bend in your elbows, open your arms out to the sides until they are level with your shoulders. Squeeze your shoulder blades together.',
+        'Lower slowly. Repeat 12 times.',
+      ],
+      tip: 'Use lighter weights than for rows; this works small muscles.',
+    },
+    {
+      id: 'lunge', name: 'Reverse lunges', kind: 'reps', card: [8, 8, 8], view: 'stand',
+      face: 1, key: 'downN', sign: { nh: 1, fh: 1, nk: -1, fk: -1 },
+      muscles: [{ kind: 'quads' }, { kind: 'glutes' }], labels: { g: 'Working: thighs, buttocks' },
+      poses: {
+        stand: G(stand, { nA: [91, 90], fA: [89, 90], hg: 0.9, db: 1, dbA: 0 }),
+        // Far leg steps back (near leg in front), then the near leg steps back (far leg in front).
+        stepF: G(stand, { hx: 196, hy: 122, t: 272, n: 272, nk: [207, 197.2], fk: [160, 184], ff: 50, nA: [91, 90], fA: [89, 90], hg: 0.9, db: 1, dbA: 0 }),
+        downN: G(stand, { hx: 186, hy: 150, t: 273, n: 272, nk: [220, 197.2], fk: [137, 186.5], ff: 60, nA: [92, 90], fA: [90, 90], hg: 0.9, db: 1, dbA: 0, g: 1 }),
+        stepN: G(stand, { hx: 196, hy: 122, t: 272, n: 272, fk: [207, 197.2], nk: [160, 184], nf: 50, nA: [91, 90], fA: [89, 90], hg: 0.9, db: 1, dbA: 0 }),
+        downF: G(stand, { hx: 186, hy: 150, t: 273, n: 272, fk: [220, 197.2], nk: [137, 186.5], nf: 60, nA: [92, 90], fA: [90, 90], hg: 0.9, db: 1, dbA: 0, g: 1 }),
+      },
+      start: 'stand',
+      setup: [['Stand tall, a dumbbell in each hand at your sides', 0, 2500]],
+      cycle: [
+        { to: 'stepF', move: 700, label: 'Step one foot back and lower your back knee', hold: 0, holdLabel: 'Step one foot back and lower your back knee', moveStep: 1, holdStep: 1 },
+        { to: 'downN', move: 900, label: 'Step one foot back and lower your back knee', hold: 300, holdLabel: 'Step one foot back and lower your back knee', moveStep: 1, holdStep: 1, quiet: true, form: 'Front knee over your ankle, chest up' },
+        { to: 'stepF', move: 900, label: 'Push through your front heel to stand', hold: 0, holdLabel: 'Push through your front heel to stand', moveStep: 2, holdStep: 2 },
+        { to: 'stand', move: 600, label: 'Push through your front heel to stand', hold: 300, holdLabel: 'Push through your front heel to stand', moveStep: 2, holdStep: 2, quiet: true },
+        { to: 'stepN', move: 700, label: 'Now the other leg', hold: 0, holdLabel: 'Now the other leg', moveStep: 3, holdStep: 3 },
+        { to: 'downF', move: 900, label: 'Now the other leg', hold: 300, holdLabel: 'Now the other leg', moveStep: 3, holdStep: 3, quiet: true, form: 'Front knee over your ankle, chest up' },
+        { to: 'stepN', move: 900, label: 'Push through your front heel to stand', hold: 0, holdLabel: 'Push through your front heel to stand', moveStep: 2, holdStep: 2, quiet: true },
+        { to: 'stand', move: 600, label: 'Push through your front heel to stand', hold: 300, holdLabel: 'Push through your front heel to stand', moveStep: 2, holdStep: 2, quiet: true },
+      ],
+      steps: [
+        'Stand tall with a dumbbell in each hand at your sides.',
+        'Step one foot back and lower your back knee toward the floor, until your front thigh is about level with the floor.',
+        'Push through your front heel to stand back up.',
+        'Do the other leg. One rep is both legs; repeat 8 times.',
+      ],
+      tip: 'Hold a chair for balance at first, and skip the dumbbells until it feels steady.',
+    },
+    {
+      id: 'stepup', name: 'Step-ups', kind: 'reps', card: [10, 10, 10], weightNote: 'bodyweight', view: 'stand',
+      face: 1, key: 'top', sign: { nh: 1, fh: 1, nk: -1, fk: -1 },
+      muscles: [{ kind: 'quads' }, { kind: 'glutes' }], labels: { g: 'Working: thighs, buttocks' },
+      poses: {
+        floor: G(stand, { hx: 182, hy: 112.6, nk: [185, 197.2], fk: [185, 197.2] }),
+        foot: G(stand, { hx: 190, hy: 118, t: 278, n: 274, nk: [228, 168.2], fk: [186, 197.2], nf: 0, ff: 0 }),
+        top: G(stand, { hx: 225, hy: 82.8, t: 271, n: 270, nk: [228, 168.2], fk: [228, 168.2], g: 1 }),
+      },
+      start: 'floor',
+      setup: [['Stand facing a sturdy step or low bench', 0, 2500]],
+      cycle: [
+        { to: 'foot', move: 900, label: 'Place one foot flat on the step', hold: 200, holdLabel: 'Place one foot flat on the step', moveStep: 1, holdStep: 1 },
+        { to: 'top', move: 1200, label: 'Push through that heel and step up', hold: 400, holdLabel: 'Push through that heel and step up', moveStep: 2, holdStep: 2, form: 'Whole foot on the step, knee in line with your toes' },
+        { to: 'foot', move: 1100, label: 'Step back down slowly', hold: 0, holdLabel: 'Step back down slowly', moveStep: 3, holdStep: 3 },
+        { to: 'floor', move: 800, label: 'Step back down slowly', hold: 300, holdLabel: 'Step back down slowly', moveStep: 3, holdStep: 3, quiet: true },
+      ],
+      steps: [
+        'Stand facing a sturdy step, low bench or bottom stair.',
+        'Place one foot flat on the step.',
+        'Push through that heel to step up until your leg is straight, then step back down slowly.',
+        'Repeat 10 times, then switch legs (or alternate legs).',
+      ],
+      tip: 'Use a step about knee height or lower. Hold dumbbells at your sides to make it harder.',
+      props(back) {
+        mk(back, 'path', 'eq-box eq-edge', { d: rrect(208, 171.5, 50, 29.5, 1.5) });
+        mk(back, 'path', 'eq-box-top', { d: rrect(208, 171.5, 50, 3, 1.2) });
+        return () => {};
+      },
+    },
+    {
+      id: 'calfraise', name: 'Calf raises', kind: 'reps', card: [15, 15, 15], view: 'stand',
+      face: 1, key: 'up', sign: { nh: 1, fh: 1, nk: -1, fk: -1 },
+      muscles: [{ kind: 'calves' }], labels: { g: 'Working: calves' },
+      poses: {
+        down: G(stand, { nA: [91, 90], fA: [89, 90], hg: 0.9, db: 1, dbA: 0 }),
+        up: G(stand, { hy: 104.6, nk: [201, 189.2], fk: [201, 189.2], nf: 38, ff: 38, nA: [91, 90], fA: [89, 90], hg: 0.9, db: 1, dbA: 0, g: 1 }),
+      },
+      start: 'down',
+      setup: [['Stand tall, a dumbbell in each hand, feet hip-width apart', 0, 2500]],
+      cycle: [
+        { to: 'up', move: 1000, label: 'Rise up onto your toes', hold: 500, holdLabel: 'Rise up onto your toes', moveStep: 1, holdStep: 1, form: 'Weight over your big toes, knees straight' },
+        { to: 'down', move: 1300, label: 'Lower your heels slowly', hold: 300, holdLabel: 'Lower your heels slowly', moveStep: 2, holdStep: 2 },
+      ],
+      steps: [
+        'Stand tall with a dumbbell in each hand at your sides, feet hip-width apart. Hold a wall or chair for balance if you need to.',
+        'Rise up onto your toes as high as you can and pause.',
+        'Lower your heels slowly. Repeat 15 times.',
+      ],
+      tip: 'For a bigger stretch, stand with the balls of your feet on a step and let your heels drop below it.',
+    },
+    {
+      id: 'deadbug', name: 'Dead bug', kind: 'reps', card: [8, 8, 8], weightNote: 'bodyweight', view: 'floor', mat: true,
+      face: 1, key: 'extN', sign: { nh: 1, fh: 1, nk: -1, fk: -1 },
+      muscles: [{ kind: 'abs' }], labels: { g: 'Working: belly (deep core)' },
+      poses: {
+        flat: G(supG, { nA: [268, 270], fA: [268, 270] }),
+        // Tabletop: knees over hips, shins level, arms reaching to the ceiling.
+        table: G(supG, { nk: [254, 145.5], fk: [254, 145.5], nf: -10, ff: -10, nA: [268, 270], fA: [268, 270] }),
+        // Near leg and far arm stretch out; then the far leg and near arm.
+        extN: G(supG, { nk: [294, 176], fk: [254, 145.5], nf: -40, ff: -10, nA: [268, 270], fA: [192, 190], g: 1 }),
+        extF: G(supG, { fk: [294, 176], nk: [254, 145.5], ff: -40, nf: -10, fA: [268, 270], nA: [192, 190], g: 1 }),
+      },
+      start: 'flat',
+      setup: [['Lie on your back, arms reaching to the ceiling', 0, 2500], ['Lift your legs, knees over your hips', 1, 1500, 'table', 1300]],
+      cycle: [
+        { to: 'extN', move: 1500, label: 'Stretch out one leg and the opposite arm', hold: 400, holdLabel: 'Stretch out one leg and the opposite arm', moveStep: 2, holdStep: 2, form: 'Lower back stays pressed into the mat' },
+        { to: 'table', move: 1300, label: 'Bring them back', hold: 200, holdLabel: 'Bring them back', moveStep: 3, holdStep: 3 },
+        { to: 'extF', move: 1500, label: 'Now the other side', hold: 400, holdLabel: 'Now the other side', moveStep: 2, holdStep: 2, form: 'Lower back stays pressed into the mat' },
+        { to: 'table', move: 1300, label: 'Bring them back', hold: 200, holdLabel: 'Bring them back', moveStep: 3, holdStep: 3, quiet: true },
+      ],
+      steps: [
+        'Lie on your back with your arms reaching straight up to the ceiling.',
+        'Lift your legs so your knees are over your hips and your shins are level with the floor.',
+        'Keeping your lower back pressed into the mat, slowly stretch one leg out and the opposite arm back over your head, just above the floor.',
+        'Bring them back and do the other side. One rep is both sides; repeat 8 times.',
+      ],
+      tip: 'Breathe out as you stretch out. Go only as low as you can keep your back flat.',
+    },
   ];
   const GYM_A = ['plank', 'pyramid', 'gbridge', 'goblet', 'hammerpress', 'latpull', 'hamcurl', 'vup'];
   const GYM_B = ['sideplank', 'gbridge', 'airsquat', 'dbdeadlift', 'midrow', 'pushup', 'latraise', 'flutter'];
+  // Upper / Lower / Core days (machine ids; Home swaps them like in A and B).
+  const GYM_UPPER = ['pushup', 'midrow', 'floorpress', 'latpull', 'hammerpress', 'latraise', 'revfly'];
+  const GYM_LOWER = ['goblet', 'dbdeadlift', 'lunge', 'gbridge', 'hamcurl', 'stepup', 'calfraise'];
+  const GYM_CORE = ['plank', 'deadbug', 'sideplank', 'vup', 'pyramid', 'flutter'];
 
   // ---------- Exercise library and workouts ----------
   // Every exercise is self-contained: `type` picks its plan (back: repeats + hold; gym: sets) and voice pack,
@@ -2111,19 +2277,21 @@
   const LIBRARY = Object.fromEntries([...BACK_EXERCISES, ...GYM_EXERCISES].map((ex) => [ex.id, ex]));
   const PROG = document.documentElement.dataset.prog === 'gym' ? 'gym' : 'back';
   const BACK_LIST = BACK_EXERCISES.map((ex) => ex.id);
-  const GYM_WORKOUTS = { a: GYM_A, b: GYM_B };
+  const GYM_WORKOUTS = { a: GYM_A, b: GYM_B, upper: GYM_UPPER, lower: GYM_LOWER, core: GYM_CORE };
+  const WORKOUT_TAGS = { a: 'A', b: 'B', upper: 'Upper', lower: 'Lower', core: 'Core' };
   // Home (an adjustable dumbbell set) swaps the three machine exercises.
   const HOME_SWAP = { latpull: 'pullover', hamcurl: 'towelcurl', midrow: 'dbrow' };
   const GYM_ONLY = new Set(Object.keys(HOME_SWAP)), HOME_ONLY = new Set(Object.values(HOME_SWAP));
   const MACHINE_OF = Object.fromEntries(Object.entries(HOME_SWAP).map(([g, h]) => [h, g]));
   // What the Custom picker offers: every exercise, each home swap listed after its machine.
-  const GYM_ALL = [...new Set([...GYM_A, ...GYM_B].flatMap((id) => (HOME_SWAP[id] ? [id, HOME_SWAP[id]] : [id])))];
+  const GYM_ALL = [...new Set(Object.values(GYM_WORKOUTS).flat().flatMap((id) => (HOME_SWAP[id] ? [id, HOME_SWAP[id]] : [id])))];
   // For fitting a workout into less time: muscle group, and how early an exercise may be dropped
   // (0 = never: big exercises; 1 = first; 2 = later). The first core exercise in a workout is always kept.
   const GYM_ROLE = {
     plank: ['core', 2], pyramid: ['core', 2], sideplank: ['core', 2], vup: ['core', 2], flutter: ['core', 2],
     gbridge: ['legs', 0], goblet: ['legs', 0], airsquat: ['legs', 0], dbdeadlift: ['legs', 0], hamcurl: ['legs', 1], towelcurl: ['legs', 1],
-    hammerpress: ['push', 0], pushup: ['push', 0], latraise: ['push', 1],
+    hammerpress: ['push', 0], pushup: ['push', 0], latraise: ['push', 1], floorpress: ['push', 0], revfly: ['pull', 1],
+    lunge: ['legs', 0], stepup: ['legs', 1], calfraise: ['legs', 1], deadbug: ['core', 2],
     latpull: ['pull', 0], midrow: ['pull', 0], pullover: ['pull', 0], dbrow: ['pull', 0],
   };
   for (const id in GYM_ROLE) Object.assign(LIBRARY[id], { cat: GYM_ROLE[id][0], dropRank: GYM_ROLE[id][1] });
@@ -2157,7 +2325,7 @@
   }
   if (!['home', 'gym'].includes(gym.where)) gym.where = 'home';
   if (!['full', 10, 15, 20, 30].includes(gym.time)) gym.time = 'full';
-  if (!['a', 'b', 'custom'].includes(gym.workout)) gym.workout = 'a';
+  if (!['a', 'b', 'upper', 'lower', 'core', 'custom'].includes(gym.workout)) gym.workout = 'a';
   if (!['auto', 'card', '8', '10', '12', 'custom'].includes(gym.level)) gym.level = 'auto';
   if (![45, 60, 90].includes(Number(gym.rest))) gym.rest = 45;
   gym.order = [...new Set([...(gym.order || []).filter((id) => GYM_ALL.includes(id)), ...GYM_ALL])];
@@ -2732,7 +2900,7 @@
   // Gym page: Workout A / B / Custom, and the custom exercise picker.
   const workoutSeg = document.getElementById('workoutSeg');
   const pickBox = document.getElementById('pickBox'), pickList = document.getElementById('pickList');
-  segButtons(workoutSeg, [['a', 'Workout A'], ['b', 'Workout B'], ['custom', 'Custom']], 'workout');
+  segButtons(workoutSeg, [['a', 'Workout A'], ['b', 'Workout B'], ['upper', 'Upper'], ['lower', 'Lower'], ['core', 'Core'], ['custom', 'Custom']], 'workout');
   workoutSeg.addEventListener('click', (e) => {
     const b = e.target.closest('button[data-workout]');
     if (!b || b.dataset.workout === gym.workout) return;
@@ -2743,7 +2911,7 @@
   function renderPicker() {
     pickBox.hidden = gym.workout !== 'custom';
     if (pickBox.hidden) return;
-    const inWhich = (id) => { const m = MACHINE_OF[id] || id; return [GYM_A.includes(m) && 'A', GYM_B.includes(m) && 'B'].filter(Boolean).join(' · '); };
+    const inWhich = (id) => { const m = MACHINE_OF[id] || id; return Object.keys(GYM_WORKOUTS).filter((w) => GYM_WORKOUTS[w].includes(m)).map((w) => WORKOUT_TAGS[w]).join(' · '); };
     const shown = gym.order.filter(available);
     pickList.replaceChildren(...shown.map((id, i) => {
       const ex = LIBRARY[id], li = document.createElement('li');
