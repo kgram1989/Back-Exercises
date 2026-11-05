@@ -92,6 +92,7 @@
   /* plan */
   .seg { display: inline-flex; flex-wrap: wrap; gap: 4px; background: var(--surface-2); border-radius: 999px; padding: 4px; margin-bottom: 10px; }
   .seg button { border: 0; background: transparent; min-height: 32px; padding: 5px 12px; }
+  .seg button:disabled { opacity: 0.4; cursor: not-allowed; }
   .seg button[aria-checked="true"] { background: var(--surface); box-shadow: 0 1px 2px rgba(0,0,0,.15); color: var(--accent); }
   .plan-table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
   .plan-table th { text-align: left; font-size: 0.78rem; color: var(--muted); font-weight: 600; padding: 4px 6px; }
@@ -2341,7 +2342,10 @@
   }
   // Rest between sets: set by the chosen time, or your own choice for a full workout.
   const REST_FOR_TIME = { 10: 20, 15: 30, 20: 30, 30: 45 };
-  const restSeconds = () => (gym.time === 'full' ? Number(gym.rest) : REST_FOR_TIME[gym.time]);
+  // The time actually used: a chosen time the full workout already fits into runs as Full (gym.time stays as chosen,
+  // so it comes back for a longer workout).
+  let effTime = 'full';
+  const restSeconds = () => (effTime === 'full' ? Number(gym.rest) : REST_FOR_TIME[effTime]);
   // Gym plan: one value per set (reps, or seconds for timed exercises); 0 skips a set.
   function gymPlan(ex) {
     let sets = ex.card.slice();
@@ -2376,7 +2380,7 @@
       return [ex.id, finishGymPlan(ex, sets, o.n[ex.id])];
     }));
     const timeOf = (plans, active) => active.reduce((ms, ex) => ms + buildGymPhases(ex, plans[ex.id], 'workout', active).total, 0);
-    const target = gym.time === 'full' ? Infinity : gym.time * 60000 + 30000;
+    const target = effTime === 'full' ? Infinity : effTime * 60000 + 30000;
     let best = null;
     // The Full button's length: every set, with the full workout's own rest.
     const full = timeOf(Object.fromEntries(list.map((ex) => [ex.id, finishGymPlan(ex, baseSets[ex.id], 3, Number(gym.rest))])), list);
@@ -2989,12 +2993,16 @@
     const f = FIT, el = document.getElementById('fitLine');
     const mins = (ms) => Math.max(1, Math.round(ms / 60000));
     timeSeg.querySelectorAll('button').forEach((b) => {
-      b.setAttribute('aria-checked', String(b.dataset.time === String(gym.time)));
+      b.setAttribute('aria-checked', String(b.dataset.time === String(effTime)));
+      // Times the full workout already fits into are greyed out.
+      const longer = b.dataset.time !== 'full' && f.full <= Number(b.dataset.time) * 60000 + 30000;
+      b.disabled = longer;
+      b.title = longer ? `This workout takes only about ${mins(f.full)} min in full` : '';
       if (b.dataset.time === 'full') b.textContent = `Full · ${mins(f.full)} min`;
     });
-    document.getElementById('restPick').hidden = gym.time !== 'full';
-    document.getElementById('restFixed').textContent = gym.time === 'full' ? '' : `Rest between sets: ${restSeconds()} s (set by the time)`;
-    const parts = [gym.time === 'full' ? 'Full workout' : `${gym.time} min`, `${restSeconds()} s rest`];
+    document.getElementById('restPick').hidden = effTime !== 'full';
+    document.getElementById('restFixed').textContent = effTime === 'full' ? '' : `Rest between sets: ${restSeconds()} s (set by the time)`;
+    const parts = [effTime === 'full' ? 'Full workout' : `${effTime} min`, `${restSeconds()} s rest`];
     if (f.o.cap) parts.push(`up to ${f.o.cap} reps`);
     else parts.push(gym.level === 'auto' ? 'card reps' : (LEVELS.gym.find(([v]) => v === gym.level) || [0, ''])[1].toLowerCase() + (/^\d/.test(gym.level) ? '' : ' reps'));
     if (f.o.hold) parts.push('holds 5 s shorter');
@@ -3013,7 +3021,9 @@
     const level = PROG === 'gym' ? gym.level : settings.level;
     levelSeg.querySelectorAll('button').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.level === level)));
     if (PROG === 'gym') {
+      effTime = gym.time;
       FIT = gymFit(BASE_LIST);
+      if (effTime !== 'full' && FIT.full <= effTime * 60000 + 30000) { effTime = 'full'; FIT = gymFit(BASE_LIST); }
       const same = FIT.active.length === EXERCISES.length && FIT.active.every((ex, i) => ex === EXERCISES[i]);
       EXERCISES = FIT.active;
       if (!same) rebuild = true;
