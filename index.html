@@ -1073,6 +1073,7 @@
     return ribbon(P, N, wl, wr, Lf, 0.3); // short end at the wrist: the hand covers it
   }
   const FAR_OFF = [2, -2.2]; // the far-side limbs are drawn shifted by this much
+  const ARM_SPLIT = 100; // elbow bend (degrees) above which the forearm is drawn as its own piece, over the sleeve
   // Limb muscle highlights: [limb, side (1 front, -1 back, 0 whole width), from, to along the limb].
   const LIMB_MUSCLES = {
     quads: ['thigh', 1, 0.1, 0.9], hams: ['thigh', -1, 0.1, 0.9], calves: ['shin', -1, 0.12, 0.6],
@@ -1231,10 +1232,21 @@
         const dT = norm(sub(target, sh));
         elb = add(sh, dT, L.ua); hand = add(elb, dT, L.fa);
       }
-      setRib(parts, side + 'ua', armRibbon(sh, elb, hand, armAnt));
+      // A strongly bent elbow (the forearm folding back over the upper arm, e.g. curls, goblet hold, crossed arms)
+      // is drawn as two pieces, the forearm over the sleeve; the one-piece outline only works for moderate bends.
+      const d1 = norm(sub(elb, sh)), d2 = norm(sub(hand, elb));
+      const bentDeg = Math.acos(Math.max(-1, Math.min(1, dot(d1, d2)))) / RAD;
+      if (bentDeg > ARM_SPLIT) {
+        setRib(parts, side + 'ua', limbRibbon(sh, elb, LIMB.upper, armAnt, 0, 1.06));
+        let fAnt = perpOf(d2); if (dot(fAnt, perpOf(d1)) * dot(perpOf(d1), armAnt) < 0) fAnt = neg(fAnt);
+        setRib(parts, side + 'fa', limbRibbon(elb, hand, LIMB.fore, fAnt, -0.1, 1));
+      } else {
+        setRib(parts, side + 'ua', armRibbon(sh, elb, hand, armAnt));
+        for (const k of ['fa', 'fas', 'fah']) if (parts[side + k]) parts[side + k].setAttribute('d', '');
+      }
       setRib(parts, side + 'sl', limbRibbon(sh, elb, LIMB.sleeve, armAnt, -0.06, 0.46));
       const ud = norm(sub(elb, sh)), un = perpOf(ud);
-      const hemC = add(sh, ud, L.ua * 0.46);
+      const hemC = add(sh, ud, Math.hypot(elb[0] - sh[0], elb[1] - sh[1]) * 0.46);
       parts[side + 'slhem'].setAttribute('d', `M${pt(add(hemC, un, 5.0 * BUILD))}L${pt(add(hemC, un, -5.0 * BUILD))}`);
       const fdir = norm(sub(hand, elb));
       const a0 = angOf(fdir);
@@ -1305,10 +1317,11 @@
         const [seg, side, fa, fb] = LIMB_MUSCLES[k], j = J[m.def.side || 'n'];
         const [A, B, prof, ant] = seg === 'thigh' ? [hip, j.knee, LIMB.thigh, j.legAnt] : seg === 'shin' ? [j.knee, j.ank, LIMB.shin, j.legAnt] : [sh, j.elb, LIMB.upper, j.armAnt];
         const b = limbBand(A, B, prof, ant, side, fa, fb, side === 0 ? 0 : 0.5, side === 0 ? 0 : 4.4);
-        m.p.setAttribute('d', b.d);
+        m.p.setAttribute('d', side === 0 ? limbRibbon(A, B, prof, ant, fa, fb).d : b.d); // whole-width: rounded ends
         m.f.setAttribute('d', [0.35, 0.65].map((q) => spline(b.outer.map((o, i) => lerp2(o, b.inner[i], q)))).join(''));
       }
     }
+    stage.J = J; // kept for checks
     return { hip, c1, c2, sh, front, contacts, J };
   }
   // A point on the body: `at` along the spine (0 hips → 1 shoulders), `off` toward the belly (negative = toward the back).
@@ -1317,7 +1330,7 @@
   // Builds the figure's SVG elements, back to front, and returns them keyed by name.
   const FIG_LAYERS = [
     ['far', [
-      ['fua', 'skin'], ['fuas', 'sh'], ['fsl', 'shirt'], ['fsls', 'sh'], ['fslhem', 'ln ln-shirt'],
+      ['fua', 'skin'], ['fuas', 'sh'], ['fsl', 'shirt'], ['fsls', 'sh'], ['fslhem', 'ln ln-shirt'], ['ffa', 'skin'], ['ffas', 'sh'],
       ['fdb', 'db'], ['fhand', 'skin hand'], ['fhandl', 'ln ln-hand'],
       ['fth', 'pants'], ['fths', 'sh'], ['fknee', 'kneecap', 'ellipse'], ['fsh', 'pants'], ['fshs', 'sh'],
       ['fsock', 'sock'], ['fshoe', 'shoe'], ['fsole', 'sole'], ['flace', 'ln ln-lace'],
@@ -1334,9 +1347,11 @@
       ['nth', 'pants'], ['nths', 'sh'], ['nthh', 'hi'], ['nseam', 'ln ln-seam'], ['ncrease', 'ln ln-crease'], ['nknee', 'kneecap', 'ellipse'],
       ['nsh', 'pants'], ['nshs', 'sh'], ['nshh', 'hi'], ['nsock', 'sock'], ['nsocks', 'sh'], ['nshoe', 'shoe'], ['nsole', 'sole'], ['nlace', 'ln ln-lace'],
       ['nua', 'skin'], ['nuas', 'sh'], ['nuah', 'hi'], ['nsl', 'shirt'], ['nsls', 'sh'], ['nslh', 'hi'], ['nslhem', 'ln ln-shirt'],
-      ['ndb', 'db'], ['nhand', 'skin hand'], ['nhandl', 'ln ln-hand'],
     ]],
     ['muscles2', []], // limb muscles, drawn over the near limbs
+    ['near2', [ // the near forearm (when folded), dumbbell and hand go in front of the upper arm and its highlight
+      ['nfa', 'skin'], ['nfas', 'sh'], ['nfah', 'hi'], ['ndb', 'db'], ['nhand', 'skin hand'], ['nhandl', 'ln ln-hand'],
+    ]],
   ];
   function buildFigure(fig, ex) {
     const parts = {};
@@ -1593,8 +1608,10 @@
   // view: 'floor' (close-up on the mat) or 'stand' (whole standing figure and machines).
   const gbase = P(base, { db: 0, db1: 0, dbA: 0, dbO: 0, dbE: 0, nLs: 1, fLs: 1 });
   const G = (o, extra) => P(P(gbase, o), extra);
+  // Ankle target for a straight leg: one full leg length from the hip, toward `toward` (so the knee doesn't buckle).
+  const reach = (hx, hy, toward) => { const d = norm(sub(toward, [hx, hy])); return [hx + d[0] * 86.6, hy + d[1] * 86.6]; };
   const stand = G({ hx: 198, hy: 112.6, t: 270, n: 270, nA: [91, 90], fA: [89, 90], nk: [201, 197.2], fk: [201, 197.2], nf: 0, ff: 0, hg: 0.45 });
-  const plankBase = G({ hx: 211, hy: 176.8, t: 188.2, n: 192, nA: [90, 180], fA: [90, 180], nk: [295, 189.5], fk: [295, 189.5], nf: 118, ff: 118, hd: 180, hdw: 1, hg: 0.55 });
+  const plankBase = G({ hx: 211, hy: 176.8, t: 188.2, n: 192, nA: [90, 180], fA: [90, 180], nk: reach(211, 176.8, [295, 187]), fk: reach(211, 176.8, [295, 187]), nf: 118, ff: 118, hd: 180, hdw: 1, hg: 0.55 });
   const supG = G(supineFlat);
   const mk = (g, tag, cls, attrs = {}) => {
     const e = document.createElementNS(SVGNS, tag);
@@ -1618,10 +1635,10 @@
   const GYM_EXERCISES = [
     {
       id: 'plank', name: 'Planks', kind: 'time', card: [25, 25, 25], weightNote: 'bodyweight', view: 'floor', mat: true,
-      face: -1, key: 'plank', sign: { nh: -1, fh: -1, nk: -1, fk: -1 },
+      face: -1, key: 'plank', sign: { nh: -1, fh: -1, nk: 1, fk: 1 },
       muscles: [{ kind: 'abs' }], labels: { g: 'Working: belly (core)' },
       poses: {
-        down: G(plankBase, { hx: 208.6, hy: 188.5, t: 197.8, n: 200, nk: [294, 193], fk: [294, 193], nf: 15, ff: 15 }),
+        down: G(plankBase, { hx: 208.6, hy: 188.5, t: 197.8, n: 200, nk: reach(208.6, 188.5, [294, 193]), fk: reach(208.6, 188.5, [294, 193]), nf: 15, ff: 15 }),
         plank: P(plankBase, { g: 1 }),
       },
       start: 'down',
@@ -1640,11 +1657,11 @@
     },
     {
       id: 'pyramid', name: 'Plank pyramids', kind: 'reps', card: [8, 8, 8], weightNote: 'bodyweight', view: 'floor', mat: true,
-      face: -1, key: 'pike', sign: { nh: -1, fh: -1, nk: -1, fk: -1 },
+      face: -1, key: 'pike', sign: { nh: -1, fh: -1, nk: 1, fk: 1 },
       muscles: [{ kind: 'abs' }, { kind: 'delts', key: 'm2' }], labels: { g: 'Working: belly, shoulders' },
       poses: {
-        plank: G(plankBase, { hx: 213, hy: 177 }),
-        pike: G(plankBase, { hx: 226, hy: 140.6, t: 154.2, n: 150, nA: [126.9, 180], fA: [126.9, 180], nk: [296, 189.5], fk: [296, 189.5], nf: 128, ff: 128, g: 1, m2: 1, a1: 1 }),
+        plank: G(plankBase, { hx: 213, hy: 177, nk: reach(213, 177, [295, 187]), fk: reach(213, 177, [295, 187]) }),
+        pike: G(plankBase, { hx: 226, hy: 140.6, t: 154.2, n: 150, nA: [126.9, 180], fA: [126.9, 180], nk: reach(226, 140.6, [296, 187]), fk: reach(226, 140.6, [296, 187]), nf: 128, ff: 128, g: 1, m2: 1, a1: 1 }),
       },
       cues: [{ key: 'a1', from: [0.05, -14], to: [0.05, -30] }],
       start: 'plank',
@@ -1833,11 +1850,11 @@
     },
     {
       id: 'sideplank', name: 'Side planks', kind: 'time', card: [15, 15, 15], weightNote: 'bodyweight', view: 'floor', mat: true,
-      face: -1, key: 'up', sign: { nh: -1, fh: -1, nk: -1, fk: -1 },
+      face: -1, key: 'up', sign: { nh: -1, fh: -1, nk: 1, fk: 1 },
       muscles: [{ kind: 'abs' }], labels: { g: 'Working: sides of your belly' },
       poses: {
-        down: G(plankBase, { hx: 208, hy: 190, t: 199.1, n: 200, nA: [90, 180], fA: [19, 19], nk: [294, 193], fk: [294, 193], nf: 70, ff: 70, hg: 0.3, hd: 180, hdw: 1 }),
-        up: G(plankBase, { hx: 211, hy: 178.2, t: 189.4, n: 190, nA: [90, 180], fA: [-88, -90], nk: [295, 192], fk: [295, 192], nf: 70, ff: 70, hg: 0.3, hd: 180, hdw: 1, g: 1 }),
+        down: G(plankBase, { hx: 208, hy: 190, t: 199.1, n: 200, nA: [90, 180], fA: [19, 19], nk: reach(208, 190, [294, 188.5]), fk: reach(208, 190, [294, 188.5]), nf: 70, ff: 70, hg: 0.3, hd: 180, hdw: 1 }),
+        up: G(plankBase, { hx: 211, hy: 178.2, t: 189.4, n: 190, nA: [90, 180], fA: [-88, -90], nk: reach(211, 178.2, [295, 188]), fk: reach(211, 178.2, [295, 188]), nf: 70, ff: 70, hg: 0.3, hd: 180, hdw: 1, g: 1 }),
       },
       start: 'down',
       setup: [['Lie on your side, propped on one forearm, legs stacked', 0, 3000]],
@@ -1926,7 +1943,7 @@
         const lever = mk(back, 'path', 'eq-metal eq-edge');
         const grip = mk(back, 'path', 'eq-iron eq-edge');
         mk(back, 'circle', 'eq-metal-lo eq-edge', { cx: 292.5, cy: 26, r: 4.5 });
-        mk(front, 'path', 'eq-pad eq-edge', { d: rrect(211, 84, 9, 38, 4) });
+        mk(back, 'path', 'eq-pad eq-edge', { d: rrect(211, 84, 9, 38, 4) }); // behind the near arm, which passes beside it
         return (J) => {
           const g = J.n.grip;
           lever.setAttribute('d', rod([292.5, 26], add(g, [0, -4], 1), 3.6));
