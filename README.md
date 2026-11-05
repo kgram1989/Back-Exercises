@@ -25,6 +25,9 @@ The **Gym workout** link at the top (`?w=gym`) opens a second page with a full-b
 
 - **Workout A:** planks, plank pyramids, glute bridges, goblet squats, hammer curl + press, lat pulldown machine, seated hamstring curls, V-ups.
 - **Workout B:** side planks, glute bridges, air squats, dumbbell deadlifts, mid-row machine, assisted push-ups, lateral raises, flutter kicks.
+- **Upper:** push-ups, bent-over rows (mid-row machine at the gym), dumbbell floor press, dumbbell pullover (lat pulldown), hammer curl + press, lateral raises, reverse fly.
+- **Lower:** goblet squats, dumbbell deadlifts, reverse lunges, glute bridges, towel leg curls (seated hamstring curls), step-ups, calf raises.
+- **Core:** planks, dead bug, side planks, V-ups, plank pyramids, flutter kicks.
 - **Custom:** tick any of these exercises and put them in your own order.
 - **Home (default) or Gym:** Home swaps the three machines for an adjustable dumbbell set: lat pulldown → dumbbell pullover, seated hamstring curls → towel leg curls, mid-row machine → bent-over dumbbell rows.
 - **Time:** 10, 15, 20 or 30 minutes, or Full (default; shows its real length). Rest between sets is 20 s for 10 min, 30 s for 15–20 min and 45 s for 30 min; Full uses your choice of 45, 60 or 90 s. The workout is fitted to the time in a relaxed way: with Auto reps it first lowers reps (12 → 10 → 8) and shortens timed holds by 5 s, then removes sets one at a time (small exercises first, then big ones), then drops small exercises. Rest and rep speed never change. Each option is timed with the app's own timeline, so the estimate matches the real workout.
