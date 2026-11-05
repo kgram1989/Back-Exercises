@@ -123,6 +123,12 @@
   .prog-nav a:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
   .plan-sub { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 700; margin: 12px 0 6px; }
   .plan-table.gym td:first-child { width: auto; }
+  .plan-table input.cut { opacity: 0.35; text-decoration: line-through; }
+  .plan-table tr.dropped td { opacity: 0.45; }
+  .plan-table tr.dropped td:first-child::after { content: " · skipped"; font-size: 0.78rem; }
+  .fit-line { margin: -4px 0 16px; color: var(--muted); font-size: 0.95rem; }
+  .fit-line strong { color: var(--text); }
+  .rest-fixed { font-size: 0.88rem; color: var(--muted); }
   html[data-prog="gym"] .me-grid { grid-template-columns: 1fr; }
   html[data-prog="gym"] .plan { max-width: 760px; }
   .plan-table.gym td { white-space: nowrap; }
@@ -229,6 +235,7 @@
   .eq-edge { stroke: rgba(0, 0, 0, 0.25); stroke-width: 0.4; stroke-linejoin: round; }
   .clock-face { fill: var(--clock); stroke: var(--metal-lo); stroke-width: 1.4; } .clock-hand { stroke: var(--iron); stroke-width: 1.1; stroke-linecap: round; fill: none; }
   .clock-tick { stroke: var(--metal-lo); stroke-width: 0.8; }
+  .eq-towel { fill: #f3efe7; stroke: rgba(0, 0, 0, 0.2); stroke-width: 0.4; }
   .fig .db { fill: var(--iron); stroke: rgba(255, 255, 255, 0.14); stroke-width: 0.5; fill-rule: nonzero; }
   .fig .skin, .fig .shirt, .fig .pants, .fig .shoe, .fig .sock, .fig .hair { stroke: rgba(0, 0, 0, 0.22); stroke-width: 0.4; stroke-linejoin: round; }
   .skin { fill: var(--skin); } .far .skin { fill: var(--skin-far); }
@@ -462,10 +469,10 @@
     <div class="panel">
       <h2>Around the workout</h2>
       <ul>
-        <li><strong>Warm up and cool down:</strong> rower for 3&ndash;5 minutes, or cardio of your choice.</li>
+        <li><strong>Warm up first:</strong> 3&ndash;5 minutes of marching on the spot, arm circles and a few slow squats (or the rower at the gym). Cool down the same way.</li>
         <li><strong>Cardio:</strong> elliptical, treadmill, rower or bike, 3&ndash;5 days a week for 20&ndash;35 minutes, on its own or after weights.</li>
         <li><strong>Flexibility:</strong> lower back holds, hip flexor stretch and foam roller.</li>
-        <li>Alternate Workout A and Workout B.</li>
+        <li>Alternate Workout A and Workout B. <strong>Home</strong> swaps the three machines for dumbbell and floor exercises.</li>
       </ul>
     </div>
     <div class="panel warn" role="note">
@@ -493,6 +500,10 @@
     <div class="panel plan">
       <h2 id="planH">Your plan</h2>
       <div data-prog="gym">
+        <div class="plan-sub" id="whereH">Where</div>
+        <div class="seg" role="radiogroup" aria-labelledby="whereH" id="whereSeg"></div>
+        <div class="plan-sub" id="timeH">Time</div>
+        <div class="seg" role="radiogroup" aria-labelledby="timeH" id="timeSeg"></div>
         <div class="plan-sub" id="wkSelH">Workout</div>
         <div class="seg" role="radiogroup" aria-labelledby="wkSelH" id="workoutSeg"></div>
         <div id="pickBox" hidden>
@@ -511,8 +522,8 @@
         <thead id="planHead"><tr><th scope="col">Exercise</th><th scope="col">Repeats</th><th scope="col">Hold (seconds)</th></tr></thead>
         <tbody id="planBody"></tbody>
       </table>
-      <div class="row" data-prog="gym" style="margin-top:10px"><label>Rest between sets <select id="restSel"><option value="30">30 s</option><option value="45">45 s</option><option value="60">60 s</option><option value="90">90 s</option></select></label></div>
-      <p class="hint" data-prog="gym">Card is your trainer's numbers. 8, 10 or 12 sets every rep exercise to that count; timed exercises keep their seconds. Typing a number switches to Custom; 0 skips a set. Weight is a note for you. Saved on this device.</p>
+      <div class="row" data-prog="gym" style="margin-top:10px"><label id="restPick">Rest between sets <select id="restSel"><option value="45">45 s</option><option value="60">60 s</option><option value="90">90 s</option></select></label><span class="rest-fixed" id="restFixed"></span></div>
+      <p class="hint" data-prog="gym"><strong>Auto</strong> uses your trainer's card for a full workout; for a shorter time it lowers reps (never below 8) before cutting sets. Card is your trainer's numbers; 8, 10 or 12 sets every rep exercise to that count. With a shorter time, fixed reps stay and sets are cut instead. Faded sets and exercises are skipped to fit the time. Typing a number switches to Custom; 0 skips a set. Weight is a note for you. Saved on this device.</p>
       <p class="hint" data-prog="back">The ranges come from your handout. Pick the numbers your provider told you &mdash; typing a number switches to Custom. Saved on this device.</p>
     </div>
     <div class="panel" data-prog="back">
@@ -540,6 +551,7 @@
     </div>
   </div>
 
+  <p class="fit-line" id="fitLine" data-prog="gym" aria-live="polite"></p>
   <main class="grid" id="grid"></main>
 
   <section class="help" data-prog="back">
@@ -1245,7 +1257,8 @@
       Object.assign(J[side], { elb, hand, ha, armAnt, grip });
       const dbEl = parts[side + 'db'];
       if (dbEl) {
-        if ((p.db || 0) > 0.02) { dbEl.setAttribute('d', dumbbellPath(grip, p.dbA || 0, p.dbO || 0, p.dbE || 0)); dbEl.setAttribute('opacity', clamp01(p.db).toFixed(2)); }
+        if ((p.db || 0) > 0.02 && !(side === 'f' && p.db1 > 0.5)) { // db1: one dumbbell in both hands, so no far copy
+          dbEl.setAttribute('d', dumbbellPath(grip, p.dbA || 0, p.dbO || 0, p.dbE || 0)); dbEl.setAttribute('opacity', clamp01(p.db).toFixed(2)); }
         else dbEl.setAttribute('d', '');
       }
       contacts.push([hand, 3.5], [elb, 3]);
@@ -1578,7 +1591,7 @@
   // along the handle, dbE (0/1) end-on; nLs/fLs arm length factor (an arm pointing at the viewer looks shorter).
   // kind: 'reps' (card = reps per set) or 'time' (card = seconds per set; hold 'H' = that many seconds).
   // view: 'floor' (close-up on the mat) or 'stand' (whole standing figure and machines).
-  const gbase = P(base, { db: 0, dbA: 0, dbO: 0, dbE: 0, nLs: 1, fLs: 1 });
+  const gbase = P(base, { db: 0, db1: 0, dbA: 0, dbO: 0, dbE: 0, nLs: 1, fLs: 1 });
   const G = (o, extra) => P(P(gbase, o), extra);
   const stand = G({ hx: 198, hy: 112.6, t: 270, n: 270, nA: [91, 90], fA: [89, 90], nk: [201, 197.2], fk: [201, 197.2], nf: 0, ff: 0, hg: 0.45 });
   const plankBase = G({ hx: 211, hy: 176.8, t: 188.2, n: 192, nA: [90, 180], fA: [90, 180], nk: [295, 189.5], fk: [295, 189.5], nf: 118, ff: 118, hd: 180, hdw: 1, hg: 0.55 });
@@ -1674,8 +1687,8 @@
       muscles: [{ kind: 'quads' }, { kind: 'glutes' }], labels: { g: 'Working: thighs, buttocks' },
       poses: {
         // Arms by joint angles: elbows down in front, forearms up, so the hands hold the top of the dumbbell at the chest.
-        up: G(stand, { nA: [80, -65], fA: [78, -67], hg: 0.75, db: 1, dbA: 90, dbO: 6 }),
-        down: G(stand, { hx: 178, hy: 150.5, t: 302, n: 290, nA: [112, -33], fA: [110, -35], hg: 0.75, db: 1, dbA: 90, dbO: 6, g: 1 }),
+        up: G(stand, { nA: [80, -65], fA: [78, -67], hg: 0.75, db: 1, db1: 1, dbA: 90, dbO: 6 }),
+        down: G(stand, { hx: 178, hy: 150.5, t: 302, n: 290, nA: [112, -33], fA: [110, -35], hg: 0.75, db: 1, db1: 1, dbA: 90, dbO: 6, g: 1 }),
       },
       start: 'up',
       setup: [['Hold one dumbbell at your chest, feet shoulder-width apart', 0, 3000]],
@@ -1992,6 +2005,83 @@
         'Lower your legs and rest.',
       ],
     },
+    // ---------- Home swaps for the machines (adjustable dumbbell set) ----------
+    {
+      id: 'pullover', name: 'Dumbbell pullover', kind: 'reps', card: [10, 10, 10], view: 'floor', mat: true,
+      face: 1, key: 'over', sign: { nh: 1, fh: 1, nk: -1, fk: -1 },
+      muscles: [{ kind: 'lowerBack', from: 0.55, to: 0.92 }, { kind: 'chest' }], labels: { g: 'Working: upper back, chest' },
+      poses: {
+        // One dumbbell held by the handle in both hands, across the fists, arms up over the chest, then back over the head.
+        up: G(supineBent, { nA: [272, 270], fA: [272, 270], hg: 0.85, db: 1, db1: 1, dbA: 360 }),
+        over: G(supineBent, { nA: [200, 194], fA: [200, 194], hg: 0.85, db: 1, db1: 1, dbA: 284, g: 1 }),
+      },
+      start: 'up',
+      setup: [['Lie on your back, knees bent, one dumbbell held over your chest', 0, 3000]],
+      cycle: [
+        { to: 'over', move: 2000, label: 'Lower the weight back over your head', hold: 300, holdLabel: 'Lower the weight back over your head', moveStep: 1, holdStep: 1, form: 'Elbows slightly bent, lower back stays down' },
+        { to: 'up', move: 1700, label: 'Pull it back over your chest', hold: 500, holdLabel: 'Pull it back over your chest', moveStep: 2, holdStep: 2 },
+      ],
+      steps: [
+        'Lie on your back with your knees bent and feet flat. Hold one dumbbell by the handle with both hands, arms straight up over your chest.',
+        'Keeping your elbows slightly bent, slowly lower the weight back over your head until you feel a stretch along your sides.',
+        'Pull it back over your chest. Repeat 10 times.',
+      ],
+      tip: 'Use a light weight, and only go as far back as is comfortable for your shoulders.',
+    },
+    {
+      id: 'towelcurl', name: 'Towel leg curls', kind: 'reps', card: [12, 12, 12], weightNote: 'bodyweight', view: 'floor', mat: true,
+      face: 1, key: 'in', sign: { nh: -1, fh: -1, nk: -1, fk: -1 },
+      muscles: [{ kind: 'hams' }, { kind: 'glutes' }], labels: { g: 'Working: backs of thighs, buttocks' },
+      poses: {
+        flat: G(supG),
+        // Hips up, legs nearly straight, heels on the towel.
+        out: G(supG, { hx: 211, hy: 177, t: 170, n: 182, nk: [295, 193.5], fk: [295, 193.5], nf: -70, ff: -70, g: 0.5 }),
+        in: G(supineBent, { hx: 206, hy: 160, t: 155.5, n: 168, nk: [262, 193.5], fk: [262, 193.5], nf: -40, ff: -40, g: 1 }),
+      },
+      start: 'flat',
+      setup: [['Lie on your back, heels on a towel', 0, 2500], ['Lift your hips off the floor', 1, 1500, 'out', 1300]],
+      cycle: [
+        { to: 'in', move: 1600, label: 'Slide your heels in toward you', hold: 300, holdLabel: 'Slide your heels in toward you', moveStep: 2, holdStep: 2, form: 'Hips stay up, squeeze your buttocks' },
+        { to: 'out', move: 1800, label: 'Slowly slide them back out', hold: 300, holdLabel: 'Slowly slide them back out', moveStep: 3, holdStep: 3 },
+      ],
+      steps: [
+        'Lie on your back on a smooth floor with your legs straight and your heels on a small towel.',
+        'Squeeze your buttocks and lift your hips off the floor.',
+        'Keeping your hips up, pull your heels in toward you, sliding the towel.',
+        'Slowly slide them back out. Repeat 12 times, then lower your hips.',
+      ],
+      tip: 'Too hard? Lower your hips between reps, or do single-leg glute bridges instead.',
+      props(back, front) {
+        const towel = mk(front, 'path', 'eq-towel');
+        return (J) => {
+          const x = (J.n.heel[0] + J.f.heel[0]) / 2;
+          towel.setAttribute('d', rrect(x - 9, 197.4, 18, 2.6, 1.2));
+        };
+      },
+    },
+    {
+      id: 'dbrow', name: 'Bent-over dumbbell rows', kind: 'reps', card: [12, 12, 12], view: 'stand',
+      face: 1, key: 'row', sign: { nh: 1, fh: 1, nk: -1, fk: -1 },
+      muscles: [{ kind: 'lowerBack', from: 0.55, to: 0.92 }, { kind: 'biceps' }], labels: { g: 'Working: upper back' },
+      poses: {
+        stand: G(stand, { nA: [91, 90], fA: [89, 90], hg: 0.9, db: 1, dbA: 0 }),
+        hang: G(stand, { hx: 172, hy: 120, t: 318, n: 334, nA: [92, 91], fA: [90, 89], hg: 0.9, db: 1, dbA: 0 }),
+        // Elbows pull up past the back; the weights come up beside the lower ribs.
+        row: G(stand, { hx: 172, hy: 120, t: 318, n: 334, nA: [160, 92], fA: [158, 90], hg: 0.9, db: 1, dbA: 0, g: 1 }),
+      },
+      start: 'stand',
+      setup: [['Hinge forward with a flat back, a dumbbell in each hand', 0, 2500, 'hang', 1500]],
+      cycle: [
+        { to: 'row', move: 1300, label: 'Pull the weights up to your ribs', hold: 400, holdLabel: 'Pull the weights up to your ribs', moveStep: 1, holdStep: 1, form: 'Elbows close to your sides, back flat' },
+        { to: 'hang', move: 1700, label: 'Lower slowly', hold: 300, holdLabel: 'Lower slowly', moveStep: 2, holdStep: 2 },
+      ],
+      steps: [
+        'Hold a dumbbell in each hand, palms facing in. Bend your knees slightly and hinge forward from your hips, keeping your back flat.',
+        'Pull the weights up toward your lower ribs, squeezing your shoulder blades together.',
+        'Lower slowly until your arms are straight. Repeat 12 times.',
+      ],
+      tip: 'Keep your neck in line with your back and look at the floor a little ahead of your feet.',
+    },
   ];
   const GYM_A = ['plank', 'pyramid', 'gbridge', 'goblet', 'hammerpress', 'latpull', 'hamcurl', 'vup'];
   const GYM_B = ['sideplank', 'gbridge', 'airsquat', 'dbdeadlift', 'midrow', 'pushup', 'latraise', 'flutter'];
@@ -2005,7 +2095,21 @@
   const PROG = document.documentElement.dataset.prog === 'gym' ? 'gym' : 'back';
   const BACK_LIST = BACK_EXERCISES.map((ex) => ex.id);
   const GYM_WORKOUTS = { a: GYM_A, b: GYM_B };
-  const GYM_ALL = [...new Set([...GYM_A, ...GYM_B])]; // what the Custom picker offers
+  // Home (an adjustable dumbbell set) swaps the three machine exercises.
+  const HOME_SWAP = { latpull: 'pullover', hamcurl: 'towelcurl', midrow: 'dbrow' };
+  const GYM_ONLY = new Set(Object.keys(HOME_SWAP)), HOME_ONLY = new Set(Object.values(HOME_SWAP));
+  const MACHINE_OF = Object.fromEntries(Object.entries(HOME_SWAP).map(([g, h]) => [h, g]));
+  // What the Custom picker offers: every exercise, each home swap listed after its machine.
+  const GYM_ALL = [...new Set([...GYM_A, ...GYM_B].flatMap((id) => (HOME_SWAP[id] ? [id, HOME_SWAP[id]] : [id])))];
+  // For fitting a workout into less time: muscle group, and how early an exercise may be dropped
+  // (0 = never: big exercises; 1 = first; 2 = later). The first core exercise in a workout is always kept.
+  const GYM_ROLE = {
+    plank: ['core', 2], pyramid: ['core', 2], sideplank: ['core', 2], vup: ['core', 2], flutter: ['core', 2],
+    gbridge: ['legs', 0], goblet: ['legs', 0], airsquat: ['legs', 0], dbdeadlift: ['legs', 0], hamcurl: ['legs', 1], towelcurl: ['legs', 1],
+    hammerpress: ['push', 0], pushup: ['push', 0], latraise: ['push', 1],
+    latpull: ['pull', 0], midrow: ['pull', 0], pullover: ['pull', 0], dbrow: ['pull', 0],
+  };
+  for (const id in GYM_ROLE) Object.assign(LIBRARY[id], { cat: GYM_ROLE[id][0], dropRank: GYM_ROLE[id][1] });
   let EXERCISES = [];
 
   // Fill in derived pose fields so every pose of an exercise has the same keys (needed for blending).
@@ -2027,16 +2131,32 @@
   const saveSettings = () => store.set('backex.settings', settings);
   const presetValue = ([lo, hi], level) => level === 'max' ? hi : level === 'standard' ? Math.round((lo + hi) / 2) : lo;
   // Gym page: which workout (A, B or a custom pick), rep preset, custom sets, weights and rest.
-  const gym = Object.assign({ workout: 'a', level: 'card', custom: {}, weights: {}, rest: 45, order: GYM_ALL.slice(), picked: GYM_A.slice() }, store.get('backex.gym', {}));
+  const GYM_DEFAULT_PICK = [...GYM_A, ...GYM_A.filter((id) => HOME_SWAP[id]).map((id) => HOME_SWAP[id])];
+  const gym = Object.assign({ v: 2, where: 'home', time: 'full', workout: 'a', level: 'auto', custom: {}, weights: {}, rest: 45, order: GYM_ALL.slice(), picked: GYM_DEFAULT_PICK.slice() }, store.get('backex.gym', {}));
+  if (gym.v !== 2) { // first visit since Home / Time / Auto reps were added
+    Object.assign(gym, { v: 2, where: 'home', time: 'full' });
+    if (gym.level === 'card') gym.level = 'auto';
+    gym.picked = [...new Set([...(gym.picked || []), ...(gym.picked || []).filter((id) => HOME_SWAP[id]).map((id) => HOME_SWAP[id])])];
+  }
+  if (!['home', 'gym'].includes(gym.where)) gym.where = 'home';
+  if (!['full', 10, 15, 20, 30].includes(gym.time)) gym.time = 'full';
   if (!['a', 'b', 'custom'].includes(gym.workout)) gym.workout = 'a';
-  if (!['card', '8', '10', '12', 'custom'].includes(gym.level)) gym.level = 'card';
-  if (![30, 45, 60, 90].includes(Number(gym.rest))) gym.rest = 45;
+  if (!['auto', 'card', '8', '10', '12', 'custom'].includes(gym.level)) gym.level = 'auto';
+  if (![45, 60, 90].includes(Number(gym.rest))) gym.rest = 45;
   gym.order = [...new Set([...(gym.order || []).filter((id) => GYM_ALL.includes(id)), ...GYM_ALL])];
   gym.picked = (gym.picked || []).filter((id) => GYM_ALL.includes(id));
-  if (!gym.picked.length) gym.picked = GYM_A.slice();
+  if (!gym.picked.length) gym.picked = GYM_DEFAULT_PICK.slice();
   for (const k of ['custom', 'weights']) if (typeof gym[k] !== 'object' || !gym[k]) gym[k] = {};
   const saveGym = () => store.set('backex.gym', gym);
-  const workoutIds = () => PROG === 'back' ? BACK_LIST : gym.workout === 'custom' ? gym.order.filter((id) => gym.picked.includes(id)) : GYM_WORKOUTS[gym.workout];
+  const available = (id) => (gym.where === 'home' ? !GYM_ONLY.has(id) : !HOME_ONLY.has(id));
+  function workoutIds() {
+    if (PROG === 'back') return BACK_LIST;
+    if (gym.workout === 'custom') return gym.order.filter((id) => gym.picked.includes(id) && available(id));
+    return [...new Set(GYM_WORKOUTS[gym.workout].map((id) => (gym.where === 'home' && HOME_SWAP[id]) || id))];
+  }
+  // Rest between sets: set by the chosen time, or your own choice for a full workout.
+  const REST_FOR_TIME = { 10: 20, 15: 30, 20: 30, 30: 45 };
+  const restSeconds = () => (gym.time === 'full' ? Number(gym.rest) : REST_FOR_TIME[gym.time]);
   // Gym plan: one value per set (reps, or seconds for timed exercises); 0 skips a set.
   function gymPlan(ex) {
     let sets = ex.card.slice();
@@ -2045,11 +2165,70 @@
       const c = gym.custom[ex.id];
       if (Array.isArray(c)) sets = sets.map((v, i) => (Number.isFinite(c[i]) ? c[i] : v));
     }
-    const done = sets.filter((v) => v > 0);
-    return { sets, done: done.length ? done : [sets[0] || 1], reps: done[0] || 1, hold: ex.kind === 'time' ? done[0] || 1 : 0, weight: gym.weights[ex.id] || '' };
+    return finishGymPlan(ex, sets, 3);
+  }
+  // `sets` holds one value per set (0 = skipped); only the first `keep` sets that aren't skipped are done.
+  function finishGymPlan(ex, sets, keep, restS = restSeconds()) {
+    const idx = sets.map((v, i) => (v > 0 ? i : -1)).filter((i) => i >= 0).slice(0, keep);
+    if (!idx.length) idx.push(0);
+    const done = idx.map((i) => sets[i] || 1);
+    return { sets, kept: idx, done, reps: done[0], hold: ex.kind === 'time' ? done[0] : 0, weight: gym.weights[ex.id] || '', rest: restS * 1000 };
+  }
+  // ---------- Fit a gym workout to the chosen time ----------
+  // Relaxed: rest and rep speed never change. With Auto reps it first lowers reps (12 → 10 → 8) and shortens timed
+  // holds by 5 s; then cuts sets on small exercises, then on big ones (3 → 2 → 1); then drops small exercises.
+  // Each candidate is timed with the app's own timeline, so the reps, rest and spoken lines are all counted.
+  let FIT = null;
+  function gymFit(list) {
+    const auto = gym.level === 'auto';
+    const firstCore = list.find((ex) => ex.cat === 'core');
+    const small = (ex) => ex.dropRank > 0 && ex !== firstCore;
+    const baseSets = Object.fromEntries(list.map((ex) => [ex.id, gymPlan(ex).sets]));
+    const plansFor = (o, active) => Object.fromEntries(active.map((ex) => {
+      let sets = baseSets[ex.id].slice();
+      if (ex.kind === 'reps' && o.cap) sets = sets.map((v) => Math.min(v, o.cap));
+      if (ex.kind === 'time' && o.hold) sets = sets.map((v) => (v > 0 ? Math.max(10, v - o.hold) : v));
+      return [ex.id, finishGymPlan(ex, sets, o.n[ex.id])];
+    }));
+    const timeOf = (plans, active) => active.reduce((ms, ex) => ms + buildGymPhases(ex, plans[ex.id], 'workout', active).total, 0);
+    const target = gym.time === 'full' ? Infinity : gym.time * 60000 + 30000;
+    let best = null;
+    // The Full button's length: every set, with the full workout's own rest.
+    const full = timeOf(Object.fromEntries(list.map((ex) => [ex.id, finishGymPlan(ex, baseSets[ex.id], 3, Number(gym.rest))])), list);
+    const tryOne = (o, active) => {
+      const plans = plansFor(o, active), total = timeOf(plans, active);
+      best = { o: { ...o, n: { ...o.n } }, plans, active, dropped: list.filter((ex) => !active.includes(ex)), total };
+      return total <= target;
+    };
+    // 1. Auto reps: lower reps, then shorten timed holds.
+    const o = { cap: 0, hold: 0, n: Object.fromEntries(list.map((ex) => [ex.id, 3])) };
+    let active = list.slice();
+    let ok = tryOne(o, active);
+    for (const step of auto ? [{ cap: 10 }, { cap: 8 }, { hold: 5 }] : []) {
+      if (ok) break;
+      Object.assign(o, step);
+      ok = tryOne(o, active);
+    }
+    // 2. One set at a time: small exercises first, then big ones; the exercise with the most sets left goes first.
+    const setsLeft = (ex) => Math.min(o.n[ex.id], plansFor(o, [ex])[ex.id].kept.length);
+    while (!ok) {
+      const pick = active.filter((ex) => setsLeft(ex) > 1)
+        .sort((x, y) => small(y) - small(x) || setsLeft(y) - setsLeft(x) || active.indexOf(y) - active.indexOf(x))[0];
+      if (!pick) break;
+      o.n[pick.id] = setsLeft(pick) - 1;
+      ok = tryOne(o, active);
+    }
+    // 3. Drop small exercises (the first core exercise and the big ones always stay).
+    const dropOrder = list.filter(small).sort((x, y) => x.dropRank - y.dropRank || list.indexOf(y) - list.indexOf(x));
+    for (const ex of dropOrder) {
+      if (ok) break;
+      active = active.filter((a) => a !== ex);
+      ok = tryOne(o, active);
+    }
+    return Object.assign(best, { full, fits: ok, list, small });
   }
   function planFor(ex) {
-    if (ex.type === 'gym') return gymPlan(ex);
+    if (ex.type === 'gym') return (FIT && FIT.plans[ex.id]) || gymPlan(ex);
     const lvl = settings.level === 'custom' ? 'beginner' : settings.level;
     let reps = presetValue(ex.range.reps, lvl);
     let hold = ex.range.hold ? presetValue(ex.range.hold, lvl) : ex.range.fixedHold || 0;
@@ -2103,14 +2282,14 @@
   function buildPhases(ex, plan, mode) {
     return ex.type === 'gym' ? buildGymPhases(ex, plan, mode) : buildBackPhases(ex, plan, mode);
   }
-  const restMs = (ex) => ex.type === 'gym' ? Number(gym.rest) * 1000 : REST_BETWEEN;
+  const restMs = (ex, plan) => (ex.type === 'gym' ? plan.rest : REST_BETWEEN);
   // Gym exercise: get ready, setup, then each set (with a rest between sets). A card plays one set and loops.
-  function buildGymPhases(ex, plan, mode) {
+  function buildGymPhases(ex, plan, mode, list = EXERCISES) {
     const phases = [];
     let prev = ex.start;
     const sets = plan.done, nSets = mode === 'card' ? 1 : sets.length;
-    if (mode === 'workout' && EXERCISES.indexOf(ex) > 0) {
-      phases.push({ from: prev, to: prev, move: 0, label: '', hold: restMs(ex), holdLabel: 'Rest', moveStep: -1, holdStep: -1, rep: 0, set: 0, sets: nSets, rest: true, counted: true });
+    if (mode === 'workout' && list.indexOf(ex) > 0) {
+      phases.push({ from: prev, to: prev, move: 0, label: '', hold: restMs(ex, plan), holdLabel: 'Rest', moveStep: -1, holdStep: -1, rep: 0, set: 0, sets: nSets, rest: true, counted: true });
     }
     if (mode === 'workout') {
       phases.push({ from: prev, to: prev, move: 0, label: '', hold: 5000, holdLabel: `Get ready: ${ex.name}`, moveStep: -1, holdStep: -1, rep: 0, set: 0, sets: nSets, intro: true, counted: true });
@@ -2120,7 +2299,7 @@
       prev = to;
     }
     for (let k = 0; k < nSets; k++) {
-      if (k > 0) phases.push({ from: prev, to: prev, move: 0, label: '', hold: restMs(ex), holdLabel: 'Rest', moveStep: -1, holdStep: -1, rep: 0, set: k, sets: nSets, rest: true, setRest: true, counted: true });
+      if (k > 0) phases.push({ from: prev, to: prev, move: 0, label: '', hold: restMs(ex, plan), holdLabel: 'Rest', moveStep: -1, holdStep: -1, rep: 0, set: k, sets: nSets, rest: true, setRest: true, counted: true });
       const reps = ex.kind === 'time' ? 1 : sets[k];
       for (let r = 0; r < reps; r++) {
         ex.cycle.forEach((seg, i) => {
@@ -2463,7 +2642,7 @@
       tr.appendChild(td);
       inp.addEventListener('change', () => {
         const custom = {};
-        GYM_ALL.forEach((id) => { custom[id] = gymPlan(LIBRARY[id]).sets.slice(); });
+        GYM_ALL.forEach((id) => { custom[id] = planFor(LIBRARY[id]).sets.slice(); }); // start from the numbers shown
         const v = parseFloat(inp.value);
         if (Number.isFinite(v)) custom[ex.id][i] = clampInt(v, 0, timed ? 60 : 30);
         gym.level = 'custom';
@@ -2480,7 +2659,7 @@
     wtIn.addEventListener('change', () => { gym.weights[ex.id] = wtIn.value.trim(); saveGym(); applyPlan(); });
     tdw.appendChild(wtIn);
     tr.appendChild(tdw);
-    planInputs[ex.id] = { setIns, wtIn };
+    planInputs[ex.id] = { setIns, wtIn, tr };
     return tr;
   }
   const PLAN_HEAD = {
@@ -2489,7 +2668,7 @@
   };
   const LEVELS = {
     back: [['beginner', 'Beginner'], ['standard', 'Standard'], ['max', 'Max'], ['custom', 'Custom']],
-    gym: [['card', 'Card'], ['8', '8 reps'], ['10', '10 reps'], ['12', '12 reps'], ['custom', 'Custom']],
+    gym: [['auto', 'Auto'], ['card', 'Card'], ['8', '8 reps'], ['10', '10 reps'], ['12', '12 reps'], ['custom', 'Custom']],
   };
   function segButtons(seg, items, attr) {
     seg.replaceChildren(...items.map(([v, label]) => {
@@ -2505,7 +2684,7 @@
     planHead.replaceChildren(Object.assign(document.createElement('tr'), {}));
     PLAN_HEAD[PROG].forEach((h) => { const th = document.createElement('th'); th.scope = 'col'; th.textContent = h; planHead.firstChild.appendChild(th); });
     document.getElementById('planTable').classList.toggle('gym', PROG === 'gym');
-    planBody.replaceChildren(...EXERCISES.map((ex) => (ex.type === 'gym' ? gymPlanRow(ex) : backPlanRow(ex))));
+    planBody.replaceChildren(...BASE_LIST.map((ex) => (ex.type === 'gym' ? gymPlanRow(ex) : backPlanRow(ex))));
   }
   segButtons(levelSeg, LEVELS[PROG], 'level');
   if (PROG === 'gym') levelSeg.setAttribute('aria-labelledby', 'repSelH');
@@ -2516,7 +2695,7 @@
     if (PROG === 'gym') {
       if (lv === 'custom' && gym.level !== 'custom') {
         const custom = {};
-        GYM_ALL.forEach((id) => { custom[id] = gymPlan(LIBRARY[id]).sets.slice(); });
+        GYM_ALL.forEach((id) => { custom[id] = planFor(LIBRARY[id]).sets.slice(); });
         gym.custom = custom;
       }
       gym.level = lv;
@@ -2547,24 +2726,25 @@
   function renderPicker() {
     pickBox.hidden = gym.workout !== 'custom';
     if (pickBox.hidden) return;
-    const inWhich = (id) => [GYM_A.includes(id) && 'A', GYM_B.includes(id) && 'B'].filter(Boolean).join(' · ');
-    pickList.replaceChildren(...gym.order.map((id, i) => {
+    const inWhich = (id) => { const m = MACHINE_OF[id] || id; return [GYM_A.includes(m) && 'A', GYM_B.includes(m) && 'B'].filter(Boolean).join(' · '); };
+    const shown = gym.order.filter(available);
+    pickList.replaceChildren(...shown.map((id, i) => {
       const ex = LIBRARY[id], li = document.createElement('li');
       const lab = document.createElement('label');
       const cb = Object.assign(document.createElement('input'), { type: 'checkbox', checked: gym.picked.includes(id) });
       const from = Object.assign(document.createElement('span'), { className: 'from', textContent: inWhich(id) });
       lab.append(cb, document.createTextNode(ex.name), from);
       cb.addEventListener('change', () => {
-        if (!cb.checked && gym.picked.length === 1) { cb.checked = true; return; } // keep at least one exercise
+        if (!cb.checked && gym.picked.filter(available).length === 1) { cb.checked = true; return; } // keep at least one exercise
         gym.picked = cb.checked ? [...gym.picked, id] : gym.picked.filter((x) => x !== id);
         saveGym();
         setWorkout(id);
       });
       const move = (d, label, sym) => {
-        const btn = Object.assign(document.createElement('button'), { type: 'button', textContent: sym, disabled: i + d < 0 || i + d >= gym.order.length });
+        const btn = Object.assign(document.createElement('button'), { type: 'button', textContent: sym, disabled: i + d < 0 || i + d >= shown.length });
         btn.setAttribute('aria-label', `Move ${ex.name} ${label}`);
         btn.addEventListener('click', () => {
-          const o = gym.order; [o[i], o[i + d]] = [o[i + d], o[i]];
+          const o = gym.order, a = o.indexOf(id), b = o.indexOf(shown[i + d]); [o[a], o[b]] = [o[b], o[a]];
           saveGym();
           setWorkout(id, d < 0 ? 'up' : 'down');
         });
@@ -2577,35 +2757,91 @@
   const restSel = document.getElementById('restSel');
   restSel.value = String(gym.rest);
   restSel.addEventListener('change', () => { gym.rest = Number(restSel.value); saveGym(); applyPlan(); });
+  // Gym page: Home / Gym, and the time to fit the workout into.
+  const whereSeg = document.getElementById('whereSeg'), timeSeg = document.getElementById('timeSeg');
+  segButtons(whereSeg, [['home', 'Home'], ['gym', 'Gym']], 'where');
+  segButtons(timeSeg, [['10', '10 min'], ['15', '15 min'], ['20', '20 min'], ['30', '30 min'], ['full', 'Full']], 'time');
+  whereSeg.addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-where]');
+    if (!b || b.dataset.where === gym.where) return;
+    gym.where = b.dataset.where;
+    saveGym();
+    setWorkout();
+  });
+  timeSeg.addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-time]');
+    if (!b) return;
+    gym.time = b.dataset.time === 'full' ? 'full' : Number(b.dataset.time);
+    saveGym();
+    applyPlan();
+  });
+  let BASE_LIST = []; // the chosen workout before fitting it to the time (the plan table lists all of it)
   // Sets the exercise list from the page and the chosen workout, then rebuilds the cards and plan rows.
   function setWorkout(focusId, focusBtn) {
-    EXERCISES = workoutIds().map((id) => LIBRARY[id]);
+    BASE_LIST = workoutIds().map((id) => LIBRARY[id]);
+    EXERCISES = BASE_LIST;
+    FIT = null;
     loadVoiceIndex(); // clip lengths for the step timing
     workoutSeg.querySelectorAll('button').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.workout === gym.workout)));
+    whereSeg.querySelectorAll('button').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.where === gym.where)));
     renderPicker();
     buildPlanRows();
-    buildCards();
-    applyPlan();
+    applyPlan(true);
     if (focusId) { // keep focus in the picker after it is rebuilt
-      const li = pickList.children[gym.order.indexOf(focusId)];
+      const li = pickList.children[gym.order.filter(available).indexOf(focusId)];
       const el = li && (focusBtn ? li.querySelectorAll('button')[focusBtn === 'up' ? 0 : 1] : li.querySelector('input'));
       if (el && !el.disabled) el.focus(); else if (li) li.querySelector('input').focus();
     }
   }
   function workoutMinutes() {
+    if (FIT) return Math.max(1, Math.round(FIT.total / 60000));
     let ms = 0;
     EXERCISES.forEach((ex) => { ms += buildPhases(ex, planFor(ex), 'workout').total; });
     return Math.max(1, Math.round(ms / 60000));
   }
-  function applyPlan() {
+  // One line above the cards: what the chosen time turned into.
+  function renderFitLine() {
+    const f = FIT, el = document.getElementById('fitLine');
+    const mins = (ms) => Math.max(1, Math.round(ms / 60000));
+    timeSeg.querySelectorAll('button').forEach((b) => {
+      b.setAttribute('aria-checked', String(b.dataset.time === String(gym.time)));
+      if (b.dataset.time === 'full') b.textContent = `Full · ${mins(f.full)} min`;
+    });
+    document.getElementById('restPick').hidden = gym.time !== 'full';
+    document.getElementById('restFixed').textContent = gym.time === 'full' ? '' : `Rest between sets: ${restSeconds()} s (set by the time)`;
+    const parts = [gym.time === 'full' ? 'Full workout' : `${gym.time} min`, `${restSeconds()} s rest`];
+    if (f.o.cap) parts.push(`up to ${f.o.cap} reps`);
+    else parts.push(gym.level === 'auto' ? 'card reps' : (LEVELS.gym.find(([v]) => v === gym.level) || [0, ''])[1].toLowerCase() + (/^\d/.test(gym.level) ? '' : ' reps'));
+    if (f.o.hold) parts.push('holds 5 s shorter');
+    const n = f.active.length;
+    const setCounts = (pick) => f.active.filter(pick).map((ex) => f.plans[ex.id].done.length);
+    const range = (a) => (!a.length ? '' : Math.min(...a) === Math.max(...a) ? `${a[0]}` : `${Math.min(...a)}–${Math.max(...a)}`);
+    const all = setCounts(() => true), big = range(setCounts((ex) => !f.small(ex))), sm = range(setCounts(f.small));
+    parts.push(`${n} exercise${n > 1 ? 's' : ''}` + (Math.min(...all) === Math.max(...all) ? `, ${all[0]} set${all[0] > 1 ? 's' : ''} each`
+      : `, ${big} sets on big ones` + (sm ? `, ${sm} on small` : '')));
+    if (f.dropped.length) parts.push(`${f.dropped.length} skipped`);
+    el.replaceChildren();
+    const b = document.createElement('strong'); b.textContent = `About ${mins(f.total)} min`;
+    el.append(b, ` · ${parts.join(' · ')}` + (f.fits ? '' : ' (the shortest this workout can be)') + '. Warm up for 3–5 minutes first.');
+  }
+  function applyPlan(rebuild) {
     const level = PROG === 'gym' ? gym.level : settings.level;
     levelSeg.querySelectorAll('button').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.level === level)));
-    EXERCISES.forEach((ex) => {
+    if (PROG === 'gym') {
+      FIT = gymFit(BASE_LIST);
+      const same = FIT.active.length === EXERCISES.length && FIT.active.every((ex, i) => ex === EXERCISES[i]);
+      EXERCISES = FIT.active;
+      if (!same) rebuild = true;
+      renderFitLine();
+    }
+    if (rebuild) buildCards();
+    BASE_LIST.forEach((ex) => {
       const plan = planFor(ex), inp = planInputs[ex.id];
       if (!inp) return;
       if (ex.type === 'gym') {
-        inp.setIns.forEach((el, i) => { el.value = plan.sets[i]; });
+        inp.setIns.forEach((el, i) => { el.value = plan.sets[i]; el.classList.toggle('cut', !plan.kept.includes(i)); });
         inp.wtIn.value = plan.weight;
+        inp.tr.classList.toggle('dropped', !!FIT && !FIT.active.includes(ex));
       } else {
         inp.repIn.value = plan.reps;
         if (inp.holdIn) inp.holdIn.value = plan.hold;
@@ -3042,7 +3278,7 @@
         if ((!s.holding || s.ph.move === 0) && !s.ph.pause) beep(990, 0.12);
       }
     }
-    const where = s.ph.rest ? (s.ph.setRest ? `Rest before set ${s.ph.set + 1} of ${s.ph.sets}` : 'Take a short break') : s.ph.intro ? 'Get ready' : s.ph.setup ? 'Setting up' : roundText(ex, s, pl.plan);
+    const where = s.ph.rest ? (s.ph.setRest ? `Rest before set ${s.ph.set + 1} of ${s.ph.sets}` : 'Take a short break') : s.ph.intro ? (W.idx === 0 && ex.type === 'gym' ? 'Get ready · warm up first if you haven\u2019t' : 'Get ready') : s.ph.setup ? 'Setting up' : roundText(ex, s, pl.plan);
     wk.sub.textContent = where + (W.running ? '' : ' · paused');
     const secLeft = Math.max(1, Math.ceil(s.remain / 1000));
     const counting = s.holding && s.ph.hold >= 2000;
