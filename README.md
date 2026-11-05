@@ -26,7 +26,9 @@ The **Gym workout** link at the top (`?w=gym`) opens a second page with a full-b
 - **Workout A:** planks, plank pyramids, glute bridges, goblet squats, hammer curl + press, lat pulldown machine, seated hamstring curls, V-ups.
 - **Workout B:** side planks, glute bridges, air squats, dumbbell deadlifts, mid-row machine, assisted push-ups, lateral raises, flutter kicks.
 - **Custom:** tick any of these exercises and put them in your own order.
-- **Reps:** *Card* (the trainer's numbers), 8, 10 or 12 reps per set, or *Custom* reps or seconds for each set (0 skips a set), with a weight note per exercise and a choice of rest between sets.
+- **Home (default) or Gym:** Home swaps the three machines for an adjustable dumbbell set: lat pulldown → dumbbell pullover, seated hamstring curls → towel leg curls, mid-row machine → bent-over dumbbell rows.
+- **Time:** 10, 15, 20 or 30 minutes, or Full (default; shows its real length). Rest between sets is 20 s for 10 min, 30 s for 15–20 min and 45 s for 30 min; Full uses your choice of 45, 60 or 90 s. The workout is fitted to the time in a relaxed way: with Auto reps it first lowers reps (12 → 10 → 8) and shortens timed holds by 5 s, then removes sets one at a time (small exercises first, then big ones), then drops small exercises. Rest and rep speed never change. Each option is timed with the app's own timeline, so the estimate matches the real workout.
+- **Reps:** *Auto* (default: the trainer's numbers for a full workout, lower reps for a shorter one), *Card* (the trainer's numbers), 8, 10 or 12 reps per set, or *Custom* reps or seconds for each set (0 skips a set), with a weight note per exercise and a choice of rest between sets.
 
 Exercises live in one library. Each one carries its own plan type, scene and voice pack, and a workout is a list of exercise ids, so back and gym exercises can be mixed in one workout later.
 
